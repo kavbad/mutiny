@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mutiny</title>
+<meta name="description" content="Every company is a series of decisions. We know which ones win.">
+<meta property="og:title" content="Mutiny">
+<meta property="og:description" content="Every company is a series of decisions. We know which ones win.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f3f1eb'/%3E%3Cpath d='M5 22 C 11 6, 15 6, 21 16 S 27 22, 29 12' fill='none' stroke='%2315130f' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f2f0ea;
+    --ink:#141210;
+    --ink-72:rgba(20,18,16,.72);
+    --ink-48:rgba(20,18,16,.48);
+    --ink-28:rgba(20,18,16,.28);
+    --rule:rgba(20,18,16,.14);
+    --orange:#D85A30; --orange-deep:#B9481F;
+    --ease:cubic-bezier(.22,.72,.12,1);
+    --g:clamp(20px, 3vw, 48px);           /* page margin */
+    --col:minmax(0,1fr);
+    --u:8px;                               /* baseline unit */
+  }
+  *{ box-sizing:border-box; margin:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif; font-weight:400;
+    font-feature-settings:"kern","liga","ss01"; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  ::selection{ background:var(--ink); color:var(--paper); }
+  a{ color:inherit; text-decoration:none; }
+  canvas{ display:block; }
+
+  #terrain, #path{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  .hero > .bar, .hero > .lockup{ position:relative; z-index:1; }
+  .grain{
+    position:fixed; inset:-20%; z-index:6; pointer-events:none; opacity:.32; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* 12-column grid shared by every screen */
+  .grid{ display:grid; grid-template-columns:repeat(12, var(--col)); column-gap:clamp(16px, 1.6vw, 24px); }
+  .c-1-7{ grid-column:1 / span 7; } .c-1-8{ grid-column:1 / span 8; } .c-9-12{ grid-column:9 / span 4; } .c-1-5{ grid-column:1 / span 5; } .c-7-12{ grid-column:7 / span 6; } .c-1-12{ grid-column:1 / -1; }
+
+  /* ---------- hero ---------- */
+  .hero{ position:relative; z-index:2; isolation:isolate; height:100dvh; min-height:620px; overflow:hidden; display:grid; grid-template-rows:auto 1fr auto; padding:calc(var(--u)*3) var(--g) calc(var(--u)*3); }
+  .hero .bar, .hero .note, .hero .lede{ text-shadow:0 0 10px var(--paper), 0 0 3px var(--paper), 0 0 1px var(--paper); }
+  .bar{ display:flex; justify-content:space-between; align-items:baseline; font-size:14px; line-height:20px; color:var(--ink-48); }
+  .bar .mark{ color:var(--ink); font-weight:500; letter-spacing:-.005em; }
+  .bar .mark small{ font-weight:400; font-size:14px; color:var(--ink-48); margin-left:12px; }
+  .bar a:hover{ color:var(--ink); }
+  .hero .lockup{ align-self:end; align-items:start; padding-top:calc(var(--u)*4); border-top:1px solid var(--ink-28); }
+  .hero .headline h1{ margin-bottom:0; }
+  .hero .aside{ padding-top:.28em; }
+  .hero .aside .lede{ max-width:none; font-size:clamp(16px, 1.22vw, 20px); }
+  .hero .aside .lede + .lede{ margin-top:calc(var(--u)*1.25); }
+  .hero .aside .cta{ margin-top:calc(var(--u)*3.5); }
+  .hero .aside .note{ margin-top:calc(var(--u)*1.5); }
+
+  h1{
+    font-size:clamp(36px, min(5.1vw, 9vh), 86px); line-height:.94; font-weight:500; letter-spacing:-.036em;
+    margin:0 0 calc(var(--u)*3.5) -0.04em;
+  }
+  h1 > span{ display:block; overflow:hidden; white-space:nowrap; padding:0 .08em 0 0; }
+  h1.settled > span{ overflow:visible; }
+  h1 > span > i{ display:block; font-style:normal; transform:translateY(105%); animation:rise 1.1s var(--ease) forwards; }
+  h1 > span:nth-child(2) > i{ animation-delay:.1s } h1 > span:nth-child(3) > i{ animation-delay:.2s }
+  h1 .quiet{ color:var(--ink-48); }
+  @keyframes rise{ to{ transform:none } }
+  .in{ opacity:0; animation:fade 1.2s var(--ease) forwards; }
+  .in.d1{ animation-delay:.55s } .in.d2{ animation-delay:.7s } .in.d3{ animation-delay:.85s }
+  @keyframes fade{ to{ opacity:1 } }
+
+  .lede{ font-size:clamp(16px, 1.15vw, 19px); line-height:1.45; letter-spacing:-.006em; max-width:44ch; }
+  .lede + .lede{ margin-top:calc(var(--u)*1.5); color:var(--ink-72); }
+
+  .sign{ display:flex; align-items:flex-end; gap:calc(var(--u)*4); max-width:520px; margin-top:calc(var(--u)*4); }
+  .field{ position:relative; flex:1; }
+  .field input{
+    width:100%; background:transparent; border:0; border-bottom:1px solid var(--ink-28); border-radius:0;
+    padding:calc(var(--u)*1) 0 calc(var(--u)*1.25); font:inherit; font-size:clamp(18px, 1.45vw, 22px); letter-spacing:-.01em;
+    color:var(--ink); outline:none; caret-color:var(--ink); transition:border-color .4s;
+  }
+  .field input::placeholder{ color:var(--ink-28); }
+  .field::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:1px; background:var(--ink); transform:scaleX(0); transform-origin:left; transition:transform .7s var(--ease); }
+  .field:focus-within::after, .field.filled::after{ transform:scaleX(1); }
+  .sign button{
+    background:none; border:0; padding:0 0 calc(var(--u)*1.25); font:inherit; font-size:clamp(16px, 1.3vw, 20px); font-weight:500; letter-spacing:-.01em;
+    color:var(--ink); cursor:pointer; position:relative; line-height:1.45;
+  }
+  .sign button::after{ content:""; position:absolute; left:0; right:0; bottom:calc(var(--u)*1.25 - 2px); height:1px; background:var(--ink); transform:scaleX(0); transform-origin:left; transition:transform .5s var(--ease); }
+  .sign button:hover::after, .sign button:focus-visible::after{ transform:scaleX(1); }
+  .sign button:focus-visible{ outline:none; }
+  .cta{
+    display:inline-flex; align-items:center; gap:14px; margin-top:calc(var(--u)*4);
+    background:var(--orange); color:var(--paper); border:0; border-radius:4px; cursor:pointer;
+    padding:0 22px 0 26px; height:60px; font:inherit; font-size:clamp(17px, 1.3vw, 20px); font-weight:500; letter-spacing:-.012em;
+    text-decoration:none; transition:background .25s var(--ease), transform .25s var(--ease);
+    box-shadow:0 1px 0 rgba(20,18,16,.08), 0 10px 30px -14px rgba(216,90,48,.55);
+  }
+  .cta svg{ width:22px; height:22px; transition:transform .35s var(--ease); }
+  .cta:hover{ background:var(--orange-deep); }
+  .cta:hover svg{ transform:translateX(4px); }
+  .cta:active{ transform:translateY(1px); }
+  .cta:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+  .bar .go{ color:var(--orange); font-weight:500; }
+  .note{ font-size:14px; line-height:20px; color:var(--ink-48); margin-top:calc(var(--u)*2); min-height:20px; transition:color .5s; }
+  .note.done{ color:var(--ink); }
+
+  .hero .bar.bottom{ margin-top:calc(var(--u)*4); }
+  .cue{ display:inline-flex; align-items:center; gap:12px; }
+  .cue::before{ content:""; display:block; width:24px; height:1px; background:var(--ink-28); }
+
+  /* ---------- sheet ---------- */
+  .sheet{ position:relative; z-index:3; background:var(--paper); border-top:1px solid var(--rule); }
+  section{ padding:clamp(80px, 10vw, 152px) var(--g); }
+  section + section{ border-top:1px solid var(--rule); }
+  h2{ font-size:clamp(28px, 3.1vw, 48px); line-height:1.06; font-weight:500; letter-spacing:-.03em; max-width:18ch; margin-bottom:calc(var(--u)*3); }
+  .copy{ font-size:clamp(16px, 1.2vw, 19px); line-height:1.5; color:var(--ink-72); max-width:44ch; }
+  .copy + .copy{ margin-top:calc(var(--u)*1.5); }
+
+  /* the sequence */
+  .seq{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); border-top:1px solid var(--ink); }
+  .seq > div{ padding:calc(var(--u)*2.5) calc(var(--u)*2.5) calc(var(--u)*3) 0; }
+  .seq > div + div{ border-left:1px solid var(--rule); padding-left:calc(var(--u)*2.5); }
+  .seq .n{ font-size:13px; line-height:20px; color:var(--ink-48); font-variant-numeric:tabular-nums; margin-bottom:calc(var(--u)*5); }
+  .seq h3{ font-size:clamp(20px, 1.7vw, 26px); line-height:1.1; font-weight:500; letter-spacing:-.02em; margin-bottom:calc(var(--u)*1.25); }
+  .seq p{ font-size:15px; line-height:1.5; color:var(--ink-72); }
+
+  /* the intake, native to the page: a window into a live conversation */
+  .intake{ position:relative; display:flex; flex-direction:column; height:min(680px, 76vh); zoom:.84; }
+  .intake .top{ flex:none; }
+  .intake .scroller{ flex:1; min-height:0; overflow-y:auto; scrollbar-width:none; -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 28px, #000 calc(100% - 56px), transparent 100%); mask-image:linear-gradient(to bottom, transparent 0, #000 28px, #000 calc(100% - 56px), transparent 100%); }
+  .intake .scroller::-webkit-scrollbar{ display:none; }
+  .intake .answer{ flex:none; position:relative; }
+  #what .cta{ margin-top:calc(var(--u)*3); }
+
+.intake{--paper:#f2f0ea;--ink:#141210;--graphite:#4a463f;--ash:#8d877b;--rule:rgba(20,18,16,.13);--rule2:rgba(20,18,16,.28);--ember:#D85A30;--sans:'Schibsted Grotesk',system-ui,sans-serif;--mono:'Spline Sans Mono',ui-monospace,Menlo,monospace;--spring:cubic-bezier(.34,1.3,.4,1)}
+.intake button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+.intake button:focus-visible, .intake input:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+.intake .mono{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash)}
+
+/* presence */
+.intake .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 0 22px;border-bottom:1px solid var(--rule);margin-bottom:26px}
+.intake .presence{display:flex;align-items:center;gap:14px}
+.intake .orb{width:38px;height:38px;border-radius:50%;background:var(--ink);position:relative;flex:none;transition:transform .5s var(--spring)}
+.intake .orb::before{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid rgba(20,19,17,.18);opacity:0;transition:opacity .4s}
+.intake .orb.speaking{animation:breathe 1.9s ease-in-out infinite}
+.intake .orb.speaking::before{opacity:1;animation:halo 1.9s ease-out infinite}
+.intake .orb.listening{background:var(--ember);animation:breathe 2.6s ease-in-out infinite}
+.intake .orb.thinking{background:var(--graphite);animation:think 1.1s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes halo{0%{transform:scale(.9);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+@keyframes think{0%,100%{opacity:.55}50%{opacity:1}}
+.intake .who{display:flex;flex-direction:column;gap:2px}
+.intake .who .name{font-weight:600;font-size:15px;letter-spacing:-.005em}
+.intake .who .state{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash);min-height:13px}
+.intake .tools{display:flex;gap:8px;align-items:center}
+.intake .pill{border:1px solid var(--rule2);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--graphite);transition:background .15s,color .15s,border-color .15s;text-align:center}
+.intake .pill:hover{border-color:var(--ink);color:var(--ink)}
+.intake .pill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.intake .pill b{font-weight:600}
+
+/* the flow */
+.intake .flow{max-width:820px;margin:0;padding:8px 0 40px}
+.intake .turn{margin:0 0 30px;opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.intake .turn.on{opacity:1;transform:none}
+.intake .turn.old{opacity:.5}
+.intake .rebel{font-size:clamp(22px,2.4vw,31px);line-height:1.24;letter-spacing:-.018em;font-weight:500}
+.intake .rebel .w{opacity:0;transition:opacity .28s}.rebel .w.on{opacity:1}
+.intake .rebel p{margin:0 0 12px}
+.intake .reflect{font-size:16px;color:var(--graphite);margin:-14px 0 0;line-height:1.45}
+.intake .reflect .w{opacity:0;transition:opacity .25s}.reflect .w.on{opacity:1}
+.intake .you{display:flex;align-items:baseline;gap:12px;margin:0 0 30px;font-size:17px;color:var(--ink)}
+.intake .you .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember);flex:none}
+.intake .you q{quotes:"“" "”";font-style:italic}
+.intake .status{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ash);margin:0 0 30px;min-height:14px}
+.intake .status .w{opacity:0;transition:opacity .2s}.status .w.on{opacity:1}
+
+/* generated displays */
+.intake .gen{margin:18px 0 32px;border:1px solid var(--rule);border-radius:16px;padding:18px 20px;background:rgba(255,255,255,.35);opacity:0;transform:translateY(8px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.intake .gen.on{opacity:1;transform:none}
+.intake .gen .eyebrow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash);margin-bottom:10px}
+.intake .gen h4{margin:0 0 4px;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.intake .gen .sub{font-size:13.5px;color:var(--graphite);margin:0 0 12px}
+.intake .rows .row{display:grid;grid-template-columns:110px 1fr auto;gap:12px;padding:9px 0;border-top:1px solid var(--rule);font-size:14px;align-items:baseline}
+.intake .rows .row:first-child{border-top:0}
+.intake .rows .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash)}
+.intake .rows .fix{color:var(--ash);font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.intake .rows .fix:hover{color:var(--ink)}
+.intake svg.map{width:100%;height:auto;display:block;overflow:visible}
+.intake .map .ax{stroke:var(--rule2);stroke-width:1;fill:none;stroke-dasharray:1200;stroke-dashoffset:1200;animation:draw 1.1s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.intake .map text{font-family:var(--mono);font-size:10.5px;fill:var(--ash);letter-spacing:.04em}
+.intake .map .axl{text-transform:uppercase;font-size:9.5px}
+.intake .map .mk{transform-box:fill-box;transform-origin:center;animation:pop .6s var(--spring) both}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+.intake .map .mk circle{fill:var(--graphite)}
+.intake .map .mk.big circle{fill:var(--ink)}
+.intake .map .mk text{fill:var(--graphite);letter-spacing:.02em}
+.intake .map .you circle{fill:var(--ember)}
+.intake .map .you .rg{fill:none;stroke:var(--ember);stroke-width:1;opacity:.6;animation:pulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%{r:8;opacity:.8}100%{r:26;opacity:0}}
+.intake .map .you text{fill:var(--ember);font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:0}
+.intake .roster{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.intake .roster .co{border:1px solid var(--rule);border-radius:12px;padding:10px 11px;animation:pop .6s var(--spring) both}
+.intake .roster .co.hi{border-color:rgba(216,96,42,.55);background:rgba(216,96,42,.06)}
+.intake .roster .n{font-weight:600;font-size:14px;margin-bottom:6px;letter-spacing:-.005em}
+.intake .roster .tok{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--graphite);border:1px solid var(--rule);border-radius:6px;padding:3px 6px;margin:0 4px 4px 0;white-space:nowrap}
+.intake .roster .tok i{width:6px;height:6px;border-radius:50%;background:var(--ink);display:inline-block}
+.intake .roster .tok.e i{background:transparent;border:1px solid var(--ink)}
+.intake .roster .tok.f i{background:var(--ember)}
+.intake .roster .kit{grid-column:1/-1;font-size:14px;color:var(--graphite);margin-top:4px;padding-top:10px;border-top:1px solid var(--rule)}
+.intake .roster .kit em{color:var(--ember);font-style:normal;font-weight:600}
+/* decision */
+.intake .dgrid{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;align-items:start}
+.intake .dopts{display:flex;flex-direction:column;gap:8px}
+.intake .dopt{display:grid;grid-template-columns:18px 1fr;gap:12px;align-items:start;border:1px solid var(--rule2);border-radius:12px;padding:12px 14px;transition:border-color .2s,background .2s,transform .25s var(--spring),box-shadow .25s}
+.intake .dopt:hover{border-color:var(--ink);transform:translateY(-1px);box-shadow:0 12px 30px rgba(20,19,17,.09)}
+.intake .dopt.chosen{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.intake .dopt .radio{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--rule2);margin-top:4px;transition:all .2s}
+.intake .dopt:hover .radio{border-color:var(--ink)}
+.intake .dopt.chosen .radio{background:var(--ember);border-color:var(--ember);box-shadow:0 0 0 4px rgba(216,96,42,.25)}
+.intake .dopt h3{margin:0 0 3px;font-size:15.5px;line-height:1.2;letter-spacing:-.01em;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.intake .dopt .pick{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember);font-weight:500;white-space:nowrap}
+.intake .dopt p{margin:0 0 8px;font-size:12.5px;line-height:1.4;color:var(--graphite)}
+.intake .dopt.chosen p{color:#d8d2c5}
+.intake .dopt .figs{display:flex;gap:14px;flex-wrap:wrap;color:var(--ash);font-size:11px}
+.intake .dopt .figs span{display:inline-flex;align-items:center;gap:6px}
+.intake .dopt.chosen .figs{color:#b8b1a4}
+.intake .dopt.chosen .dot{fill:rgba(245,242,235,.25)}.dopt.chosen .line{stroke:rgba(245,242,235,.25)}
+.intake .map .you circle, .intake .map .you text{transition:cx .8s var(--ease),cy .8s var(--ease),x .8s var(--ease),y .8s var(--ease)}
+.intake .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+.intake .opt{position:relative;border:1px solid var(--rule2);border-radius:14px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;min-height:150px;transition:border-color .2s,background .2s,transform .25s var(--spring),box-shadow .25s}
+.intake .opt:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:0 14px 34px rgba(20,19,17,.10)}
+.intake .opt.chosen{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.intake .opt .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.intake .opt .radio{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--rule2);flex:none;transition:all .2s}
+.intake .opt:hover .radio{border-color:var(--ink)}
+.intake .opt.chosen .radio{background:var(--ember);border-color:var(--ember);box-shadow:0 0 0 4px rgba(216,96,42,.25)}
+.intake .opt .pick{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember)}
+.intake .opt h3{margin:0;font-size:16px;line-height:1.2;letter-spacing:-.01em;font-weight:600}
+.intake .opt p{margin:0;font-size:12.5px;line-height:1.4;color:var(--graphite)}
+.intake .opt.chosen p{color:#d8d2c5}
+.intake .opt .fig{margin-top:auto;display:flex;align-items:center;gap:8px;color:var(--ash);font-size:11.5px}
+.intake .opt.chosen .fig{color:#b8b1a4}
+.intake .dot{fill:rgba(20,19,17,.2)}.dot.on{fill:var(--ember)}.opt.chosen .dot{fill:rgba(245,242,235,.25)}
+.intake .line{stroke:rgba(20,19,17,.2);fill:none;stroke-width:1.5}.line.on{stroke:var(--ember)}.opt.chosen .line{stroke:rgba(245,242,235,.25)}
+.intake .artifact{background:var(--ink);color:var(--paper);border-radius:18px;padding:26px 28px;margin-top:8px}
+.intake .artifact .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#9d9689;display:flex;justify-content:space-between;margin-bottom:14px}
+.intake .artifact h3{margin:0 0 14px;font-size:clamp(22px,2.6vw,32px);line-height:1.1;letter-spacing:-.02em;font-weight:600}
+.intake .artifact .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;border-top:1px solid rgba(255,255,255,.14);padding-top:14px;font-size:13px;color:#dcd6c8}
+.intake .artifact .grid .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9d9689;margin-bottom:6px}
+.intake .artifact ul{margin:0;padding-left:14px}
+
+/* answer bar */
+.intake .answer{padding:10px 0 4px}
+.intake .answer .inner{max-width:820px;margin:0}
+.intake .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:0}
+.intake .chip{border:1px solid var(--rule2);border-radius:999px;padding:10px 15px;font-size:15px;background:var(--paper);transition:background .15s,color .15s,border-color .15s,transform .15s var(--spring)}
+.intake .chip:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);transform:translateY(-1px)}
+.intake .chip.ghost{color:var(--graphite);border-color:var(--rule)}
+.intake .bar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--rule2);border-radius:999px;padding:8px 8px 8px 18px;box-shadow:0 12px 40px rgba(20,19,17,.08)}
+.intake .bar:focus-within{border-color:var(--ember)}
+.intake .bar input{flex:1;border:0;background:transparent;font-size:16px;color:var(--ink);min-width:0;outline:none}
+.intake .bar input::placeholder{color:var(--ash)}
+.intake .mic{width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;flex:none;transition:background .2s,transform .2s var(--spring)}
+.intake .mic:hover{transform:scale(1.05)}
+.intake .mic.live{background:var(--ember);animation:breathe 1.6s ease-in-out infinite}
+.intake .mic svg{width:16px;height:16px;fill:currentColor}
+.intake .send{border:0;background:var(--paper);border-radius:999px;padding:9px 14px;font-weight:500;color:var(--ink);flex:none}
+.intake .send:hover{background:var(--ink);color:var(--paper)}
+.intake .answer .hint{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash);margin-top:10px;display:flex;justify-content:space-between}
+.intake .answer.done{display:none}
+@media (max-width:820px){.dgrid{grid-template-columns:1fr}.opts{grid-template-columns:1fr}.opt{min-height:0}.roster{grid-template-columns:repeat(2,1fr)}.artifact .grid{grid-template-columns:1fr}.rows .row{grid-template-columns:90px 1fr auto}}
+
+
+  /* the figure */
+  figure{ position:relative; }
+  .model{ position:relative; width:100%; aspect-ratio:3/2; overflow:hidden; }
+  .model canvas{ position:absolute; inset:0; width:100%; height:100%; }
+  figcaption{ font-size:13px; line-height:20px; color:var(--ink-48); margin-top:calc(var(--u)*1.5); display:flex; justify-content:space-between; gap:24px; }
+
+  /* close */
+  .close h2{ max-width:22ch; }
+  .close .sign{ margin-top:calc(var(--u)*4); }
+  footer{ padding:calc(var(--u)*3) var(--g) calc(var(--u)*4); border-top:1px solid var(--rule); font-size:13px; line-height:20px; color:var(--ink-48); }
+  footer .grid > span:last-child{ text-align:right; }
+
+  @media (max-width:960px){
+    .c-1-7,.c-1-5,.c-7-12,.c-1-8,.c-9-12{ grid-column:1 / -1; }
+    .hero .lockup{ align-items:start; border-top:0; padding-top:0; }
+    .hero .aside{ padding-top:0; }
+    .hero .aside .lede{ max-width:44ch; }
+    .grid{ row-gap:calc(var(--u)*5); }
+    .seq{ grid-template-columns:1fr 1fr; }
+    .seq > div{ padding-right:calc(var(--u)*2); }
+    .seq > div + div{ border-left:0; padding-left:0; }
+    .seq > div:nth-child(2n){ border-left:1px solid var(--rule); padding-left:calc(var(--u)*2); }
+    .seq > div:nth-child(n+3){ border-top:1px solid var(--rule); }
+  }
+  @media (max-width:600px){
+    .hero{ padding:calc(var(--u)*2) 20px; height:auto; min-height:100dvh; }
+    .hero .lockup{ padding-top:min(26vh, 240px); }
+    h1{ font-size:clamp(40px, 12vw, 64px); margin-bottom:calc(var(--u)*3); line-height:.98; }
+    h1 > span{ white-space:normal; overflow:visible; }
+    .sign{ gap:16px; }
+    .cta{ height:56px; width:100%; justify-content:space-between; }
+    .intake{ height:70vh; zoom:.9; }
+    figcaption{ flex-direction:column; gap:4px; }
+    footer .grid{ row-gap:6px; }
+    footer .grid > span:last-child{ text-align:left; }
+    .seq{ grid-template-columns:1fr; }
+    .seq > div, .seq > div:nth-child(2n){ border-left:0; padding-left:0; }
+    .seq > div:nth-child(n+2){ border-top:1px solid var(--rule); }
+    .seq .n{ margin-bottom:calc(var(--u)*2); }
+  }
+  @media (prefers-reduced-motion:reduce){
+    h1 > span > i{ animation:none; transform:none } .in{ animation:none; opacity:1 }
+    .field::after, .sign button::after{ transition:none }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="hero" id="top">
+  <canvas id="terrain" aria-hidden="true"></canvas>
+  <canvas id="path" aria-hidden="true"></canvas>
+  <div class="bar in d1">
+    <span class="mark">Mutiny<small>Private</small></span>
+    <a class="go" href="#what" data-intake>Start company</a>
+  </div>
+
+  <div class="lockup grid">
+    <div class="c-1-8 headline">
+      <h1>
+        <span><i>Every company</i></span>
+        <span><i>is a series of decisions.</i></span>
+        <span class="quiet"><i>We know which ones win.</i></span>
+      </h1>
+    </div>
+    <div class="c-9-12 aside">
+      <p class="lede in d2">Mutiny positions, builds, operates, and scales your company autonomously with a tailored fleet of AI agents. From 0, or wherever you are, to infinity.</p>
+      <p class="lede in d2">Rebel-1, a world model trained on millions of company and product decisions and outcomes, guides your business.</p>
+      <a class="cta in d3" href="#what" data-intake>Start company<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <p class="note in d3">A small number of founders go first.</p>
+    </div>
+  </div>
+
+  <div class="bar bottom in d3">
+    <a class="cue" href="#what">Talk to Rebel-1</a>
+    <span>San Francisco</span>
+  </div>
+</header>
+
+<div class="sheet">
+  <section id="what" class="intake-section">
+    <div class="grid">
+      <div class="c-1-5">
+        <h2>Talk to Rebel-1.</h2>
+        <p class="copy">Before anything is built, Rebel gets to know you: the idea, what you want from it, and the life it has to fit inside. Then it reads every company already in your field and shows you where you'd win, and why, so the first thing built is the right thing.</p>
+        <p class="copy">Below is Rebel with a founder it already knows. Watch, or start your own.</p>
+        <a class="cta" href="#what" data-intake>Talk to Rebel-1<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="c-7-12 intake" id="intake">
+        <div class="top">
+          <div class="presence"><div class="orb" id="orb"></div><div class="who"><span class="name">Rebel</span><span class="state" id="state">here</span></div></div>
+          <div class="tools"><button class="pill" id="voice">Voice off</button><button class="pill" id="prof">What Rebel knows · <b id="pcount">0 / 4</b></button></div>
+        </div>
+        <div class="scroller" id="scroller"><div class="flow" id="flow"></div></div>
+        <div class="answer" id="answer">
+          <div class="inner">
+            <div class="chips" id="chips"></div>
+            <div class="bar"><input id="text" placeholder="Say it however it comes out…" autocomplete="off"><button class="mic" id="mic" title="Talk"><svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg></button><button class="send" id="send">Send</button></div>
+            <div class="hint"><span id="hintl">Talk, type, or tap.</span><span id="hintr">Rebel keeps up either way</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="grid">
+      <div class="c-1-5">
+        <h2>Every move, played forward before you make it.</h2>
+        <p class="copy">Rebel-1 has watched thousands of companies make millions of decisions, and it knows how each one ended.</p>
+        <p class="copy">You bring the idea and the judgment. A fleet of AI agents, assembled for your company, brings the rest: the code you can't write, the outbound you'd rather not send, the books, the contracts, the support queue at three in the morning. Where you are strong, they follow. Where you are not, they take over.</p>
+        <p class="copy">Building a company used to be a bet placed in the dark. Now you can see the whole board: try a move, watch where it leads, take the one that wins, keep going.</p>
+      </div>
+      <figure class="c-7-12">
+        <div class="model" aria-label="The world model as terrain, with one path climbing to high ground."><canvas id="model-terrain"></canvas><canvas id="model-path"></canvas></div>
+        <figcaption><span>Your company, in play.</span><span>Every step is a move. Rebel-1 has already seen where it leads.</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="go" class="close">
+    <div class="grid">
+      <div class="c-1-7">
+        <h2>A small number of founders go first.</h2>
+        <p class="copy">Founders are admitted in order of arrival. Bring the idea. Mutiny brings the rest.</p>
+        <a class="cta" id="start" href="#what" data-intake>Start company<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="grid">
+      <span class="c-1-5">Mutiny</span>
+      <span class="c-7-12">San Francisco, 2026 <a href="#top" style="margin-left:24px">Top</a></span>
+    </div>
+  </footer>
+</div>
+
+<script>
+// once the headline has risen, let it breathe past its column
+setTimeout(()=>{ const h=document.querySelector('h1'); if(h) h.classList.add('settled'); }, 1800);
+
+// ---------- forms ----------
+document.querySelectorAll('form.sign').forEach(f => {
+  const inp = f.querySelector('input'), fld = f.querySelector('.field'), out = f.nextElementSibling;
+  inp.addEventListener('input', () => fld.classList.toggle('filled', inp.value.length > 0));
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    const v = inp.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { out.textContent = 'Enter an email address to sign.'; inp.focus(); return; }
+    out.textContent = 'Signed. You will hear from us. Nobody else will.'; out.classList.add('done');
+    inp.value = ''; fld.classList.remove('filled'); inp.blur();
+    dispatchEvent(new CustomEvent('mutiny:signed'));
+  });
+});
+
+// ---------- the terrain ----------
+// The world model, drawn as ground: a living topographic map in ink. One path reads the terrain and climbs.
+// Contours are drawn on the GPU from a height field; the path walks the same field on the CPU.
+function Terrain(terrainCanvas, pathCanvas, opt){
+  const o = Object.assign({ seed:5, scale:520, levels:30, scroll:26, walk:64, clear:null, drift:1, headAt:.5, startY:.58 }, opt||{});
+  const gl = terrainCanvas.getContext('webgl2', { antialias:true, alpha:true, premultipliedAlpha:true });
+  const px = pathCanvas.getContext('2d');
+  if (!gl) return;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mulberry = a => () => { a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
+  const rnd = mulberry(o.seed);
+
+  // shared noise lattice: 256x256 random values, sampled identically by the shader and the walker
+  const N = 256, lattice = new Float32Array(N*N); for (let i=0;i<N*N;i++) lattice[i] = rnd();
+  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, N, N, 0, gl.RED, gl.FLOAT, lattice);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+  const vs = `#version 300 es
+  in vec2 a; void main(){ gl_Position = vec4(a,0.,1.); }`;
+  const fs = `#version 300 es
+  precision highp float;
+  uniform vec2 u_res, u_off; uniform float u_t, u_scale, u_levels, u_dpr; uniform vec4 u_clear; uniform sampler2D u_lat;
+  out vec4 o;
+  float lat(vec2 i){ return texelFetch(u_lat, ivec2(mod(i, 256.0)), 0).r; }
+  float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+    float a=lat(i), b=lat(i+vec2(1,0)), c=lat(i+vec2(0,1)), d=lat(i+vec2(1,1));
+    return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
+  float height(vec2 w, float t){
+    vec2 p = w / u_scale;
+    vec2 q = p + 0.08*vec2(vn(p*1.7 + t*0.011), vn(p*1.7 + 11.3 - t*0.009));   // slow warp: the ground breathes
+    return 0.52*vn(q) + 0.26*vn(q*2.03 + 7.1) + 0.13*vn(q*4.1 + 2.7) + 0.065*vn(q*8.3 + 5.5) + 0.03*vn(q*16.7 + 9.1);
+  }
+  void main(){
+    vec2 s = vec2(gl_FragCoord.x, u_res.y - gl_FragCoord.y) / u_dpr;   // css px, y down
+    vec2 w = s + u_off;
+    float h = height(w, u_t);
+    float v = h * u_levels;
+    float fw = fwidth(v);
+    float f = fract(v), d = min(f, 1.0 - f);
+    float minor = 1.0 - smoothstep(0.0, fw*1.25, d);
+    float v5 = v/5.0; float f5 = fract(v5), d5 = min(f5, 1.0-f5); float fw5 = fwidth(v5);
+    float major = 1.0 - smoothstep(0.0, fw5*1.9, d5);
+    float a = max(minor*0.42, major*0.78);
+    // keep the type clear: soft rectangle
+    vec2 dv = max(vec2(u_clear.x - s.x, s.x - (u_clear.x + u_clear.z)), 0.0) + max(vec2(u_clear.y - s.y, s.y - (u_clear.y + u_clear.w)), 0.0);
+    float dd = length(vec2(max(dv.x, dv.y), 0.0));
+    float dist = length(max(vec2(max(u_clear.x - s.x, s.x - (u_clear.x+u_clear.z)), max(u_clear.y - s.y, s.y - (u_clear.y+u_clear.w))), 0.0));
+    a *= mix(0.16, 1.0, smoothstep(0.0, 110.0, dist));
+    o = vec4(vec3(20.,18.,16.)/255.0 * a, a);
+  }`;
+  const sh=(t,src)=>{const x=gl.createShader(t); gl.shaderSource(x,src); gl.compileShader(x); if(!gl.getShaderParameter(x,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(x)); return x;};
+  const prog=gl.createProgram(); gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(prog); gl.useProgram(prog);
+  const vb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,vb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const U=n=>gl.getUniformLocation(prog,n); const u={res:U('u_res'),off:U('u_off'),t:U('u_t'),scale:U('u_scale'),levels:U('u_levels'),dpr:U('u_dpr'),clear:U('u_clear'),lat:U('u_lat')};
+  gl.uniform1i(u.lat,0); gl.uniform1f(u.scale,o.scale); gl.uniform1f(u.levels,o.levels);
+
+  // the same field on the CPU
+  const L=(x,y)=>lattice[(((y%N)+N)%N)*N + (((x%N)+N)%N)];
+  const sm=t=>t*t*(3-2*t);
+  function vn(x,y){ const i=Math.floor(x), j=Math.floor(y); const fx=sm(x-i), fy=sm(y-j); const a=L(i,j),b=L(i+1,j),c=L(i,j+1),d=L(i+1,j+1); return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy; }
+  function height(wx,wy,t){ const p=[wx/o.scale, wy/o.scale]; const q=[p[0]+0.08*vn(p[0]*1.7+t*0.011,p[1]*1.7+t*0.011), p[1]+0.08*vn(p[0]*1.7+11.3-t*0.009,p[1]*1.7+11.3-t*0.009)];
+    return 0.52*vn(q[0],q[1])+0.26*vn(q[0]*2.03+7.1,q[1]*2.03+7.1)+0.13*vn(q[0]*4.1+2.7,q[1]*4.1+2.7)+0.065*vn(q[0]*8.3+5.5,q[1]*8.3+5.5)+0.03*vn(q[0]*16.7+9.1,q[1]*16.7+9.1); }
+
+  let W=0,H=0,dpr=1, off=[0,0], t=0, trail=[], head=null, marks=[], last=performance.now(), on=true, keep=null;
+  function size(){
+    dpr=Math.min(devicePixelRatio||1,2); const r=terrainCanvas.getBoundingClientRect(); W=r.width; H=r.height;
+    for (const c of [terrainCanvas,pathCanvas]){ c.width=Math.round(W*dpr); c.height=Math.round(H*dpr); }
+    px.setTransform(dpr,0,0,dpr,0,0); gl.viewport(0,0,terrainCanvas.width,terrainCanvas.height);
+    gl.uniform2f(u.res,terrainCanvas.width,terrainCanvas.height); gl.uniform1f(u.dpr,dpr);
+    if (!head){ head={x:W*0.04, y:H*o.startY, ang:0.1}; trail=[{x:head.x,y:head.y}]; }
+  }
+  function clearRect(){
+    if (!o.clear) { gl.uniform4f(u.clear,-9999,-9999,0,0); return; }
+    const el=o.clear(); if(!el){ gl.uniform4f(u.clear,-9999,-9999,0,0); return; }
+    const r=el.getBoundingClientRect(), hr=terrainCanvas.getBoundingClientRect();
+    let x0=r.left-hr.left, y0=r.top-hr.top, x1=r.right-hr.left, y1=r.bottom-hr.top;
+    const el2=o.clear2 && o.clear2(); if (el2){ const q=el2.getBoundingClientRect(); x0=Math.min(x0,q.left-hr.left); y0=Math.min(y0,q.top-hr.top); x1=Math.max(x1,q.right-hr.left); y1=Math.max(y1,q.bottom-hr.top); }
+    keep={x0:x0-20,y0:y0-12,x1:x1+20,y1:y1+12};
+    gl.uniform4f(u.clear, keep.x0, keep.y0, keep.x1-keep.x0, keep.y1-keep.y0);
+  }
+  // ---------- the company, as a life ----------
+  // Three voices ride the path. Ink: a decision. Orange: the engine did it. Green: the result, in money and growth.
+  // The company has a state (age, revenue, customers, reach) that grows as the trail advances, so every number is
+  // consistent with the last, and it can run for thousands of messages without repeating a life.
+  const fmt$ = v => v>=1e6 ? '$'+(v/1e6).toFixed(v<1e7?1:0)+'M' : v>=1e3 ? '$'+Math.round(v/1e3)+'k' : '$'+Math.round(v);
+  const fmtN = v => v>=1e6 ? (v/1e6).toFixed(1)+'M' : v>=1e3 ? Math.round(v/1e3)+'k' : String(Math.round(v));
+  const pick = arr => arr[Math.floor(rnd()*arr.length)];
+  const co = { week:0, mrr:0, customers:0, regions:1, stage:0, lastRecord:0, bestWeek:0, month:0 };
+  const POOLS = {
+    d: [ // decisions, by stage
+      ['Narrow the customer to one segment','Sell the outcome, not the workflow','Ship the API before the interface','Build the workflow, not the dashboard','First aha in under five minutes','Price per seat, not per usage','Publish the pricing','Launch on the pain, not the feature','Design partner over the logo','One experiment at a time','Own the data, rent the model','Lead with the compliance angle','Own the category term early','Postgres, not the graph database','Buy the auth, build the core'],
+      ['Default to annual contracts','Free pilot, expensive rollout','Turn off paid acquisition','Concentrate on the channel that converts','Add a self-serve tier','Charge for implementation','Instrument retention before growth','Sponsor nothing, publish everything','Stop building for the loudest customer','Make the customers the distribution','Renew automatically, expand deliberately','Kill the marketplace, keep the API','Cut the roadmap to one integration','Ship the SDK, not the second product','Hold the price through the churn'],
+      ['Raise prices 30% for new accounts','Add a usage floor to enterprise','Enter Europe through the UK','Hold the second market until retention clears 110%','Reposition as the system of record','Deprecate v1, migrate the base','Anchor the top tier high','Walk away from the custom build','Let the benchmarks do the marketing','Expansion motion before the land','Drop the AI from the name','Open the partner program','Split the product into two','Rebuild the billing engine before it breaks','Own the model for the core loop']
+    ],
+    a: [ // the engine's receipts: what it built, wired, ran, wrote, and handled, across the whole company
+      ['Chose the stack for you: Postgres, Next, Stripe','Built the Stripe integration, tested with real cards','Set up CI, staging, and rollbacks','Drafted the privacy policy and terms','Formed the company and opened the bank account','Interviewed 12 target users, wrote up the pattern','Integrated with HubSpot to sync every deal','Wrote the onboarding emails, 5 in the sequence','Set up analytics: activation, retention, revenue','Registered the trademark','Built the admin panel you asked for','Answered every inbound within the hour','Wrote the docs from the code','Set up SOC 2 monitoring from day one','Ran the pricing test, kept variant B','Merged 46 pull requests','Fixed the checkout drop-off'],
+      ['Spun up a go-to-market agent for outbound','Ran 4 GTM experiments this week, kept one','Integrated with Salesforce for the enterprise pilot','Built the Slack app customers kept asking for','Rewrote onboarding, activation up 12%','Resolved {t} support tickets, escalated 3','Migrated the database with zero downtime','Added SSO for the first enterprise account','Built the usage dashboard for customers','Wrote the quarterly review, every number reconciled','Reconciled the books and filed sales tax','Renewed {c8} accounts overnight','Onboarded {c5} accounts while you slept','Caught a fraud ring in signups, blocked 41','Patched the auth regression before anyone noticed','Cut infra spend 18%','Built the Zapier integration, 1,200 zaps in a week','Ran a churn analysis, found the cause','Shipped the mobile view','Trained the support agent on 2,000 past tickets'],
+      ['Provisioned the EU region and data residency','Passed the security review for the enterprise deal','Drafted the SOC 2 evidence, audit booked','Localized into four languages','Built the partner API and the docs for it','Integrated with NetSuite for the finance team','Rebuilt billing to handle {c4} accounts on custom terms','Closed {c7} renewals without a call','Set up the on-call rotation across agents','Ran the annual pricing review, raised the floor','Migrated {c4} accounts to the new tier','Answered the RFP, 214 questions','Shipped the public roadmap','Ran the customer advisory call and wrote it up','Negotiated the cloud contract, saved 23%','Built the churn-prediction model on your data','Retired the legacy plan, zero churn','Filed the annual report and the taxes','Opened the second region','Handled the outage: 11 minutes, postmortem written']
+    ]
+  };
+  const RESULTS = [
+    ['Week {w}: {cust} customers','MRR passed {mrr}','First month closed: {mo}','{cust} customers, all from inbound','Activation flat this week','Second customer came from the first'],
+    ['MRR passed {mrr}','{cust} customers, {g}% growth this month','Net retention {nrr}%','Month {m} closed: {mo}','Record week: {wk}','Churned 2 accounts, both under 10 seats','Missed the month by 8%','Payback under 4 months','{cust} customers across {r} countries'],
+    ['ARR passed {arr}','Record month: {mo}','Profitable this month','Year {y}: {arr} ARR, {gx}x','{cust} customers across {r} countries','Net retention {nrr}%','Month {m} closed: {mo}, {g}% growth','Flat quarter, retention held','Record week: {wk}']
+  ];
+  const deckOf = {}; 
+  function draw(kind, stage){ const key=kind+stage; if(!deckOf[key]||!deckOf[key].length) deckOf[key]=POOLS[kind][stage].slice().sort(()=>rnd()-.5); return deckOf[key].pop(); }
+  function fill(t){
+    const c=co.customers;
+    return t.replace('{c3}',fmtN(Math.max(3,Math.round(c*0.05)))).replace('{c4}',fmtN(Math.max(4,Math.round(c*0.3)))).replace('{c5}',fmtN(Math.max(5,Math.round(c*0.08))))
+            .replace('{c6}',fmtN(Math.max(6,Math.round(c*0.12)))).replace('{c7}',fmtN(Math.max(7,Math.round(c*0.1)))).replace('{c8}',fmtN(Math.max(8,Math.round(c*0.15)))).replace('{c9}',fmtN(Math.max(9,Math.round(c*0.06))))
+            .replace('{t}',fmtN(Math.max(40,Math.round(c*1.8))))
+            .replace('{mrr}',fmt$(co.mrr)).replace('{mo}',fmt$(co.mrr)).replace('{arr}',fmt$(co.mrr*12)).replace('{wk}',fmt$(co.bestWeek))
+            .replace('{cust}',fmtN(c)).replace('{w}',co.week).replace('{m}',co.month).replace('{y}',Math.max(1,Math.floor(co.week/52)))
+            .replace('{g}',co.g).replace('{gx}',co.gx).replace('{nrr}',co.nrr).replace('{r}',co.regions);
+  }
+  let lastKind='', run=0, lastResult='', saidFirst=false; const usedOnce=new Set();
+  // the opening: the founder and Rebel position the idea, the fleet spins up, the first customer lands
+  const OPENING = [
+    { kind:'d', text:'The idea: a personal AI that wins your refunds, fees, and claims back for you' },
+    { kind:'a', text:'Read the field: 12 companies, nobody fights for the person' },
+    { kind:'d', text:'Position it: your own agent, on your side, paid only when it wins' },
+    { kind:'a', text:'Spun up the build fleet: 6 agents, one codebase' },
+    { kind:'a', text:'Shipped v1 to a private URL' },
+    { kind:'a', text:'Ran the first GTM experiment: 3 landing pages, 3 audiences' },
+    { kind:'r', text:'First win: $640 back. First paying customer' }
+  ];
+  let opening = OPENING.slice();
+  function nextDecision(){
+    if (opening.length){
+      const m = opening.shift(); co.week += 1; co.month = 1;
+      if (m.kind === 'r'){ co.customers = 1; co.mrr = 900 + rnd()*600; saidFirst = true; }
+      lastKind = m.kind; run = 1; return m;
+    }
+    return generate();
+  }
+  function generate(){
+    // time passes: one to three weeks per message, and the company compounds
+    const dw = 1 + Math.floor(rnd()*3); co.week += dw; co.month = Math.max(1, Math.floor(co.week/4.33));
+    if (co.customers > 0){
+      const weekly = co.stage===0 ? 0.08 : co.stage===1 ? 0.045 : 0.02;          // weekly growth, slowing as it scales
+      const growth = Math.pow(1 + weekly + (rnd()-.5)*0.03, dw);
+      co.customers = Math.max(co.customers+1, Math.round(co.customers*growth));
+      co.mrr = co.mrr * growth * (1 + (rnd()-.4)*0.02);
+    }
+    co.bestWeek = Math.max(co.bestWeek, co.mrr/4.33 * (1 + rnd()*0.35));
+    co.g = Math.round(6 + rnd()*16); co.gx = (1.8 + rnd()*1.6).toFixed(1); co.nrr = Math.round(104 + rnd()*18);
+    co.regions = co.mrr > 150000 ? 4 + Math.floor(co.mrr/400000) : co.mrr > 40000 ? 2 + (rnd()<.5?1:0) : 1;
+    co.stage = co.mrr > 250000 ? 2 : co.mrr > 12000 ? 1 : 0;
+    // what kind of message: early it is mostly deciding and shipping; at scale the results come faster
+    const wR = co.customers === 0 ? 0 : co.stage===0 ? 0.09 : co.stage===1 ? 0.14 : 0.18;
+    const wA = 0.52;
+    let kind = rnd() < wR ? 'r' : rnd() < wA/(1-wR) ? 'a' : 'd';
+    if (kind === lastKind && run >= 2) kind = kind==='a' ? 'd' : 'a';
+    run = kind === lastKind ? run+1 : 1; lastKind = kind;
+    if (kind === 'r'){
+      const stageR = co.customers <= 3 ? 0 : co.stage;
+      let t, tries=0;
+      do { t = pick(RESULTS[stageR]); tries++; } while (tries<8 && (t===lastResult || usedOnce.has(t) || (t.includes('{r}') && co.regions<2) || (t.includes('Profitable') && co.mrr<400000)));
+      if (!saidFirst){ t='First paying customer'; saidFirst=true; }
+      if (/^First |^Second /.test(t)) usedOnce.add(t);
+      lastResult = t;
+      return { text: fill(t), kind:'r' };
+    }
+    return { text: fill(draw(kind, co.stage)), kind };
+  }
+  // tempo: a young company is quiet; things happen faster as it grows
+  const cadence = () => opening.length ? 6.5 + rnd()*1.5 : co.stage===0 ? 5.0 + rnd()*1.8 : co.stage===1 ? 3.2 + rnd()*1.2 : 2.1 + rnd()*0.9;
+  let current = null, labelAge = 0, sinceDecision = 0, nextIn = 6.5;
+  current = nextDecision();
+  let lastSide = 1;
+  function walk(dt){
+    // the path is a trail, not a bulldozer: it runs along the contour it is on and climbs by switchbacks.
+    // Direction = mostly along-contour, a little uphill, and always onward, so it can never stall on a summit.
+    const step=o.walk*dt, e=6;
+    const gx=(height(head.x+e,head.y,t)-height(head.x-e,head.y,t))/(2*e);
+    const gy=(height(head.x,head.y+e,t)-height(head.x,head.y-e,t))/(2*e);
+    const gl_=Math.hypot(gx,gy)||1e-6; const ux=gx/gl_, uy=gy/gl_;            // uphill
+    let cx=-uy, cy=ux;                                                          // along the contour
+    const hx=Math.cos(head.ang), hy=Math.sin(head.ang);
+    // pick the contour direction that keeps us moving onward (and roughly where we were heading)
+    const score=(x,y)=> x*0.9 + (x*hx+y*hy)*0.6;
+    const side = score(cx,cy) >= score(-cx,-cy) ? 1 : -1;
+    if (side !== lastSide && (marks.length===0 || Math.hypot(head.x-marks[marks.length-1].x, head.y-marks[marks.length-1].y)>150)){
+      marks.push({x:head.x,y:head.y,ang:Math.atan2(-side*cy,-side*cx),len:22+rnd()*36,text:current,flip:marks.length%2});   // a fork: the decision is made here
+      current = nextDecision(); labelAge = 0; sinceDecision = 0; nextIn = cadence();
+    }
+    lastSide = side; cx*=side; cy*=side;
+    let dx = 0.72*cx + 0.22*ux + 0.42;                                          // along + up + onward
+    let dy = 0.72*cy + 0.22*uy;
+    // stay on the page and out of the type
+    if (head.y < H*0.13) dy += 1.2; if (head.y > H*0.9) dy -= 0.6;
+    if (keep){ const sx=head.x-off[0]; const nearX = sx>keep.x0-140 && sx<keep.x1+60; const nearY = head.y>keep.y0-90 && head.y<keep.y1+40;
+      if (nearX && nearY) { dy -= 1.6; dx += 0.4; }
+      // to the right of the type the whole height is open ground; drift back down into it
+      if (sx>keep.x1+120 && head.y < H*0.3) dy += 0.35; }
+    const want=Math.atan2(dy,dx); let d=want-head.ang; d=Math.atan2(Math.sin(d),Math.cos(d));
+    head.ang += Math.max(-0.09, Math.min(0.09, d));
+    head.x+=Math.cos(head.ang)*step; head.y+=Math.sin(head.ang)*step;
+    labelAge += dt; sinceDecision += dt;
+    // decisions come whether or not the ground forks: a company decides constantly
+    if (sinceDecision > nextIn && (marks.length===0 || Math.hypot(head.x-marks[marks.length-1].x, head.y-marks[marks.length-1].y)>150)){
+      const sideStub = rnd()<.5?-1:1;
+      marks.push({x:head.x,y:head.y,ang:head.ang+sideStub*(0.9+rnd()*0.8),len:16+rnd()*26,text:current,flip:marks.length%2});
+      current = nextDecision(); labelAge = 0; sinceDecision = 0; nextIn = cadence();
+    }
+    trail.push({x:head.x,y:head.y}); if (trail.length>5000) trail.shift();
+    const sx=head.x-off[0]; if (sx>W*o.headAt) off[0]+= (sx-W*o.headAt)*Math.min(1,dt*3);
+    marks = marks.filter(m=>m.x-off[0]>-80);
+    while (trail.length && trail[0].x-off[0] < -40) trail.shift();
+  }
+  function drawPath(){
+    px.clearRect(0,0,W,H); px.strokeStyle='#D85A30'; px.fillStyle='#D85A30'; px.lineCap='round'; px.lineJoin='round';
+    // roads not taken
+    px.globalAlpha=.4; px.lineWidth=1.2;
+    for (const m of marks){ px.beginPath(); px.moveTo(m.x-off[0],m.y); px.lineTo(m.x-off[0]+Math.cos(m.ang)*m.len, m.y+Math.sin(m.ang)*m.len); px.stroke(); }
+    // the path
+    px.globalAlpha=1; px.lineWidth=2.6; px.beginPath();
+    let started=false;
+    for (const q of trail){ const x=q.x-off[0]; if (x<-10){ continue; } if(!started){ px.moveTo(x,q.y); started=true; } else px.lineTo(x,q.y); }
+    px.stroke();
+    for (const m of marks){ px.beginPath(); px.arc(m.x-off[0],m.y,2.6,0,6.2832); px.fill(); }
+    // the decisions, stamped where they were made; the current one rides with the head
+    if (o.labels){
+      px.font = '500 12.5px "Schibsted Grotesk", sans-serif'; px.textBaseline='alphabetic';
+      px.lineJoin='round'; px.lineWidth=4; px.strokeStyle='#f2f0ea';
+      const setFont = k => { px.font = (k==='a' ? 'italic 400' : '500') + ' ' + (W < 600 ? '11.5px' : '12.5px') + ' "Schibsted Grotesk", sans-serif'; };
+      // a decision is set in ink. a completed task is set in orange with a check: the engine's receipt.
+      const check = (x,y,al) => { px.save(); px.globalAlpha=al; px.strokeStyle='#B9481F'; px.lineWidth=1.6; px.lineCap='round'; px.beginPath(); px.moveTo(x,y-3.5); px.lineTo(x+3,y-0.5); px.lineTo(x+8.5,y-7); px.stroke(); px.restore(); };
+      const rise = (x,y,al) => { px.save(); px.globalAlpha=al; px.strokeStyle='#2E7D5B'; px.lineWidth=1.6; px.lineCap='round'; px.lineJoin='round'; px.beginPath(); px.moveTo(x,y-1); px.lineTo(x+7.5,y-8.5); px.moveTo(x+3.5,y-8.5); px.lineTo(x+7.5,y-8.5); px.lineTo(x+7.5,y-4.5); px.stroke(); px.restore(); };
+      const label = (item,x,y,al) => {
+        const k = item.kind; setFont(k); px.lineWidth=4; px.strokeStyle='#f2f0ea'; px.globalAlpha=Math.min(1, al*1.3);
+        let tx = k==='d' ? x : x+14;
+        const tw = px.measureText(item.text).width;
+        if (tx + tw > W - 8){ x = x - 24 - tw - (k==='d'?0:14); tx = k==='d' ? x : x+14; }   // flip to the left of the point
+        if (tx < 8){ const shift = 8 - tx; tx += shift; x += shift; }                          // never off the left edge either
+        px.strokeText(item.text,tx,y);
+        px.globalAlpha=al; px.fillStyle = k==='a' ? '#B9481F' : k==='r' ? '#2E7D5B' : '#141210'; px.fillText(item.text,tx,y);
+        if (k==='a') check(x, y, al); if (k==='r') rise(x, y, al);
+      };
+      for (const m of marks){ if (!m.text) continue; const x=m.x-off[0]+12, y=m.flip? m.y+24 : m.y-14; const sx=m.x-off[0]; const far=Math.max(0, Math.min(1, (W*0.55-sx)/(W*0.45))); const edge=Math.max(0, Math.min(1, (sx-40)/120)); label(m.text, x, y, .62*(1-far*0.7)*edge); }
+      const a = Math.min(1, labelAge/0.5); const lastFlip = marks.length ? marks[marks.length-1].flip : 1; const x=head.x-off[0]+16, y= lastFlip ? head.y-14 : head.y+24;
+      label(current, x, y, a);
+      px.globalAlpha=1; px.fillStyle='#D85A30'; px.strokeStyle='#D85A30'; px.lineWidth=2.6;
+    }
+    px.beginPath(); px.arc(head.x-off[0],head.y,4,0,6.2832); px.fill();
+    px.strokeStyle='#f2f0ea'; px.lineWidth=1.6; px.beginPath(); px.arc(head.x-off[0],head.y,4,0,6.2832); px.stroke();
+    px.strokeStyle='#D85A30'; px.globalAlpha=.35; px.lineWidth=1; px.beginPath(); px.arc(head.x-off[0],head.y,10,0,6.2832); px.stroke(); px.globalAlpha=1;
+  }
+  new IntersectionObserver(([e])=>{ on=e.isIntersecting; },{threshold:0}).observe(terrainCanvas);
+  function frame(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+    if (on){
+      if (!reduce){ t+=dt*o.drift; walk(dt); }
+      clearRect();
+      gl.uniform1f(u.t,t); gl.uniform2f(u.off,off[0],off[1]);
+      gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      drawPath();
+    }
+    requestAnimationFrame(frame);
+  }
+  let rt; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(size,120); }); size();
+  // know where the type sits, then give the path a history before the page opens
+  clearRect();
+  for (let i=0;i<420;i++){ t+=1/60; walk(1/60); }
+  requestAnimationFrame(frame);
+}
+document.fonts.ready.then(()=>{
+  Terrain(document.getElementById('terrain'), document.getElementById('path'), { seed:5, startY:.2, headAt:.5, labels:true, walk:78, clear:()=>document.querySelector('.hero .aside'), clear2:()=>document.querySelector('.hero h1') });
+  Terrain(document.getElementById('model-terrain'), document.getElementById('model-path'), { seed:29, scale:260, levels:22, walk:40, headAt:.62, startY:.5, labels:true });
+});
+
+</script>
+<script>
+(() => {
+
+const ROOT=document.getElementById('intake'); const $=s=>ROOT.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const S={idea:'',goal:'',time:'',bg:'',edge:'',noidea:false,voice:false,step:0,chosen:null};
+const flow=$('#flow');
+
+/* ---------- presence + voice ---------- */
+function state(s,label){ const o=$('#orb'); o.className='orb '+(s||''); $('#state').textContent=label||({speaking:'speaking',listening:'listening',thinking:'thinking'})[s]||'here'; }
+let synthVoice=null;
+function pickVoice(){ const vs=speechSynthesis.getVoices(); synthVoice=vs.find(v=>/en(-|_)(GB|US)/i.test(v.lang)&&/Google|Samantha|Daniel|Karen|Serena|Alex/i.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||vs[0]||null; }
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; } else { $('#voice').style.display='none'; }
+$('#voice').addEventListener('click',()=>{ S.voice=!S.voice; $('#voice').textContent=S.voice?'Voice on':'Voice off'; $('#voice').classList.toggle('on',S.voice); if(!S.voice&&'speechSynthesis' in window) speechSynthesis.cancel(); });
+function speak(text){ if(!S.voice||!('speechSynthesis' in window)) return; const u=new SpeechSynthesisUtterance(text.replace(/[“”]/g,'')); if(synthVoice) u.voice=synthVoice; u.rate=.98; u.pitch=1; speechSynthesis.speak(u); }
+
+/* ---------- typesetting ---------- */
+async function typeInto(container,text,cls,speed){
+  const p=el('p'); container.appendChild(p);
+  text.split(/(\s+)/).forEach(t=>{ if(t) p.appendChild(el('span',cls||'w',t)); });
+  const ws=[...p.children]; for(const w of ws){ w.classList.add('on'); await sleep(speed||(24+Math.random()*20)); }
+}
+async function rebelSays(lines,opts={}){
+  const t=el('div','turn'); const r=el('div','rebel'); t.appendChild(r); flow.appendChild(t); requestAnimationFrame(()=>t.classList.add('on'));
+  state('speaking'); scrollDown();
+  for(const l of lines){ speak(l); await typeInto(r,l); await sleep(180); scrollDown(); }
+  state('','here'); return t;
+}
+async function reflect(text){
+  const t=el('div','turn on'); const rf=el('div','reflect'); t.appendChild(rf); flow.appendChild(t); state('speaking'); speak(text); await typeInto(rf,text,'w',18); state('','here'); scrollDown();
+}
+function youSaid(text){ const y=el('div','you',`<span class="lbl">You</span><q>${escape(text)}</q>`); flow.appendChild(y); scrollDown(); }
+function escape(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function statusLine(parts){ const s=el('div','status'); flow.appendChild(s); state('thinking'); for(const p of parts){ s.innerHTML=''; p.split(/(\s+)/).forEach(t=>{ if(t) s.appendChild(el('span','w',t)); }); const ws=[...s.children]; for(const w of ws){ w.classList.add('on'); await sleep(14); } await sleep(520); } await sleep(200); s.remove(); state('','here'); }
+let follow=false; const scroller=$('#scroller'); function scrollDown(){ scroller.scrollTo({top:scroller.scrollHeight,behavior:'smooth'}); }
+function gen(html,cls){ const g=el('div','gen '+(cls||''),html); flow.appendChild(g); requestAnimationFrame(()=>requestAnimationFrame(()=>g.classList.add('on'))); scrollDown(); return g; }
+function dimOld(){ [...flow.querySelectorAll('.turn.on')].slice(0,-1).forEach(t=>t.classList.add('old')); }
+
+/* ---------- answering ---------- */
+let pending=null; // {chips:[{t,fx,key}], onFree(text)}
+function ask(chips,onAnswer){
+  pending={chips,onAnswer}; const c=$('#chips'); c.innerHTML='';
+  chips.forEach(ch=>{ const b=el('button','chip'+(ch.ghost?' ghost':''),ch.t); b.addEventListener('click',()=>answer(ch.t,ch)); c.appendChild(b); });
+  $('#text').value=''; if(follow) $('#text').focus({preventScroll:true}); state('listening');
+}
+async function answer(text,chip){
+  if(!pending) return; const p=pending; pending=null; $('#chips').innerHTML=''; state('','here');
+  youSaid(text); dimOld();
+  await p.onAnswer(text,chip||matchChip(p.chips,text));
+}
+function matchChip(chips,text){ const t=text.toLowerCase(); return chips.find(c=>c.keys&&c.keys.some(k=>t.includes(k)))||null; }
+$('#send').addEventListener('click',()=>{ const v=$('#text').value.trim(); if(v) answer(v); });
+$('#text').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) answer(v); } });
+/* mic (Chrome) */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition; let rec=null;
+if(SR){ rec=new SR(); rec.lang='en-US'; rec.interimResults=true; rec.onresult=e=>{ let s=''; for(const r of e.results) s+=r[0].transcript; $('#text').value=s; if(e.results[e.results.length-1].isFinal){ $('#mic').classList.remove('live'); answer(s.trim()); } }; rec.onend=()=>$('#mic').classList.remove('live'); rec.onerror=()=>$('#mic').classList.remove('live'); }
+$('#mic').addEventListener('click',()=>{ if(!rec){ $('#hintl').textContent='No speech recognition in this browser. Type it, or tap a chip.'; return; } if($('#mic').classList.contains('live')){ rec.stop(); return; } $('#mic').classList.add('live'); state('listening'); try{ rec.start(); }catch(e){} });
+
+/* ---------- profile ---------- */
+function profileHTML(){ const rows=[['Idea',S.idea],['Goal',S.goal],['Time',S.time],['Background',S.bg]]; const n=rows.filter(r=>r[1]).length; $('#pcount').textContent=`${n} / 4`;
+  return `<div class="eyebrow"><span>What I heard</span><span>${n} of 4 · correct me if I'm off</span></div><div class="rows">${rows.map(([k,v])=>`<div class="row"><span class="k">${k}</span><span>${v?escape(v):'<span style="color:var(--ash);font-style:italic">not yet</span>'}</span>${v?'<button class="fix">that\'s not quite it</button>':'<span></span>'}</div>`).join('')}${S.edge==='eng'?`<div class="row"><span class="k">Noticed</span><span>You talk in systems: latency, handoffs, resolution rate. I\'ll use that, and I won\'t assert more than you told me.</span><span></span></div>`:S.edge==='ops'?`<div class="row"><span class="k">Noticed</span><span>You talk in statutes and deadlines: EU261, chargeback windows, small-claims limits. I\'ll use that, and I won\'t assert more than you told me.</span><span></span></div>`:''}</div>`; }
+$('#prof').addEventListener('click',()=>{ const g=gen(profileHTML()); g.querySelectorAll('.fix').forEach(b=>b.addEventListener('click',()=>{ const nv=prompt('Tell me again, in your words:'); if(nv){ b.closest('.row').children[1].textContent=nv; } })); });
+
+/* ---------- figures ---------- */
+const FIELD=[{n:'FormForge',x:.22,y:.20,r:7},{n:'LetterHub',x:.34,y:.30,r:6},{n:'CancelNow',x:.14,y:.40,r:5},{n:'DisputeDesk',x:.78,y:.22,r:7.5},{n:'ChargebackPro',x:.88,y:.36,r:6.5},{n:'Ombud',x:.64,y:.44,r:4.5},{n:'Recoup',x:.72,y:.14,r:4},{n:'Paperwork.ai',x:.46,y:.50,r:4},{n:'FairFare',x:.30,y:.60,r:4.5},{n:'ClaimJet',x:.20,y:.84,r:5},{n:'AirComp',x:.36,y:.90,r:4.5},{n:'Refundly',x:.50,y:.80,r:3.5}];
+const MW=600,MH=340,PL=44,PT=16,PB=38; const mx=v=>PL+v*(MW-PL-30), my=v=>PT+v*(MH-PT-PB);
+function mapSVG(you){ const marks=FIELD.map((c,k)=>{ const x=mx(c.x),y=my(c.y),left=c.x>.85; return `<g class="mk ${c.r>=6?'big':''}" style="animation-delay:${.3+k*.06}s"><circle cx="${x}" cy="${y}" r="${c.r}"/><text x="${left?x-c.r-7:x+c.r+7}" y="${y+3.5}" ${left?'text-anchor="end"':''}>${c.n}</text></g>`; }).join('');
+  const yg=you?`<g class="you"><circle class="rg" cx="${mx(you.x)}" cy="${my(you.y)}" r="8"/><circle cx="${mx(you.x)}" cy="${my(you.y)}" r="6.5"/><text x="${mx(you.x)+14}" y="${my(you.y)+4}">${you.label}</text></g>`:'';
+  return `<svg class="map" viewBox="0 0 ${MW} ${MH}"><path class="ax" d="M${PL} ${PT} V${MH-PB} H${MW-30}"/><text class="axl" x="${PL}" y="${MH-PB+16}">Works for the person</text><text class="axl" x="${MW-30}" y="${MH-PB+16}" text-anchor="end">Works for the company</text><text class="axl" transform="translate(${PL-14} ${MH-PB}) rotate(-90)">Wins the money</text><text class="axl" transform="translate(${PL-14} ${PT+110}) rotate(-90)">Sells the form</text>${marks}${yg}</svg>`; }
+const dots=on=>`<svg width="96" height="12" viewBox="0 0 96 12">${Array.from({length:12},(_,i)=>`<circle class="dot ${on.includes(i)?'on':''}" cx="${5+i*7.8}" cy="6" r="3"/>`).join('')}</svg>`;
+const spark=d=>`<svg width="96" height="24" viewBox="0 0 96 24"><path class="line" d="M0 20 L14 16 L28 13 L42 11 L56 9 L70 6 L84 4 L96 2"/><path class="line on" d="${d}"/></svg>`;
+
+/* ---------- the conversation ---------- */
+const edgeLine={ops:'You know which letter makes a company fold, and which filing it can\'t ignore. The agent will send ten thousand of them.',eng:'You can build the agent that waits on hold for four hours and never loses its temper. Nobody in the field has one.',none:'You have time and no reputation yet. That argues for a place where a won claim speaks before you do.'};
+async function start(){
+  await rebelSays(["Hi. I'm Rebel. This isn't a form, it's a conversation, so say it however it comes out and I'll keep up. I'll ask before I recommend, and I won't decide for you.","What are you thinking about building?"]);
+  ask([{t:'A personal AI that gets your money back: the delayed flight, the fee, the subscription that won\'t cancel',keys:['money back','refund','fight','claim','fee','flight','cancel','personal ai'],v:'A personal AI that gets your money back from airlines, banks, and subscriptions: it reads the terms, calls, files, and settles for you'},{t:'I have an idea but it\'s rough',keys:['rough','idea'],v:'A rough idea, to be sharpened'},{t:'I don\'t have one yet',keys:['don\'t','no idea','nothing','yet'],v:'',ghost:true}],async(text,chip)=>{
+    if(chip&&chip.t.startsWith('I don')){ S.noidea=true; S.idea='None yet, Rebel to find it'; await reflect('Good. Then we find one that fits you instead of the other way round. That means I need to know you first.'); }
+    else { S.idea=chip?chip.v:text; await reflect(`“${text}.” Okay. I'm already curious who's doing that today. We'll get there; you first.`); }
+    await q2();
+  });
+}
+async function q2(){
+  await rebelSays(["What do you want out of this? Something that pays you well and stays yours, or as big as it can possibly get. There's no wrong answer, but the answers lead to different places."]);
+  ask([{t:'Pays me well and stays small',keys:['small','pays','lifestyle','mine'],v:'Lifestyle: pays well, stays small'},{t:'As big as it can get',keys:['big','scale','huge','venture'],v:'Scale: as big as it can get'}],async(text,chip)=>{
+    S.goal=chip?chip.v:text; await reflect(chip&&chip.v.startsWith('Scale')?'As big as it gets. That changes what I\'ll recommend, and how hard I\'ll push you.':'Pays well, stays yours. Good. That rules out half the field already, in a good way.'); await q3();
+  });
+}
+async function q3(){
+  await rebelSays(["How much of you does this get? All of it from day one, or evenings until it proves itself?"]);
+  ask([{t:'All of it. I\'m full-time on this',keys:['full','all','day one','quit'],v:'Full-time from day one'},{t:'Evenings until it works, then I quit',keys:['evening','until','then'],v:'Evenings until it works, then full-time'},{t:'I\'m keeping my job for a while',keys:['keep','job'],v:'Keeping the job for now'}],async(text,chip)=>{
+    S.time=chip?chip.v:text; await reflect(S.time.startsWith('Full')?'All of it. Then speed is your edge and the plan should spend it: first claim won in weeks, not quarters.':S.time.startsWith('Evenings')?'Evenings until it works. Then the first thirty days have one job: make it work.':'Keeping the job. So we build something that runs while you\'re elsewhere, until it can\'t.'); await q4();
+  });
+}
+async function q4(){
+  await rebelSays(["Last one before I look anything up. What have you done? Not a résumé. The one thing that matters."]);
+  ask([{t:'Consumer-rights lawyer. Six years, thousands of claims by hand',keys:['lawyer','legal','claims','consumer','rights','attorney'],v:'Consumer-rights lawyer; six years, thousands of claims by hand',edge:'ops'},{t:'Built call-handling agents at a contact-center startup',keys:['agent','call','voice','built','engineer','ml'],v:'Built call-handling agents',edge:'eng'},{t:'Just out of school',keys:['school','student','graduate','college'],v:'Recent graduate',edge:'none'}],async(text,chip)=>{
+    S.bg=chip?chip.v:text; S.edge=chip?chip.edge:'none';
+    await reflect(S.edge==='ops'?'Thousands of claims by hand. Hold that, because you know exactly which ones win, and nobody in this field does.':S.edge==='eng'?'You can build the agent that makes the call. Hold that; the field is full of forms and empty of anyone who picks up the phone.':'Just out. Time and no reputation. That\'s not nothing; it\'s a specific shape, and there\'s a place in the field for it.');
+    const g=gen(profileHTML()); g.querySelectorAll('.fix').forEach(b=>b.addEventListener('click',()=>{ const nv=prompt('Tell me again, in your words:'); if(nv) b.closest('.row').children[1].textContent=nv; }));
+    await sleep(700); await field();
+  });
+}
+async function field(){
+  await rebelSays(["Give me a second. I'm looking at the field."]);
+  await statusLine(['reading the world model · consumer claims, refunds, disputes','twelve companies · whose side they are on · what they charge','reading their teams from public records','done']);
+  const g=gen(`<div class="eyebrow"><span>The field · illustrative</span><span>12 companies · what the world model sees</span></div><h4>Everyone sells the form. Nobody fights the fight.</h4><p class="sub">Six sell templates and cancellation forms to consumers and leave the fight to them. Three sell dispute software to the companies on the other side. The three that actually win money back only touch flights, keep 40%, and run on rooms of case handlers.</p>${mapSVG()}`);
+  await sleep(900);
+  await rebelSays([S.noidea?"You didn't bring an idea, so I brought the field where what you told me is worth the most: money people are owed and never collect. Twelve companies. Nine sell forms or sell to the other side. Three win money back, for flights only, at 40%.":"Here's the field. Twelve companies. Six sell you a letter and wish you luck. Three work for the companies you'd be fighting. The three that actually win money back handle flights only, keep 40%, and can't grow past their case handlers."]);
+  await sleep(300);
+  const teams=[{n:'FormForge',mk:[['s',5],['e',2]]},{n:'DisputeDesk',mk:[['s',7],['e',3]]},{n:'LetterHub',mk:[['s',4],['e',1]]},{n:'ClaimJet',mk:[['f',1],['s',11]],hi:true},{n:'AirComp',mk:[['f',1],['s',8]],hi:true}];
+  gen(`<div class="eyebrow"><span>Who is building this</span><span>Teams · from public records</span></div><div class="roster">${teams.map((t,i)=>`<div class="co ${t.hi?'hi':''}" style="animation-delay:${.15+i*.09}s"><div class="n">${t.n}</div>${t.mk.map(([k,n])=>`<span class="tok ${k}"><i></i>${k==='f'?'founder':n+' '+(k==='s'?(t.hi?'case handlers':'sales'):'eng')}</span>`).join('')}</div>`).join('')}<div class="kit">The software companies are sales teams with an engineer or two. The claims companies are case handlers at desks. <em>${S.edge==='ops'?'Nobody in the field has argued a thousand of these and won. You have.':S.edge==='eng'?'Nobody in the field has an agent that picks up the phone. You can build it.':'Nobody in the field started with time to spare. You have it.'}</em></div></div>`);
+  await sleep(600);
+  await rebelSays(["Their teams. The software side is salespeople and a couple of engineers. The claims side is eleven case handlers and a founder. Nobody has an agent that reads the terms, makes the call, waits on hold, and files, which is the product."]);
+  if(S.noidea){ await rebelSays(["Three gaps fit you: a personal agent for airline claims, one for subscriptions that won't cancel, one for medical bills that were coded wrong. I'd start with the first. The law is clearest, the money is biggest, and every win is a story people tell."]); ask([{t:'Take the airline claims',v:'A personal AI that gets your money back, airlines first (Rebel-proposed)'},{t:'Medical bills. I know that world',v:'A personal AI for wrongly coded medical bills (Rebel-proposed)'}],async(text,chip)=>{ S.idea=chip?chip.v:text; await reflect(`“${text}.” Good. Then here's where I think you'd sit.`); await recommend(); }); }
+  else { await recommend(); }
+}
+const OPTS=[
+ {id:'person',pick:true,h:'On the person\'s side, end to end: airline claims first, paid only when it wins',p:'Nobody works for the person all the way through. Forward the email, and the agent reads the terms, files, calls, escalates, and settles. It costs nothing until money lands, and every win is a story people tell.',fig:[dots([9,10,11])+'<span>3 of 12 win money back</span>',spark('M0 20 L14 16 L28 13 L42 11 L56 9 L70 6 L84 4 L96 2')+'<span>revenue from the first win</span>'],you:{x:.12,y:.86,label:'You, if you agree'},
+  done:'On the person\'s side, airlines first, paid only when it wins. That\'s the equilibrium: an idea you chose, against the field, with your life in the picture. Here it is, as something you can hold.',art:{h:'A personal AI that gets your money back: it reads the terms, files, calls, and settles, starting with airline claims, paid a share only of what it wins.',s:['The agent is the product','Costs nothing until it wins','Every win gets told'],w:['Revenue lags the win','Airlines will change the rules','Every claim is on the record'],o:['Nine of twelve sell forms or sell to the other side','Claims companies keep 40% and can\'t scale','Every category after airlines is open']}},
+ {id:'business',h:'Dispute software for the companies',p:'Three of twelve sell here, with sales teams built for it. Merchants pay for chargeback tools and pay well. Bigger contracts, and you\'d be building for the other side.',fig:[dots([3,4,5])+'<span>3 of 12 sell here</span>',spark('M0 20 L28 20 L52 19 L72 14 L84 9 L96 2')+'<span>revenue late, then steep</span>'],you:{x:.84,y:.28,label:'You, for the companies'},
+  done:'Okay. Then let\'s make it work. I\'ll build the product to resolve a dispute live in the demo, and I\'ll line up the first ten merchants drowning in chargebacks. I said what I think. I won\'t say it twice.',art:{h:'Dispute-resolution software for merchants, with an agent inside it, sold against three incumbents.',s:['Bigger contracts','A real product from day one','Merchants already pay'],w:['Long cycles','Three incumbents with sales teams','You\'d be fighting the people you wanted to help'],o:['Merchants that lose every chargeback','A demo that settles a dispute live','Rebel finds the first ten']}},
+ {id:'issuer',h:'Bundled by the banks and card issuers',p:'One comparable never sold to a person: the card that bundled it did. Every cardholder gets the agent, the issuer pays per account, and you never run an ad.',fig:[dots([9])+'<span>1 of 12 did it</span>',spark('M0 20 L18 16 L38 12 L58 8 L78 5 L96 3')+'<span>revenue via the channel</span>'],you:{x:.42,y:.66,label:'You, through the issuers'},
+  done:'The issuers it is. I\'ll map every card and neobank that markets itself on protection, which of them lose customers over disputes today, and who wants the agent first. You keep building. Let\'s go find the first one.',art:{h:'A personal money-back agent bundled by banks and card issuers, paid per cardholder.',s:['You keep building','A channel with every cardholder','No acquisition cost'],w:['Channel owns the relationship','Margin shared','Bank procurement'],o:['One comparable proved the channel','Issuers compete on protection','Every card is a distribution deal']}}
+];
+async function recommend(){
+  await rebelSays([`Given ${S.time.startsWith('Full')?'you\'re full-time':'your time'} and what you\'ve done, I think you win by being the only one on the person\'s side end to end: airline claims first, where the law is clearest and the money is biggest, paid only from what it wins.`,`Nine of twelve sell forms or sell to the other side. The three that win money back keep 40% and can\'t grow past their case handlers. ${edgeLine[S.edge]||edgeLine.none}`,`That's a recommendation. Here are the three ways this can go. Your call.`]);
+  const d=gen(`<div class="eyebrow"><span>Where do you start? Your call.</span><span>hover to hear the case · click to choose · <b style="color:var(--ember)">Rebel's pick is marked</b></span></div><div class="dgrid"><div class="dmap">${mapSVG(OPTS[0].you)}</div><div class="dopts">${OPTS.map(o=>`<button class="dopt" data-id="${o.id}"><span class="radio"></span><span><h3><span>${o.h}</span>${o.pick?'<span class="pick">Rebel\'s pick</span>':''}</h3><p>${o.p}</p><div class="figs"><span>${o.fig[0]}</span><span>${o.fig[1]}</span></div></span></button>`).join('')}</div></div>`);
+  setTimeout(()=>{ scroller.scrollTo({top:d.offsetTop-12,behavior:'smooth'}); },350);
+  const svg=d.querySelector('svg');
+  const moveYou=o=>{ const g=svg.querySelector('.you'); const x=mx(o.you.x),y=my(o.you.y); g.querySelectorAll('circle').forEach(c=>{c.setAttribute('cx',x);c.setAttribute('cy',y);}); const t=g.querySelector('text'); t.setAttribute('x',x+14); t.setAttribute('y',y+4); t.textContent=o.you.label; };
+  d.querySelectorAll('.dopt').forEach(b=>{ const o=OPTS.find(x=>x.id===b.dataset.id);
+    b.addEventListener('mouseenter',()=>{ if(!S.chosen) moveYou(o); });
+    b.addEventListener('mouseleave',()=>{ if(!S.chosen) moveYou(OPTS[0]); });
+    b.addEventListener('click',async()=>{ if(S.chosen) return; S.chosen=o.id; moveYou(o); d.querySelectorAll('.dopt').forEach(x=>x.classList.toggle('chosen',x===b)); $('#chips').innerHTML=''; pending=null; youSaid(o.h); await rebelSays([o.done]);
+      gen(`<div class="artifact"><div class="eyebrow"><span>Positioning · chosen against 12 comparables</span><span>Mutiny · Rebel</span></div><h3>${o.art.h}</h3><div class="grid"><div><div class="k">Strengths</div><ul>${o.art.s.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><div class="k">Weaknesses</div><ul>${o.art.w.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><div class="k">Opportunities</div><ul>${o.art.o.map(x=>`<li>${x}</li>`).join('')}</ul></div></div></div>`);
+      await sleep(400); await rebelSays(["That's Act 1. Next we build it, and I'll ask before I recommend there too."]);
+      $('#answer').classList.add('done');
+      const go=gen(`<div class="eyebrow"><span>Ready when you are</span><span>one subscription · one living business</span></div><h4>Start the company.</h4><p class="sub">Rebel comes with you. Nothing irreversible happens in there without your press.</p><div style="display:flex;gap:12px;align-items:center;margin-top:8px"><button class="btn ember" id="startco" style="background:var(--ember);border-color:var(--ember);color:#fff;border-radius:999px;padding:12px 20px;font-weight:500">Start the company →</button><span class="small" style="color:var(--ash);font-size:13px">Pivot inside it as hard as you like.</span></div>`);
+      go.querySelector('#startco').addEventListener('click',()=>{ if(window.parent!==window){ window.parent.postMessage({mutinyIntakeDone:true,variant:o.id,idea:S.idea,goal:S.goal,time:S.time,bg:S.bg},'*'); } else { location.href='mutiny-os.html'; } });
+    });
+  });
+  ask([{t:'None of these. Let me tell you why',keys:['none','no','why','neither'],ghost:true}],async(text)=>{ await rebelSays(["Fair. Tell me what's wrong with it, in your words, and I'll bring back what the field says about that. We iterate until it's yours."]); ask([{t:'Companies will just ignore an AI',keys:['ignore','ai','bot','respond']},{t:'I don\'t want to sell to consumers',keys:['consumer','sell','people','b2c']}],async(t2)=>{ const c=t2.toLowerCase(); await rebelSays([c.includes('ignore')||c.includes('bot')||c.includes('respond')?"They ignore letters. They don't ignore filings. Two of the twelve win by going to the regulator and the card network, and neither cares who wrote the claim. The agent's job isn't to be heard; it's to be impossible to ignore.":"Then the issuers do the selling for you. One comparable never sold to a person: the card that bundled it did, and every cardholder got the agent on day one. I'd take the channel."]); await rebelSays(["Pick again, or tell me more."]); }); });
+}
+
+/* ---------- mounting ---------- */
+let started=false;
+function preview(){
+  if(started) return; started=true; follow=false;
+  Object.assign(S,{ idea:'A personal AI that gets your money back from airlines, banks, and subscriptions: it reads the terms, calls, files, and settles for you', goal:'Scale: as big as it can get', time:'Full-time from day one', bg:'Consumer-rights lawyer; six years, thousands of claims by hand', edge:'ops' });
+  $('#hintr').textContent='Preview · a founder Rebel already knows';
+  (async()=>{ const g=gen(profileHTML()); g.querySelectorAll('.fix').forEach(b=>b.style.display='none'); await sleep(600); await field(); })();
+}
+function restart(){
+  started=true; follow=true; pending=null; S.chosen=null; S.noidea=false; S.idea=S.goal=S.time=S.bg=S.edge='';
+  flow.innerHTML=''; $('#chips').innerHTML=''; $('#answer').classList.remove('done'); $('#pcount').textContent='0 / 4'; $('#hintr').textContent='Rebel keeps up either way';
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  window.scrollTo({top:ROOT.getBoundingClientRect().top+window.scrollY-40,behavior:'smooth'});
+  setTimeout(start, 500);
+}
+new IntersectionObserver(([e])=>{ if(e.isIntersecting) preview(); },{threshold:0.25}).observe(ROOT);
+ROOT.addEventListener('click',()=>{ follow=true; },{once:true});
+document.querySelectorAll('[data-intake]').forEach(a=>a.addEventListener('click',e=>{ e.preventDefault(); restart(); }));
+
+})();
+</script>
+</body>
+</html>
