@@ -1,0 +1,24 @@
+name = "mutiny-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Comma-separated list of allowed browser origins. localhost is always allowed.
+ALLOWED_ORIGINS = "https://mutiny.ai,https://www.mutiny.ai,https://kavbad.github.io"
+SITE_ORIGIN = "https://mutiny.ai"
+# claude | rebel   (rebel = the real world model, via WORLD_MODEL_URL; not wired yet)
+WORLD_MODEL = "claude"
+WORLD_MODEL_URL = ""
+# Output tokens per UTC day before Rebel asks founders to come back tomorrow.
+DAILY_TOKEN_CEILING = "400000"
+# Founder turns per session before Rebel wraps up.
+MAX_TURNS = "60"
+
+# Secrets (set with `npx wrangler secret put <NAME>`):
+#   ANTHROPIC_API_KEY
+#   ADMIN_TOKEN
+
+[[kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_KV_ID"

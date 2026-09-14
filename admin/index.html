@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Queue · Mutiny</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  main{ padding-top:clamp(32px, 4vw, 56px); }
+  .mono{ font-family:'Spline Sans Mono',ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); }
+  h1{ font-size:clamp(24px, 2.4vw, 34px); margin-bottom:calc(var(--u)*2); }
+  h2{ font-size:18px; margin:calc(var(--u)*6) 0 calc(var(--u)*2); }
+  table{ width:100%; border-collapse:collapse; font-size:14px; }
+  th{ text-align:left; font-weight:400; padding:8px 10px 8px 0; border-bottom:1px solid var(--ink); }
+  th.mono{ font-size:10.5px; }
+  td{ padding:12px 10px 12px 0; border-bottom:1px solid var(--rule); vertical-align:top; }
+  td.idea{ max-width:36ch; color:var(--ink-72); }
+  .st{ display:inline-block; font-family:'Spline Sans Mono',ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border:1px solid var(--rule); border-radius:6px; color:var(--ink-72); }
+  .st.new{ border-color:var(--orange); color:var(--orange-deep); }
+  .st.done{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  button.b{ font:inherit; font-size:13px; border:1px solid var(--ink-28); background:transparent; border-radius:999px; padding:7px 12px; cursor:pointer; color:var(--ink); }
+  button.b:hover{ border-color:var(--ink); }
+  button.b.primary{ background:var(--orange); border-color:var(--orange); color:var(--paper); }
+  code{ font-family:'Spline Sans Mono',ui-monospace,monospace; font-size:12px; word-break:break-all; }
+  .tokenform{ display:flex; gap:12px; align-items:flex-end; max-width:520px; }
+  .tokenform .field{ flex:1; }
+  .empty{ color:var(--ink-48); padding:16px 0; }
+  details{ font-size:14px; }
+  details summary{ cursor:pointer; color:var(--ink-72); }
+  .pos{ margin-top:10px; background:var(--ink); color:var(--paper); border-radius:12px; padding:14px 16px; }
+  .pos h4{ font-size:15px; font-weight:600; margin-bottom:8px; }
+  .pos .cols{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; font-size:12.5px; color:#dcd6c8; }
+  .pos .cols .k{ font-family:'Spline Sans Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#9d9689; margin-bottom:4px; }
+  .pos ul{ padding-left:14px; margin:0; }
+  .wrap{ overflow-x:auto; }
+  @media (max-width:820px){ .pos .cols{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="bar"><a class="mark" href="/">Mutiny<small>Queue</small></a><span id="whoami" class="mono"></span></div>
+<main>
+  <div id="login">
+    <h1>The queue.</h1>
+    <form class="tokenform" id="tokenform">
+      <div class="field"><label for="token">Admin token</label><input id="token" type="password" autocomplete="current-password" placeholder="Paste the ADMIN_TOKEN secret"></div>
+      <button class="cta" type="submit" style="height:48px;font-size:16px;padding:0 18px 0 20px">Open</button>
+    </form>
+    <p class="note" id="loginnote">Stored in this browser only.</p>
+  </div>
+  <div id="app" hidden>
+    <h1>Applications <span class="mono" id="count"></span></h1>
+    <div class="wrap"><table id="apps"><thead><tr><th class="mono">When</th><th class="mono">Founder</th><th class="mono">Idea</th><th class="mono">Stage</th><th class="mono">Status</th><th class="mono">Invite</th></tr></thead><tbody></tbody></table></div>
+    <h2>Intakes</h2>
+    <div class="wrap"><table id="sessions"><thead><tr><th class="mono">Updated</th><th class="mono">Founder</th><th class="mono">Status</th><th class="mono">Turns</th><th class="mono">Tokens out</th><th class="mono">Email</th><th class="mono">Positioning</th></tr></thead><tbody></tbody></table></div>
+    <p class="note"><button class="b" id="refresh">Refresh</button> <button class="b" id="logout" style="margin-left:8px">Forget token</button></p>
+  </div>
+</main>
+<script src="../assets/config.js"></script>
+<script>
+(() => {
+  const API=window.MUTINY_API; const $=s=>document.querySelector(s);
+  let token=null; try{ token=localStorage.getItem('mutiny_admin'); }catch{}
+  const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const when=iso=>{ const d=new Date(iso); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); };
+  async function api(path, body){ const r=await fetch(API+path,{method:body?'POST':'GET',headers:{'authorization':'Bearer '+token,...(body?{'content-type':'application/json'}:{})},body:body?JSON.stringify(body):undefined}); const j=await r.json().catch(()=>({})); if(!r.ok) throw new Error(j.error||('Request failed '+r.status)); return j; }
+  $('#tokenform').addEventListener('submit',async e=>{ e.preventDefault(); token=$('#token').value.trim(); try{ await load(); try{ localStorage.setItem('mutiny_admin',token); }catch{} }catch(err){ $('#loginnote').textContent=err.message; $('#loginnote').className='note bad'; } });
+  $('#refresh').addEventListener('click',()=>load().catch(e=>alert(e.message)));
+  $('#logout').addEventListener('click',()=>{ try{ localStorage.removeItem('mutiny_admin'); }catch{} location.reload(); });
+  async function load(){
+    const [apps,sessions]=await Promise.all([api('/admin/applications'),api('/admin/sessions')]);
+    $('#login').hidden=true; $('#app').hidden=false; $('#whoami').textContent='admin';
+    const byApp=Object.fromEntries(apps.map(a=>[a.id,a]));
+    $('#count').textContent=`${apps.length} · ${apps.filter(a=>a.status==='new').length} waiting`;
+    const tb=$('#apps tbody'); tb.innerHTML='';
+    if(!apps.length) tb.innerHTML='<tr><td colspan="6" class="empty">Nobody yet.</td></tr>';
+    for(const a of [...apps].reverse()){
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td class="mono">${when(a.createdAt)}</td><td><b>${esc(a.name)}</b><br><code>${esc(a.email)}</code></td><td class="idea">${esc(a.idea)||'<span class="mono">blank</span>'}</td><td>${esc(a.stage)}</td><td><span class="st ${esc(a.status)}">${esc(a.status)}</span></td><td></td>`;
+      const cell=tr.lastElementChild;
+      if(a.inviteLink){ cell.innerHTML=`<code>${esc(a.inviteLink)}</code><br><button class="b" style="margin-top:6px">Copy link</button>`; cell.querySelector('button').addEventListener('click',async ev=>{ await navigator.clipboard.writeText(a.inviteLink); ev.target.textContent='Copied'; }); }
+      else { const b=document.createElement('button'); b.className='b primary'; b.textContent='Admit'; b.addEventListener('click',async()=>{ b.disabled=true; b.textContent='Minting…'; try{ await api('/admin/approve',{id:a.id}); await load(); }catch(err){ alert(err.message); b.disabled=false; b.textContent='Admit'; } }); cell.appendChild(b); }
+      tb.appendChild(tr);
+    }
+    const sb=$('#sessions tbody'); sb.innerHTML='';
+    if(!sessions.length) sb.innerHTML='<tr><td colspan="7" class="empty">No intakes yet.</td></tr>';
+    for(const s of sessions){
+      const a=byApp[s.applicationId]||{}; const tr=document.createElement('tr');
+      const pos=s.positioning?`<details><summary>${esc(s.positioning.headline)}</summary><div class="pos"><h4>${esc(s.positioning.headline)}</h4><div class="cols">${['strengths','weaknesses','opportunities'].map(k=>`<div><div class="k">${k}</div><ul>${(s.positioning[k]||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div></div></details>`:'<span class="mono">not yet</span>';
+      const prof=['idea','goal','time','background'].filter(k=>s.profile&&s.profile[k]).map(k=>`<div><span class="mono">${k}</span> ${esc(s.profile[k])}</div>`).join('');
+      tr.innerHTML=`<td class="mono">${when(s.updatedAt)}</td><td><b>${esc(a.name||'?')}</b><br><code>${esc(a.email||'')}</code>${prof?`<details style="margin-top:6px"><summary>profile</summary>${prof}</details>`:''}</td><td><span class="st ${esc(s.status)}">${esc(s.status)}</span></td><td>${s.turns}</td><td>${(s.usage&&s.usage.output||0).toLocaleString()}</td><td><code>${esc(s.email||'')}</code></td><td>${pos}</td>`;
+      sb.appendChild(tr);
+    }
+  }
+  if(token) load().catch(()=>{ token=null; });
+})();
+</script>
+</body>
+</html>

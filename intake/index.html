@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talk to Rebel-1 · Mutiny</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f3f1eb'/%3E%3Cpath d='M5 22 C 11 6, 15 6, 21 16 S 27 22, 29 12' fill='none' stroke='%2315130f' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/intake.css">
+<style>
+  main{ padding:calc(var(--u)*3) var(--g) calc(var(--u)*2); display:flex; flex-direction:column; }
+  .intake{ height:auto; flex:1; min-height:0; zoom:1; max-width:1040px; width:100%; margin:0 auto; }
+  body{ height:100dvh; overflow:hidden; }
+  .intake .flow{ max-width:900px; }
+  .gate{ max-width:44ch; margin:10vh auto 0; }
+  .gate h1{ font-size:clamp(28px, 3.1vw, 44px); }
+  .gate a.cta{ margin-top:calc(var(--u)*3); }
+  .usage{ font-family:'Spline Sans Mono',ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); }
+  @media (max-width:600px){ main{ padding:calc(var(--u)*2) 16px; } .intake .top{ flex-wrap:wrap; } }
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="bar"><a class="mark" href="/">Mutiny<small>Private</small></a><span id="who">Talk to Rebel-1</span></div>
+<main>
+  <div class="gate" id="gate" hidden>
+    <h1 id="gate-h">This page needs an invitation.</h1>
+    <p class="copy" id="gate-p">Founders are admitted in order of arrival. Apply, and when it's your turn a link lands in your inbox.</p>
+    <a class="cta" href="/apply/">Apply<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
+  </div>
+  <div class="intake" id="intake" hidden>
+    <div class="top">
+      <div class="presence"><div class="orb" id="orb"></div><div class="who"><span class="name">Rebel</span><span class="state" id="state">here</span></div></div>
+      <div class="tools"><button class="pill" id="voice">Voice off</button><button class="pill" id="prof">What Rebel knows · <b id="pcount">0 / 4</b></button></div>
+    </div>
+    <div class="scroller" id="scroller"><div class="flow" id="flow"></div></div>
+    <div class="answer" id="answer">
+      <div class="inner">
+        <div class="chips" id="chips"></div>
+        <div class="bar" style="padding:8px 8px 8px 18px"><input id="text" placeholder="Say it however it comes out…" autocomplete="off"><button class="mic" id="mic" title="Talk"><svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg></button><button class="send" id="send">Send</button></div>
+        <div class="hint"><span id="hintl">Talk, type, or tap.</span><span id="hintr">Rebel keeps up either way</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="../assets/config.js"></script>
+<script src="../assets/intake-ui.js"></script>
+<script>
+(() => {
+  const API=window.MUTINY_API;
+  const k=new URLSearchParams(location.search).get('k');
+  const gate=document.getElementById('gate'), root=document.getElementById('intake');
+  const showGate=(h,p)=>{ if(h) document.getElementById('gate-h').textContent=h; if(p) document.getElementById('gate-p').textContent=p; gate.hidden=false; root.hidden=true; };
+  if(!k){ showGate(); return; }
+  root.hidden=false;
+  const ui=IntakeUI.mount(root,{follow:true});
+  const state={ sessionId:null, profile:{}, reading:null, status:null, busy:false, profileShown:false, usage:{output:0}, done:false };
+  let q=Promise.resolve(); const enqueue=fn=>{ q=q.then(fn).catch(e=>console.error(e)); return q; };
+
+  async function api(path, body, method){
+    const r=await fetch(API+path,{method:method||(body?'POST':'GET'),headers:body?{'content-type':'application/json'}:{},body:body?JSON.stringify(body):undefined});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||`Request failed (${r.status})`);
+    return j;
+  }
+
+  // ---------- rendering tool calls (live and on replay) ----------
+  function renderTool(name, input, replay){
+    if(name==='set_profile'){
+      for(const key of ['idea','goal','time','background','constraints','noticed']){ const v=(input[key]||'').trim(); if(v) state.profile[key]=v; }
+      const n=['idea','goal','time','background'].filter(x=>state.profile[x]).length; const pc=document.getElementById('pcount'); if(pc) pc.textContent=`${n} / 4`;
+      if(input.reflection && !replay) enqueue(()=>ui.reflect(input.reflection));
+      else if(input.reflection && replay) enqueue(()=>{ const t=document.createElement('div'); t.className='turn on old'; t.innerHTML=`<div class="reflect"><p><span class="w on">${ui.escape(input.reflection)}</span></p></div>`; document.getElementById('flow').appendChild(t); });
+    }
+    else if(name==='offer_choices'){ if(!replay) enqueue(()=>ui.chips(input.choices||[], label=>turn(label))); }
+    else if(name==='show_status'){ if(!replay) enqueue(()=>{ if(!state.profileShown){ state.profileShown=true; ui.profileCard(state.profile,{editable:true,onFix}); } state.status=ui.statusLine(input.lines||['reading the world model']); }); }
+    else if(name==='propose_positions'){
+      enqueue(()=>{ ui.positionsCard(input.options||[], state.reading?state.reading.axes:{x:['',''],y:['','']}, state.reading?state.reading.companies:[], o=>{ ui.clearChips(); turn(`I'll take: ${o.title}`); });
+        if(!replay) ui.chips([{label:'None of these. Let me tell you why',ghost:true}], label=>turn(label)); });
+    }
+    else if(name==='show_positioning'){ enqueue(()=>ui.artifactCard(input)); }
+    else if(name==='finish'){ enqueue(()=>{ ui.finishCard({email:state.email, onEmail: async v=>{ await api(`/sessions/${state.sessionId}/finish`,{email:v}); state.email=v; }}); ui.hint('Rebel is done. You can still say anything.','Founders are admitted in order of arrival'); }); }
+  }
+  function renderField(reading){ enqueue(()=>{ if(state.status){ state.status.done(); state.status=null; } state.reading=reading; ui.fieldCard(reading); ui.teamsCard(reading); }); }
+  function onFix(key){ const inp=document.getElementById('text'); inp.value=`That's not quite it. About my ${key.toLowerCase()}: `; inp.focus(); }
+  document.getElementById('prof').addEventListener('click',()=>ui.profileCard(state.profile,{editable:true,onFix}));
+
+  function instantRebel(text){ const t=document.createElement('div'); t.className='turn on old'; const r=document.createElement('div'); r.className='rebel'; text.split(/\n\s*\n/).forEach(par=>{ const p=document.createElement('p'); p.innerHTML=`<span class="w on">${ui.escape(par)}</span>`; r.appendChild(p); }); t.appendChild(r); document.getElementById('flow').appendChild(t); }
+  function replay(s){
+    for(const r of s.renders){
+      if(r.kind==='rebel') instantRebel(r.text);
+      else if(r.kind==='you') ui.youSaid(r.text);
+      else if(r.kind==='field') { state.reading=r.reading; ui.fieldCard(r.reading); ui.teamsCard(r.reading); }
+      else if(r.kind==='tool') renderTool(r.name, r.input, true);
+    }
+    if(s.pending && s.pending.name==='offer_choices') ui.chips(s.pending.input.choices||[], label=>turn(label));
+    if(s.pending && s.pending.name==='propose_positions') ui.chips([{label:'None of these. Let me tell you why',ghost:true}], label=>turn(label));
+    setTimeout(()=>ui.scrollDown(),50);
+  }
+
+  // ---------- a turn: founder speaks, Rebel streams back ----------
+  async function turn(text){
+    if(state.busy) return; state.busy=true;
+    text=(text||'').trim();
+    if(text){ ui.clearChips(); ui.youSaid(text); }
+    ui.state('thinking');
+    let w=null, res;
+    try{
+      res=await fetch(`${API}/sessions/${state.sessionId}/turn`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text})});
+      if(!res.ok){ const j=await res.json().catch(()=>({})); throw new Error(j.error||`Rebel didn't answer (${res.status}).`); }
+      const reader=res.body.getReader(), dec=new TextDecoder(); let buf='';
+      while(true){
+        const {value,done}=await reader.read(); if(done) break;
+        buf+=dec.decode(value,{stream:true});
+        let i; while((i=buf.indexOf('\n\n'))>=0){
+          const chunk=buf.slice(0,i); buf=buf.slice(i+2);
+          for(const line of chunk.split('\n')){ if(!line.startsWith('data:')) continue; let f; try{ f=JSON.parse(line.slice(5)); }catch{ continue; } handle(f); }
+        }
+      }
+    }catch(err){ enqueue(async()=>{ const ww=ui.beginRebel(); ww.write(err.message||'Something broke on my side. Say that again.'); await ww.end(); }); }
+    function handle(f){
+      if(f.type==='text'){ enqueue(()=>{ if(!w) w=ui.beginRebel(); w.write(f.text); }); }
+      else if(f.type==='text_end'){ enqueue(async()=>{ if(w){ const ww=w; w=null; await ww.end(); } }); }
+      else if(f.type==='tool'){ renderTool(f.name,f.input,false); }
+      else if(f.type==='field'){ renderField(f.reading); }
+      else if(f.type==='status'){ enqueue(()=>{ if(!state.status) state.status=ui.statusLine(f.lines||['reading the world model']); }); }
+      else if(f.type==='usage'){ state.usage.output+=f.output||0; }
+      else if(f.type==='error'){ enqueue(async()=>{ if(state.status){ state.status.done(); state.status=null; } const ww=ui.beginRebel(); ww.write(f.message); await ww.end(); }); }
+      else if(f.type==='done'){ enqueue(()=>{ if(w){ const ww=w; w=null; return ww.end(); } }); enqueue(()=>{ if(state.status){ state.status.done(); state.status=null; } if(f.status==='capped'){ ui.setInput(false); } ui.state('', 'here'); }); }
+    }
+    await enqueue(()=>{});
+    if(w){ await w.end(); w=null; }
+    state.busy=false; ui.state('', document.getElementById('chips').children.length?'listening':'here');
+  }
+  ui.onSend(text=>turn(text));
+
+  // ---------- open ----------
+  (async()=>{
+    try{
+      const o=await api('/sessions',{k});
+      state.sessionId=o.sessionId;
+      const s=await api(`/sessions/${state.sessionId}`);
+      if(s.founder && s.founder.name) document.getElementById('who').textContent=`Rebel-1 · ${s.founder.name}`;
+      state.profile=s.profile||{}; state.email=s.email||null;
+      const n=['idea','goal','time','background'].filter(x=>state.profile[x]).length; document.getElementById('pcount').textContent=`${n} / 4`;
+      if(s.renders && s.renders.length) replay(s);
+      if(s.status==='capped') ui.setInput(false);
+      if(s.turns===0 && s.status==='open') turn('');
+    }catch(err){
+      showGate(err.message.includes('expired')?'This link has expired.':'This link isn\'t valid.', err.message.includes('expired')?'Write to us and we\'ll send another.':'Check the link from your email, or apply again and we\'ll send a new one.');
+    }
+  })();
+})();
+</script>
+</body>
+</html>

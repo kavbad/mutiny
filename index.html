@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/intake.css">
 <style>
   :root{
     --paper:#f2f0ea;
@@ -132,152 +133,7 @@
   .seq h3{ font-size:clamp(20px, 1.7vw, 26px); line-height:1.1; font-weight:500; letter-spacing:-.02em; margin-bottom:calc(var(--u)*1.25); }
   .seq p{ font-size:15px; line-height:1.5; color:var(--ink-72); }
 
-  /* the intake, native to the page: a window into a live conversation */
-  .intake{ position:relative; display:flex; flex-direction:column; height:min(680px, 76vh); zoom:.84; }
-  .intake .top{ flex:none; }
-  .intake .scroller{ flex:1; min-height:0; overflow-y:auto; scrollbar-width:none; -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 28px, #000 calc(100% - 56px), transparent 100%); mask-image:linear-gradient(to bottom, transparent 0, #000 28px, #000 calc(100% - 56px), transparent 100%); }
-  .intake .scroller::-webkit-scrollbar{ display:none; }
-  .intake .answer{ flex:none; position:relative; }
-  #what .cta{ margin-top:calc(var(--u)*3); }
-
-.intake{--paper:#f2f0ea;--ink:#141210;--graphite:#4a463f;--ash:#8d877b;--rule:rgba(20,18,16,.13);--rule2:rgba(20,18,16,.28);--ember:#D85A30;--sans:'Schibsted Grotesk',system-ui,sans-serif;--mono:'Spline Sans Mono',ui-monospace,Menlo,monospace;--spring:cubic-bezier(.34,1.3,.4,1)}
-.intake button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
-.intake button:focus-visible, .intake input:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
-.intake .mono{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash)}
-
-/* presence */
-.intake .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 0 22px;border-bottom:1px solid var(--rule);margin-bottom:26px}
-.intake .presence{display:flex;align-items:center;gap:14px}
-.intake .orb{width:38px;height:38px;border-radius:50%;background:var(--ink);position:relative;flex:none;transition:transform .5s var(--spring)}
-.intake .orb::before{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid rgba(20,19,17,.18);opacity:0;transition:opacity .4s}
-.intake .orb.speaking{animation:breathe 1.9s ease-in-out infinite}
-.intake .orb.speaking::before{opacity:1;animation:halo 1.9s ease-out infinite}
-.intake .orb.listening{background:var(--ember);animation:breathe 2.6s ease-in-out infinite}
-.intake .orb.thinking{background:var(--graphite);animation:think 1.1s ease-in-out infinite}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-@keyframes halo{0%{transform:scale(.9);opacity:.6}100%{transform:scale(1.5);opacity:0}}
-@keyframes think{0%,100%{opacity:.55}50%{opacity:1}}
-.intake .who{display:flex;flex-direction:column;gap:2px}
-.intake .who .name{font-weight:600;font-size:15px;letter-spacing:-.005em}
-.intake .who .state{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash);min-height:13px}
-.intake .tools{display:flex;gap:8px;align-items:center}
-.intake .pill{border:1px solid var(--rule2);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--graphite);transition:background .15s,color .15s,border-color .15s;text-align:center}
-.intake .pill:hover{border-color:var(--ink);color:var(--ink)}
-.intake .pill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.intake .pill b{font-weight:600}
-
-/* the flow */
-.intake .flow{max-width:820px;margin:0;padding:8px 0 40px}
-.intake .turn{margin:0 0 30px;opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
-.intake .turn.on{opacity:1;transform:none}
-.intake .turn.old{opacity:.5}
-.intake .rebel{font-size:clamp(22px,2.4vw,31px);line-height:1.24;letter-spacing:-.018em;font-weight:500}
-.intake .rebel .w{opacity:0;transition:opacity .28s}.rebel .w.on{opacity:1}
-.intake .rebel p{margin:0 0 12px}
-.intake .reflect{font-size:16px;color:var(--graphite);margin:-14px 0 0;line-height:1.45}
-.intake .reflect .w{opacity:0;transition:opacity .25s}.reflect .w.on{opacity:1}
-.intake .you{display:flex;align-items:baseline;gap:12px;margin:0 0 30px;font-size:17px;color:var(--ink)}
-.intake .you .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember);flex:none}
-.intake .you q{quotes:"“" "”";font-style:italic}
-.intake .status{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ash);margin:0 0 30px;min-height:14px}
-.intake .status .w{opacity:0;transition:opacity .2s}.status .w.on{opacity:1}
-
-/* generated displays */
-.intake .gen{margin:18px 0 32px;border:1px solid var(--rule);border-radius:16px;padding:18px 20px;background:rgba(255,255,255,.35);opacity:0;transform:translateY(8px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
-.intake .gen.on{opacity:1;transform:none}
-.intake .gen .eyebrow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash);margin-bottom:10px}
-.intake .gen h4{margin:0 0 4px;font-size:17px;font-weight:600;letter-spacing:-.01em}
-.intake .gen .sub{font-size:13.5px;color:var(--graphite);margin:0 0 12px}
-.intake .rows .row{display:grid;grid-template-columns:110px 1fr auto;gap:12px;padding:9px 0;border-top:1px solid var(--rule);font-size:14px;align-items:baseline}
-.intake .rows .row:first-child{border-top:0}
-.intake .rows .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash)}
-.intake .rows .fix{color:var(--ash);font-size:12px;text-decoration:underline;text-underline-offset:3px}
-.intake .rows .fix:hover{color:var(--ink)}
-.intake svg.map{width:100%;height:auto;display:block;overflow:visible}
-.intake .map .ax{stroke:var(--rule2);stroke-width:1;fill:none;stroke-dasharray:1200;stroke-dashoffset:1200;animation:draw 1.1s var(--ease) forwards}
-@keyframes draw{to{stroke-dashoffset:0}}
-.intake .map text{font-family:var(--mono);font-size:10.5px;fill:var(--ash);letter-spacing:.04em}
-.intake .map .axl{text-transform:uppercase;font-size:9.5px}
-.intake .map .mk{transform-box:fill-box;transform-origin:center;animation:pop .6s var(--spring) both}
-@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
-.intake .map .mk circle{fill:var(--graphite)}
-.intake .map .mk.big circle{fill:var(--ink)}
-.intake .map .mk text{fill:var(--graphite);letter-spacing:.02em}
-.intake .map .you circle{fill:var(--ember)}
-.intake .map .you .rg{fill:none;stroke:var(--ember);stroke-width:1;opacity:.6;animation:pulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
-@keyframes pulse{0%{r:8;opacity:.8}100%{r:26;opacity:0}}
-.intake .map .you text{fill:var(--ember);font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:0}
-.intake .roster{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.intake .roster .co{border:1px solid var(--rule);border-radius:12px;padding:10px 11px;animation:pop .6s var(--spring) both}
-.intake .roster .co.hi{border-color:rgba(216,96,42,.55);background:rgba(216,96,42,.06)}
-.intake .roster .n{font-weight:600;font-size:14px;margin-bottom:6px;letter-spacing:-.005em}
-.intake .roster .tok{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--graphite);border:1px solid var(--rule);border-radius:6px;padding:3px 6px;margin:0 4px 4px 0;white-space:nowrap}
-.intake .roster .tok i{width:6px;height:6px;border-radius:50%;background:var(--ink);display:inline-block}
-.intake .roster .tok.e i{background:transparent;border:1px solid var(--ink)}
-.intake .roster .tok.f i{background:var(--ember)}
-.intake .roster .kit{grid-column:1/-1;font-size:14px;color:var(--graphite);margin-top:4px;padding-top:10px;border-top:1px solid var(--rule)}
-.intake .roster .kit em{color:var(--ember);font-style:normal;font-weight:600}
-/* decision */
-.intake .dgrid{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;align-items:start}
-.intake .dopts{display:flex;flex-direction:column;gap:8px}
-.intake .dopt{display:grid;grid-template-columns:18px 1fr;gap:12px;align-items:start;border:1px solid var(--rule2);border-radius:12px;padding:12px 14px;transition:border-color .2s,background .2s,transform .25s var(--spring),box-shadow .25s}
-.intake .dopt:hover{border-color:var(--ink);transform:translateY(-1px);box-shadow:0 12px 30px rgba(20,19,17,.09)}
-.intake .dopt.chosen{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.intake .dopt .radio{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--rule2);margin-top:4px;transition:all .2s}
-.intake .dopt:hover .radio{border-color:var(--ink)}
-.intake .dopt.chosen .radio{background:var(--ember);border-color:var(--ember);box-shadow:0 0 0 4px rgba(216,96,42,.25)}
-.intake .dopt h3{margin:0 0 3px;font-size:15.5px;line-height:1.2;letter-spacing:-.01em;font-weight:600;display:flex;justify-content:space-between;gap:8px}
-.intake .dopt .pick{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember);font-weight:500;white-space:nowrap}
-.intake .dopt p{margin:0 0 8px;font-size:12.5px;line-height:1.4;color:var(--graphite)}
-.intake .dopt.chosen p{color:#d8d2c5}
-.intake .dopt .figs{display:flex;gap:14px;flex-wrap:wrap;color:var(--ash);font-size:11px}
-.intake .dopt .figs span{display:inline-flex;align-items:center;gap:6px}
-.intake .dopt.chosen .figs{color:#b8b1a4}
-.intake .dopt.chosen .dot{fill:rgba(245,242,235,.25)}.dopt.chosen .line{stroke:rgba(245,242,235,.25)}
-.intake .map .you circle, .intake .map .you text{transition:cx .8s var(--ease),cy .8s var(--ease),x .8s var(--ease),y .8s var(--ease)}
-.intake .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
-.intake .opt{position:relative;border:1px solid var(--rule2);border-radius:14px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;min-height:150px;transition:border-color .2s,background .2s,transform .25s var(--spring),box-shadow .25s}
-.intake .opt:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:0 14px 34px rgba(20,19,17,.10)}
-.intake .opt.chosen{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.intake .opt .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.intake .opt .radio{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--rule2);flex:none;transition:all .2s}
-.intake .opt:hover .radio{border-color:var(--ink)}
-.intake .opt.chosen .radio{background:var(--ember);border-color:var(--ember);box-shadow:0 0 0 4px rgba(216,96,42,.25)}
-.intake .opt .pick{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember)}
-.intake .opt h3{margin:0;font-size:16px;line-height:1.2;letter-spacing:-.01em;font-weight:600}
-.intake .opt p{margin:0;font-size:12.5px;line-height:1.4;color:var(--graphite)}
-.intake .opt.chosen p{color:#d8d2c5}
-.intake .opt .fig{margin-top:auto;display:flex;align-items:center;gap:8px;color:var(--ash);font-size:11.5px}
-.intake .opt.chosen .fig{color:#b8b1a4}
-.intake .dot{fill:rgba(20,19,17,.2)}.dot.on{fill:var(--ember)}.opt.chosen .dot{fill:rgba(245,242,235,.25)}
-.intake .line{stroke:rgba(20,19,17,.2);fill:none;stroke-width:1.5}.line.on{stroke:var(--ember)}.opt.chosen .line{stroke:rgba(245,242,235,.25)}
-.intake .artifact{background:var(--ink);color:var(--paper);border-radius:18px;padding:26px 28px;margin-top:8px}
-.intake .artifact .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#9d9689;display:flex;justify-content:space-between;margin-bottom:14px}
-.intake .artifact h3{margin:0 0 14px;font-size:clamp(22px,2.6vw,32px);line-height:1.1;letter-spacing:-.02em;font-weight:600}
-.intake .artifact .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;border-top:1px solid rgba(255,255,255,.14);padding-top:14px;font-size:13px;color:#dcd6c8}
-.intake .artifact .grid .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9d9689;margin-bottom:6px}
-.intake .artifact ul{margin:0;padding-left:14px}
-
-/* answer bar */
-.intake .answer{padding:10px 0 4px}
-.intake .answer .inner{max-width:820px;margin:0}
-.intake .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:0}
-.intake .chip{border:1px solid var(--rule2);border-radius:999px;padding:10px 15px;font-size:15px;background:var(--paper);transition:background .15s,color .15s,border-color .15s,transform .15s var(--spring)}
-.intake .chip:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);transform:translateY(-1px)}
-.intake .chip.ghost{color:var(--graphite);border-color:var(--rule)}
-.intake .bar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--rule2);border-radius:999px;padding:8px 8px 8px 18px;box-shadow:0 12px 40px rgba(20,19,17,.08)}
-.intake .bar:focus-within{border-color:var(--ember)}
-.intake .bar input{flex:1;border:0;background:transparent;font-size:16px;color:var(--ink);min-width:0;outline:none}
-.intake .bar input::placeholder{color:var(--ash)}
-.intake .mic{width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;flex:none;transition:background .2s,transform .2s var(--spring)}
-.intake .mic:hover{transform:scale(1.05)}
-.intake .mic.live{background:var(--ember);animation:breathe 1.6s ease-in-out infinite}
-.intake .mic svg{width:16px;height:16px;fill:currentColor}
-.intake .send{border:0;background:var(--paper);border-radius:999px;padding:9px 14px;font-weight:500;color:var(--ink);flex:none}
-.intake .send:hover{background:var(--ink);color:var(--paper)}
-.intake .answer .hint{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash);margin-top:10px;display:flex;justify-content:space-between}
-.intake .answer.done{display:none}
-@media (max-width:820px){.dgrid{grid-template-columns:1fr}.opts{grid-template-columns:1fr}.opt{min-height:0}.roster{grid-template-columns:repeat(2,1fr)}.artifact .grid{grid-template-columns:1fr}.rows .row{grid-template-columns:90px 1fr auto}}
+  /* intake styles live in assets/intake.css */
 
 
   /* the figure */
@@ -335,7 +191,7 @@
   <canvas id="path" aria-hidden="true"></canvas>
   <div class="bar in d1">
     <span class="mark">Mutiny<small>Private</small></span>
-    <a class="go" href="#what" data-intake>Start company</a>
+    <a class="go" href="/apply/">Start company</a>
   </div>
 
   <div class="lockup grid">
@@ -349,7 +205,7 @@
     <div class="c-9-12 aside">
       <p class="lede in d2">Mutiny positions, builds, operates, and scales your company autonomously with a tailored fleet of AI agents. From 0, or wherever you are, to infinity.</p>
       <p class="lede in d2">Rebel-1, a world model trained on millions of company and product decisions and outcomes, guides your business.</p>
-      <a class="cta in d3" href="#what" data-intake>Start company<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a class="cta in d3" href="/apply/">Start company<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
       <p class="note in d3">A small number of founders go first.</p>
     </div>
   </div>
@@ -367,7 +223,7 @@
         <h2>Talk to Rebel-1.</h2>
         <p class="copy">Before anything is built, Rebel gets to know you: the idea, what you want from it, and the life it has to fit inside. Then it reads every company already in your field and shows you where you'd win, and why, so the first thing built is the right thing.</p>
         <p class="copy">Below is Rebel with a founder it already knows. Watch, or start your own.</p>
-        <a class="cta" href="#what" data-intake>Talk to Rebel-1<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
+        <a class="cta" href="/apply/">Talk to Rebel-1<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
       </div>
       <div class="c-7-12 intake" id="intake">
         <div class="top">
@@ -406,7 +262,7 @@
       <div class="c-1-7">
         <h2>A small number of founders go first.</h2>
         <p class="copy">Founders are admitted in order of arrival. Bring the idea. Mutiny brings the rest.</p>
-        <a class="cta" id="start" href="#what" data-intake>Start company<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
+        <a class="cta" id="start" href="/apply/">Start company<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></a>
       </div>
     </div>
   </section>
@@ -713,171 +569,49 @@ document.fonts.ready.then(()=>{
 });
 
 </script>
+<script src="assets/intake-ui.js"></script>
 <script>
+// The preview: Rebel with a founder it already knows. Same renderer as the live intake.
 (() => {
-
-const ROOT=document.getElementById('intake'); const $=s=>ROOT.querySelector(s);
-const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const ROOT=document.getElementById('intake');
+const ui=IntakeUI.mount(ROOT,{follow:false});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const S={idea:'',goal:'',time:'',bg:'',edge:'',noidea:false,voice:false,step:0,chosen:null};
-const flow=$('#flow');
-
-/* ---------- presence + voice ---------- */
-function state(s,label){ const o=$('#orb'); o.className='orb '+(s||''); $('#state').textContent=label||({speaking:'speaking',listening:'listening',thinking:'thinking'})[s]||'here'; }
-let synthVoice=null;
-function pickVoice(){ const vs=speechSynthesis.getVoices(); synthVoice=vs.find(v=>/en(-|_)(GB|US)/i.test(v.lang)&&/Google|Samantha|Daniel|Karen|Serena|Alex/i.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||vs[0]||null; }
-if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; } else { $('#voice').style.display='none'; }
-$('#voice').addEventListener('click',()=>{ S.voice=!S.voice; $('#voice').textContent=S.voice?'Voice on':'Voice off'; $('#voice').classList.toggle('on',S.voice); if(!S.voice&&'speechSynthesis' in window) speechSynthesis.cancel(); });
-function speak(text){ if(!S.voice||!('speechSynthesis' in window)) return; const u=new SpeechSynthesisUtterance(text.replace(/[“”]/g,'')); if(synthVoice) u.voice=synthVoice; u.rate=.98; u.pitch=1; speechSynthesis.speak(u); }
-
-/* ---------- typesetting ---------- */
-async function typeInto(container,text,cls,speed){
-  const p=el('p'); container.appendChild(p);
-  text.split(/(\s+)/).forEach(t=>{ if(t) p.appendChild(el('span',cls||'w',t)); });
-  const ws=[...p.children]; for(const w of ws){ w.classList.add('on'); await sleep(speed||(24+Math.random()*20)); }
-}
-async function rebelSays(lines,opts={}){
-  const t=el('div','turn'); const r=el('div','rebel'); t.appendChild(r); flow.appendChild(t); requestAnimationFrame(()=>t.classList.add('on'));
-  state('speaking'); scrollDown();
-  for(const l of lines){ speak(l); await typeInto(r,l); await sleep(180); scrollDown(); }
-  state('','here'); return t;
-}
-async function reflect(text){
-  const t=el('div','turn on'); const rf=el('div','reflect'); t.appendChild(rf); flow.appendChild(t); state('speaking'); speak(text); await typeInto(rf,text,'w',18); state('','here'); scrollDown();
-}
-function youSaid(text){ const y=el('div','you',`<span class="lbl">You</span><q>${escape(text)}</q>`); flow.appendChild(y); scrollDown(); }
-function escape(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-async function statusLine(parts){ const s=el('div','status'); flow.appendChild(s); state('thinking'); for(const p of parts){ s.innerHTML=''; p.split(/(\s+)/).forEach(t=>{ if(t) s.appendChild(el('span','w',t)); }); const ws=[...s.children]; for(const w of ws){ w.classList.add('on'); await sleep(14); } await sleep(520); } await sleep(200); s.remove(); state('','here'); }
-let follow=false; const scroller=$('#scroller'); function scrollDown(){ scroller.scrollTo({top:scroller.scrollHeight,behavior:'smooth'}); }
-function gen(html,cls){ const g=el('div','gen '+(cls||''),html); flow.appendChild(g); requestAnimationFrame(()=>requestAnimationFrame(()=>g.classList.add('on'))); scrollDown(); return g; }
-function dimOld(){ [...flow.querySelectorAll('.turn.on')].slice(0,-1).forEach(t=>t.classList.add('old')); }
-
-/* ---------- answering ---------- */
-let pending=null; // {chips:[{t,fx,key}], onFree(text)}
-function ask(chips,onAnswer){
-  pending={chips,onAnswer}; const c=$('#chips'); c.innerHTML='';
-  chips.forEach(ch=>{ const b=el('button','chip'+(ch.ghost?' ghost':''),ch.t); b.addEventListener('click',()=>answer(ch.t,ch)); c.appendChild(b); });
-  $('#text').value=''; if(follow) $('#text').focus({preventScroll:true}); state('listening');
-}
-async function answer(text,chip){
-  if(!pending) return; const p=pending; pending=null; $('#chips').innerHTML=''; state('','here');
-  youSaid(text); dimOld();
-  await p.onAnswer(text,chip||matchChip(p.chips,text));
-}
-function matchChip(chips,text){ const t=text.toLowerCase(); return chips.find(c=>c.keys&&c.keys.some(k=>t.includes(k)))||null; }
-$('#send').addEventListener('click',()=>{ const v=$('#text').value.trim(); if(v) answer(v); });
-$('#text').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const v=e.target.value.trim(); if(v) answer(v); } });
-/* mic (Chrome) */
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition; let rec=null;
-if(SR){ rec=new SR(); rec.lang='en-US'; rec.interimResults=true; rec.onresult=e=>{ let s=''; for(const r of e.results) s+=r[0].transcript; $('#text').value=s; if(e.results[e.results.length-1].isFinal){ $('#mic').classList.remove('live'); answer(s.trim()); } }; rec.onend=()=>$('#mic').classList.remove('live'); rec.onerror=()=>$('#mic').classList.remove('live'); }
-$('#mic').addEventListener('click',()=>{ if(!rec){ $('#hintl').textContent='No speech recognition in this browser. Type it, or tap a chip.'; return; } if($('#mic').classList.contains('live')){ rec.stop(); return; } $('#mic').classList.add('live'); state('listening'); try{ rec.start(); }catch(e){} });
-
-/* ---------- profile ---------- */
-function profileHTML(){ const rows=[['Idea',S.idea],['Goal',S.goal],['Time',S.time],['Background',S.bg]]; const n=rows.filter(r=>r[1]).length; $('#pcount').textContent=`${n} / 4`;
-  return `<div class="eyebrow"><span>What I heard</span><span>${n} of 4 · correct me if I'm off</span></div><div class="rows">${rows.map(([k,v])=>`<div class="row"><span class="k">${k}</span><span>${v?escape(v):'<span style="color:var(--ash);font-style:italic">not yet</span>'}</span>${v?'<button class="fix">that\'s not quite it</button>':'<span></span>'}</div>`).join('')}${S.edge==='eng'?`<div class="row"><span class="k">Noticed</span><span>You talk in systems: latency, handoffs, resolution rate. I\'ll use that, and I won\'t assert more than you told me.</span><span></span></div>`:S.edge==='ops'?`<div class="row"><span class="k">Noticed</span><span>You talk in statutes and deadlines: EU261, chargeback windows, small-claims limits. I\'ll use that, and I won\'t assert more than you told me.</span><span></span></div>`:''}</div>`; }
-$('#prof').addEventListener('click',()=>{ const g=gen(profileHTML()); g.querySelectorAll('.fix').forEach(b=>b.addEventListener('click',()=>{ const nv=prompt('Tell me again, in your words:'); if(nv){ b.closest('.row').children[1].textContent=nv; } })); });
-
-/* ---------- figures ---------- */
-const FIELD=[{n:'FormForge',x:.22,y:.20,r:7},{n:'LetterHub',x:.34,y:.30,r:6},{n:'CancelNow',x:.14,y:.40,r:5},{n:'DisputeDesk',x:.78,y:.22,r:7.5},{n:'ChargebackPro',x:.88,y:.36,r:6.5},{n:'Ombud',x:.64,y:.44,r:4.5},{n:'Recoup',x:.72,y:.14,r:4},{n:'Paperwork.ai',x:.46,y:.50,r:4},{n:'FairFare',x:.30,y:.60,r:4.5},{n:'ClaimJet',x:.20,y:.84,r:5},{n:'AirComp',x:.36,y:.90,r:4.5},{n:'Refundly',x:.50,y:.80,r:3.5}];
-const MW=600,MH=340,PL=44,PT=16,PB=38; const mx=v=>PL+v*(MW-PL-30), my=v=>PT+v*(MH-PT-PB);
-function mapSVG(you){ const marks=FIELD.map((c,k)=>{ const x=mx(c.x),y=my(c.y),left=c.x>.85; return `<g class="mk ${c.r>=6?'big':''}" style="animation-delay:${.3+k*.06}s"><circle cx="${x}" cy="${y}" r="${c.r}"/><text x="${left?x-c.r-7:x+c.r+7}" y="${y+3.5}" ${left?'text-anchor="end"':''}>${c.n}</text></g>`; }).join('');
-  const yg=you?`<g class="you"><circle class="rg" cx="${mx(you.x)}" cy="${my(you.y)}" r="8"/><circle cx="${mx(you.x)}" cy="${my(you.y)}" r="6.5"/><text x="${mx(you.x)+14}" y="${my(you.y)+4}">${you.label}</text></g>`:'';
-  return `<svg class="map" viewBox="0 0 ${MW} ${MH}"><path class="ax" d="M${PL} ${PT} V${MH-PB} H${MW-30}"/><text class="axl" x="${PL}" y="${MH-PB+16}">Works for the person</text><text class="axl" x="${MW-30}" y="${MH-PB+16}" text-anchor="end">Works for the company</text><text class="axl" transform="translate(${PL-14} ${MH-PB}) rotate(-90)">Wins the money</text><text class="axl" transform="translate(${PL-14} ${PT+110}) rotate(-90)">Sells the form</text>${marks}${yg}</svg>`; }
-const dots=on=>`<svg width="96" height="12" viewBox="0 0 96 12">${Array.from({length:12},(_,i)=>`<circle class="dot ${on.includes(i)?'on':''}" cx="${5+i*7.8}" cy="6" r="3"/>`).join('')}</svg>`;
-const spark=d=>`<svg width="96" height="24" viewBox="0 0 96 24"><path class="line" d="M0 20 L14 16 L28 13 L42 11 L56 9 L70 6 L84 4 L96 2"/><path class="line on" d="${d}"/></svg>`;
-
-/* ---------- the conversation ---------- */
-const edgeLine={ops:'You know which letter makes a company fold, and which filing it can\'t ignore. The agent will send ten thousand of them.',eng:'You can build the agent that waits on hold for four hours and never loses its temper. Nobody in the field has one.',none:'You have time and no reputation yet. That argues for a place where a won claim speaks before you do.'};
-async function start(){
-  await rebelSays(["Hi. I'm Rebel. This isn't a form, it's a conversation, so say it however it comes out and I'll keep up. I'll ask before I recommend, and I won't decide for you.","What are you thinking about building?"]);
-  ask([{t:'A personal AI that gets your money back: the delayed flight, the fee, the subscription that won\'t cancel',keys:['money back','refund','fight','claim','fee','flight','cancel','personal ai'],v:'A personal AI that gets your money back from airlines, banks, and subscriptions: it reads the terms, calls, files, and settles for you'},{t:'I have an idea but it\'s rough',keys:['rough','idea'],v:'A rough idea, to be sharpened'},{t:'I don\'t have one yet',keys:['don\'t','no idea','nothing','yet'],v:'',ghost:true}],async(text,chip)=>{
-    if(chip&&chip.t.startsWith('I don')){ S.noidea=true; S.idea='None yet, Rebel to find it'; await reflect('Good. Then we find one that fits you instead of the other way round. That means I need to know you first.'); }
-    else { S.idea=chip?chip.v:text; await reflect(`“${text}.” Okay. I'm already curious who's doing that today. We'll get there; you first.`); }
-    await q2();
-  });
-}
-async function q2(){
-  await rebelSays(["What do you want out of this? Something that pays you well and stays yours, or as big as it can possibly get. There's no wrong answer, but the answers lead to different places."]);
-  ask([{t:'Pays me well and stays small',keys:['small','pays','lifestyle','mine'],v:'Lifestyle: pays well, stays small'},{t:'As big as it can get',keys:['big','scale','huge','venture'],v:'Scale: as big as it can get'}],async(text,chip)=>{
-    S.goal=chip?chip.v:text; await reflect(chip&&chip.v.startsWith('Scale')?'As big as it gets. That changes what I\'ll recommend, and how hard I\'ll push you.':'Pays well, stays yours. Good. That rules out half the field already, in a good way.'); await q3();
-  });
-}
-async function q3(){
-  await rebelSays(["How much of you does this get? All of it from day one, or evenings until it proves itself?"]);
-  ask([{t:'All of it. I\'m full-time on this',keys:['full','all','day one','quit'],v:'Full-time from day one'},{t:'Evenings until it works, then I quit',keys:['evening','until','then'],v:'Evenings until it works, then full-time'},{t:'I\'m keeping my job for a while',keys:['keep','job'],v:'Keeping the job for now'}],async(text,chip)=>{
-    S.time=chip?chip.v:text; await reflect(S.time.startsWith('Full')?'All of it. Then speed is your edge and the plan should spend it: first claim won in weeks, not quarters.':S.time.startsWith('Evenings')?'Evenings until it works. Then the first thirty days have one job: make it work.':'Keeping the job. So we build something that runs while you\'re elsewhere, until it can\'t.'); await q4();
-  });
-}
-async function q4(){
-  await rebelSays(["Last one before I look anything up. What have you done? Not a résumé. The one thing that matters."]);
-  ask([{t:'Consumer-rights lawyer. Six years, thousands of claims by hand',keys:['lawyer','legal','claims','consumer','rights','attorney'],v:'Consumer-rights lawyer; six years, thousands of claims by hand',edge:'ops'},{t:'Built call-handling agents at a contact-center startup',keys:['agent','call','voice','built','engineer','ml'],v:'Built call-handling agents',edge:'eng'},{t:'Just out of school',keys:['school','student','graduate','college'],v:'Recent graduate',edge:'none'}],async(text,chip)=>{
-    S.bg=chip?chip.v:text; S.edge=chip?chip.edge:'none';
-    await reflect(S.edge==='ops'?'Thousands of claims by hand. Hold that, because you know exactly which ones win, and nobody in this field does.':S.edge==='eng'?'You can build the agent that makes the call. Hold that; the field is full of forms and empty of anyone who picks up the phone.':'Just out. Time and no reputation. That\'s not nothing; it\'s a specific shape, and there\'s a place in the field for it.');
-    const g=gen(profileHTML()); g.querySelectorAll('.fix').forEach(b=>b.addEventListener('click',()=>{ const nv=prompt('Tell me again, in your words:'); if(nv) b.closest('.row').children[1].textContent=nv; }));
-    await sleep(700); await field();
-  });
-}
-async function field(){
-  await rebelSays(["Give me a second. I'm looking at the field."]);
-  await statusLine(['reading the world model · consumer claims, refunds, disputes','twelve companies · whose side they are on · what they charge','reading their teams from public records','done']);
-  const g=gen(`<div class="eyebrow"><span>The field · illustrative</span><span>12 companies · what the world model sees</span></div><h4>Everyone sells the form. Nobody fights the fight.</h4><p class="sub">Six sell templates and cancellation forms to consumers and leave the fight to them. Three sell dispute software to the companies on the other side. The three that actually win money back only touch flights, keep 40%, and run on rooms of case handlers.</p>${mapSVG()}`);
-  await sleep(900);
-  await rebelSays([S.noidea?"You didn't bring an idea, so I brought the field where what you told me is worth the most: money people are owed and never collect. Twelve companies. Nine sell forms or sell to the other side. Three win money back, for flights only, at 40%.":"Here's the field. Twelve companies. Six sell you a letter and wish you luck. Three work for the companies you'd be fighting. The three that actually win money back handle flights only, keep 40%, and can't grow past their case handlers."]);
-  await sleep(300);
-  const teams=[{n:'FormForge',mk:[['s',5],['e',2]]},{n:'DisputeDesk',mk:[['s',7],['e',3]]},{n:'LetterHub',mk:[['s',4],['e',1]]},{n:'ClaimJet',mk:[['f',1],['s',11]],hi:true},{n:'AirComp',mk:[['f',1],['s',8]],hi:true}];
-  gen(`<div class="eyebrow"><span>Who is building this</span><span>Teams · from public records</span></div><div class="roster">${teams.map((t,i)=>`<div class="co ${t.hi?'hi':''}" style="animation-delay:${.15+i*.09}s"><div class="n">${t.n}</div>${t.mk.map(([k,n])=>`<span class="tok ${k}"><i></i>${k==='f'?'founder':n+' '+(k==='s'?(t.hi?'case handlers':'sales'):'eng')}</span>`).join('')}</div>`).join('')}<div class="kit">The software companies are sales teams with an engineer or two. The claims companies are case handlers at desks. <em>${S.edge==='ops'?'Nobody in the field has argued a thousand of these and won. You have.':S.edge==='eng'?'Nobody in the field has an agent that picks up the phone. You can build it.':'Nobody in the field started with time to spare. You have it.'}</em></div></div>`);
-  await sleep(600);
-  await rebelSays(["Their teams. The software side is salespeople and a couple of engineers. The claims side is eleven case handlers and a founder. Nobody has an agent that reads the terms, makes the call, waits on hold, and files, which is the product."]);
-  if(S.noidea){ await rebelSays(["Three gaps fit you: a personal agent for airline claims, one for subscriptions that won't cancel, one for medical bills that were coded wrong. I'd start with the first. The law is clearest, the money is biggest, and every win is a story people tell."]); ask([{t:'Take the airline claims',v:'A personal AI that gets your money back, airlines first (Rebel-proposed)'},{t:'Medical bills. I know that world',v:'A personal AI for wrongly coded medical bills (Rebel-proposed)'}],async(text,chip)=>{ S.idea=chip?chip.v:text; await reflect(`“${text}.” Good. Then here's where I think you'd sit.`); await recommend(); }); }
-  else { await recommend(); }
-}
+const PROFILE={idea:'A personal AI that gets your money back from airlines, banks, and subscriptions: it reads the terms, calls, files, and settles for you',goal:'Scale: as big as it can get',time:'Full-time from day one',background:'Consumer-rights lawyer; six years, thousands of claims by hand',noticed:'You talk in statutes and deadlines: EU261, chargeback windows, small-claims limits.'};
+const C=(name,x,y,size,team,highlight)=>({name,x,y,size,note:'',team:team||[],highlight:!!highlight,confidence:'known'});
+const READING={field:'Consumer refunds, fees, and claims',title:'Everyone sells the form. Nobody fights the fight.',sub:'Six sell templates and cancellation forms to consumers and leave the fight to them. Three sell dispute software to the companies on the other side. The three that actually win money back only touch flights, keep 40%, and run on rooms of case handlers.',axes:{x:['Works for the person','Works for the company'],y:['Wins the money','Sells the form']},
+  companies:[C('FormForge',.22,.80,3,[{kind:'sales',n:5},{kind:'eng',n:2}]),C('LetterHub',.34,.70,2,[{kind:'sales',n:4},{kind:'eng',n:1}]),C('CancelNow',.14,.60,2),C('DisputeDesk',.78,.78,3,[{kind:'sales',n:7},{kind:'eng',n:3}]),C('ChargebackPro',.88,.64,3,[{kind:'sales',n:6},{kind:'eng',n:2}]),C('Ombud',.64,.56,1),C('Recoup',.72,.86,1),C('Paperwork.ai',.46,.50,1),C('FairFare',.30,.40,1),C('ClaimJet',.20,.16,2,[{kind:'founder',n:1},{kind:'ops',n:11}],true),C('AirComp',.36,.10,1,[{kind:'founder',n:1},{kind:'ops',n:8}],true),C('Refundly',.50,.20,1)],
+  gaps:[],teamsTakeaway:'The software companies are sales teams with an engineer or two. The claims companies are case handlers at desks. Nobody in the field has argued a thousand of these and won. You have.',source:'preview',caveat:''};
 const OPTS=[
- {id:'person',pick:true,h:'On the person\'s side, end to end: airline claims first, paid only when it wins',p:'Nobody works for the person all the way through. Forward the email, and the agent reads the terms, files, calls, escalates, and settles. It costs nothing until money lands, and every win is a story people tell.',fig:[dots([9,10,11])+'<span>3 of 12 win money back</span>',spark('M0 20 L14 16 L28 13 L42 11 L56 9 L70 6 L84 4 L96 2')+'<span>revenue from the first win</span>'],you:{x:.12,y:.86,label:'You, if you agree'},
-  done:'On the person\'s side, airlines first, paid only when it wins. That\'s the equilibrium: an idea you chose, against the field, with your life in the picture. Here it is, as something you can hold.',art:{h:'A personal AI that gets your money back: it reads the terms, files, calls, and settles, starting with airline claims, paid a share only of what it wins.',s:['The agent is the product','Costs nothing until it wins','Every win gets told'],w:['Revenue lags the win','Airlines will change the rules','Every claim is on the record'],o:['Nine of twelve sell forms or sell to the other side','Claims companies keep 40% and can\'t scale','Every category after airlines is open']}},
- {id:'business',h:'Dispute software for the companies',p:'Three of twelve sell here, with sales teams built for it. Merchants pay for chargeback tools and pay well. Bigger contracts, and you\'d be building for the other side.',fig:[dots([3,4,5])+'<span>3 of 12 sell here</span>',spark('M0 20 L28 20 L52 19 L72 14 L84 9 L96 2')+'<span>revenue late, then steep</span>'],you:{x:.84,y:.28,label:'You, for the companies'},
-  done:'Okay. Then let\'s make it work. I\'ll build the product to resolve a dispute live in the demo, and I\'ll line up the first ten merchants drowning in chargebacks. I said what I think. I won\'t say it twice.',art:{h:'Dispute-resolution software for merchants, with an agent inside it, sold against three incumbents.',s:['Bigger contracts','A real product from day one','Merchants already pay'],w:['Long cycles','Three incumbents with sales teams','You\'d be fighting the people you wanted to help'],o:['Merchants that lose every chargeback','A demo that settles a dispute live','Rebel finds the first ten']}},
- {id:'issuer',h:'Bundled by the banks and card issuers',p:'One comparable never sold to a person: the card that bundled it did. Every cardholder gets the agent, the issuer pays per account, and you never run an ad.',fig:[dots([9])+'<span>1 of 12 did it</span>',spark('M0 20 L18 16 L38 12 L58 8 L78 5 L96 3')+'<span>revenue via the channel</span>'],you:{x:.42,y:.66,label:'You, through the issuers'},
-  done:'The issuers it is. I\'ll map every card and neobank that markets itself on protection, which of them lose customers over disputes today, and who wants the agent first. You keep building. Let\'s go find the first one.',art:{h:'A personal money-back agent bundled by banks and card issuers, paid per cardholder.',s:['You keep building','A channel with every cardholder','No acquisition cost'],w:['Channel owns the relationship','Margin shared','Bank procurement'],o:['One comparable proved the channel','Issuers compete on protection','Every card is a distribution deal']}}
+ {id:'person',pick:true,title:'On the person\'s side, end to end: airline claims first, paid only when it wins',case:'Nobody works for the person all the way through. Forward the email, and the agent reads the terms, files, calls, escalates, and settles. It costs nothing until money lands, and every win is a story people tell.',figures:[{label:'3 of 12 win money back',share_n:3,share_of:12,trend:'none'},{label:'revenue from the first win',share_n:0,share_of:0,trend:'early'}],you:{x:.12,y:.14,label:'You, if you agree'},
+  done:'On the person\'s side, airlines first, paid only when it wins. That\'s the equilibrium: an idea you chose, against the field, with your life in the picture. Here it is, as something you can hold.',art:{headline:'A personal AI that gets your money back: it reads the terms, files, calls, and settles, starting with airline claims, paid a share only of what it wins.',strengths:['The agent is the product','Costs nothing until it wins','Every win gets told'],weaknesses:['Revenue lags the win','Airlines will change the rules','Every claim is on the record'],opportunities:['Nine of twelve sell forms or sell to the other side','Claims companies keep 40% and can\'t scale','Every category after airlines is open']}},
+ {id:'business',title:'Dispute software for the companies',case:'Three of twelve sell here, with sales teams built for it. Merchants pay for chargeback tools and pay well. Bigger contracts, and you\'d be building for the other side.',figures:[{label:'3 of 12 sell here',share_n:3,share_of:12,trend:'none'},{label:'revenue late, then steep',share_n:0,share_of:0,trend:'late'}],you:{x:.84,y:.72,label:'You, for the companies'},
+  done:'Okay. Then let\'s make it work. I\'ll build the product to resolve a dispute live in the demo, and I\'ll line up the first ten merchants drowning in chargebacks. I said what I think. I won\'t say it twice.',art:{headline:'Dispute-resolution software for merchants, with an agent inside it, sold against three incumbents.',strengths:['Bigger contracts','A real product from day one','Merchants already pay'],weaknesses:['Long cycles','Three incumbents with sales teams','You\'d be fighting the people you wanted to help'],opportunities:['Merchants that lose every chargeback','A demo that settles a dispute live','Rebel finds the first ten']}},
+ {id:'issuer',title:'Bundled by the banks and card issuers',case:'One comparable never sold to a person: the card that bundled it did. Every cardholder gets the agent, the issuer pays per account, and you never run an ad.',figures:[{label:'1 of 12 did it',share_n:1,share_of:12,trend:'none'},{label:'revenue via the channel',share_n:0,share_of:0,trend:'steady'}],you:{x:.42,y:.34,label:'You, through the issuers'},
+  done:'The issuers it is. I\'ll map every card and neobank that markets itself on protection, which of them lose customers over disputes today, and who wants the agent first. You keep building. Let\'s go find the first one.',art:{headline:'A personal money-back agent bundled by banks and card issuers, paid per cardholder.',strengths:['You keep building','A channel with every cardholder','No acquisition cost'],weaknesses:['Channel owns the relationship','Margin shared','Bank procurement'],opportunities:['One comparable proved the channel','Issuers compete on protection','Every card is a distribution deal']}}
 ];
-async function recommend(){
-  await rebelSays([`Given ${S.time.startsWith('Full')?'you\'re full-time':'your time'} and what you\'ve done, I think you win by being the only one on the person\'s side end to end: airline claims first, where the law is clearest and the money is biggest, paid only from what it wins.`,`Nine of twelve sell forms or sell to the other side. The three that win money back keep 40% and can\'t grow past their case handlers. ${edgeLine[S.edge]||edgeLine.none}`,`That's a recommendation. Here are the three ways this can go. Your call.`]);
-  const d=gen(`<div class="eyebrow"><span>Where do you start? Your call.</span><span>hover to hear the case · click to choose · <b style="color:var(--ember)">Rebel's pick is marked</b></span></div><div class="dgrid"><div class="dmap">${mapSVG(OPTS[0].you)}</div><div class="dopts">${OPTS.map(o=>`<button class="dopt" data-id="${o.id}"><span class="radio"></span><span><h3><span>${o.h}</span>${o.pick?'<span class="pick">Rebel\'s pick</span>':''}</h3><p>${o.p}</p><div class="figs"><span>${o.fig[0]}</span><span>${o.fig[1]}</span></div></span></button>`).join('')}</div></div>`);
-  setTimeout(()=>{ scroller.scrollTo({top:d.offsetTop-12,behavior:'smooth'}); },350);
-  const svg=d.querySelector('svg');
-  const moveYou=o=>{ const g=svg.querySelector('.you'); const x=mx(o.you.x),y=my(o.you.y); g.querySelectorAll('circle').forEach(c=>{c.setAttribute('cx',x);c.setAttribute('cy',y);}); const t=g.querySelector('text'); t.setAttribute('x',x+14); t.setAttribute('y',y+4); t.textContent=o.you.label; };
-  d.querySelectorAll('.dopt').forEach(b=>{ const o=OPTS.find(x=>x.id===b.dataset.id);
-    b.addEventListener('mouseenter',()=>{ if(!S.chosen) moveYou(o); });
-    b.addEventListener('mouseleave',()=>{ if(!S.chosen) moveYou(OPTS[0]); });
-    b.addEventListener('click',async()=>{ if(S.chosen) return; S.chosen=o.id; moveYou(o); d.querySelectorAll('.dopt').forEach(x=>x.classList.toggle('chosen',x===b)); $('#chips').innerHTML=''; pending=null; youSaid(o.h); await rebelSays([o.done]);
-      gen(`<div class="artifact"><div class="eyebrow"><span>Positioning · chosen against 12 comparables</span><span>Mutiny · Rebel</span></div><h3>${o.art.h}</h3><div class="grid"><div><div class="k">Strengths</div><ul>${o.art.s.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><div class="k">Weaknesses</div><ul>${o.art.w.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><div class="k">Opportunities</div><ul>${o.art.o.map(x=>`<li>${x}</li>`).join('')}</ul></div></div></div>`);
-      await sleep(400); await rebelSays(["That's Act 1. Next we build it, and I'll ask before I recommend there too."]);
-      $('#answer').classList.add('done');
-      const go=gen(`<div class="eyebrow"><span>Ready when you are</span><span>one subscription · one living business</span></div><h4>Start the company.</h4><p class="sub">Rebel comes with you. Nothing irreversible happens in there without your press.</p><div style="display:flex;gap:12px;align-items:center;margin-top:8px"><button class="btn ember" id="startco" style="background:var(--ember);border-color:var(--ember);color:#fff;border-radius:999px;padding:12px 20px;font-weight:500">Start the company →</button><span class="small" style="color:var(--ash);font-size:13px">Pivot inside it as hard as you like.</span></div>`);
-      go.querySelector('#startco').addEventListener('click',()=>{ if(window.parent!==window){ window.parent.postMessage({mutinyIntakeDone:true,variant:o.id,idea:S.idea,goal:S.goal,time:S.time,bg:S.bg},'*'); } else { location.href='mutiny-os.html'; } });
-    });
+const toApply=()=>{ location.href='/apply/'; };
+let chosen=false;
+async function preview(){
+  ui.hint('Talk, type, or tap.','Preview · a founder Rebel already knows');
+  ui.profileCard(PROFILE); await sleep(600);
+  await ui.rebelSays(["Give me a second. I'm looking at the field."]);
+  const st=ui.statusLine(['reading the world model · consumer claims, refunds, disputes','twelve companies · whose side they are on · what they charge','reading their teams from public records']);
+  await sleep(2600); st.done();
+  ui.fieldCard(READING); await sleep(900);
+  await ui.rebelSays(["Here's the field. Twelve companies. Six sell you a letter and wish you luck. Three work for the companies you'd be fighting. The three that actually win money back handle flights only, keep 40%, and can't grow past their case handlers."]);
+  await sleep(300); ui.teamsCard(READING); await sleep(600);
+  await ui.rebelSays(["Their teams. The software side is salespeople and a couple of engineers. The claims side is eleven case handlers and a founder. Nobody has an agent that reads the terms, makes the call, waits on hold, and files, which is the product."]);
+  await ui.rebelSays(["Given you're full-time and what you've done, I think you win by being the only one on the person's side end to end: airline claims first, where the law is clearest and the money is biggest, paid only from what it wins.","Nine of twelve sell forms or sell to the other side. The three that win money back keep 40% and can't grow past their case handlers. You know which letter makes a company fold, and which filing it can't ignore. The agent will send ten thousand of them.","That's a recommendation. Here are the three ways this can go. Your call."]);
+  ui.positionsCard(OPTS,READING.axes,READING.companies,async o=>{
+    chosen=true; ui.clearChips(); ui.youSaid(o.title); await ui.rebelSays([o.done]); ui.artifactCard(o.art); await sleep(400);
+    await ui.rebelSays(["That's Act 1. Next we build it, and I'll ask before I recommend there too."]);
+    ui.finishCard({onEmail:async v=>{ location.href='/apply/?email='+encodeURIComponent(v); }});
   });
-  ask([{t:'None of these. Let me tell you why',keys:['none','no','why','neither'],ghost:true}],async(text)=>{ await rebelSays(["Fair. Tell me what's wrong with it, in your words, and I'll bring back what the field says about that. We iterate until it's yours."]); ask([{t:'Companies will just ignore an AI',keys:['ignore','ai','bot','respond']},{t:'I don\'t want to sell to consumers',keys:['consumer','sell','people','b2c']}],async(t2)=>{ const c=t2.toLowerCase(); await rebelSays([c.includes('ignore')||c.includes('bot')||c.includes('respond')?"They ignore letters. They don't ignore filings. Two of the twelve win by going to the regulator and the card network, and neither cares who wrote the claim. The agent's job isn't to be heard; it's to be impossible to ignore.":"Then the issuers do the selling for you. One comparable never sold to a person: the card that bundled it did, and every cardholder got the agent on day one. I'd take the channel."]); await rebelSays(["Pick again, or tell me more."]); }); });
+  ui.chips([{label:'None of these. Let me tell you why',ghost:true}],async l=>{ ui.youSaid(l); await ui.rebelSays(["Fair. That's the preview talking, though. Apply, and when your link comes we'll argue it properly, against your field."]); ui.chips([{label:'Apply to talk to Rebel'}],toApply); });
 }
-
-/* ---------- mounting ---------- */
+ui.onSend(async text=>{ ui.youSaid(text); await ui.rebelSays(["That's the preview talking. To have this conversation for real, apply and I'll send you a link when it's your turn."]); ui.chips([{label:'Apply to talk to Rebel'}],toApply); });
 let started=false;
-function preview(){
-  if(started) return; started=true; follow=false;
-  Object.assign(S,{ idea:'A personal AI that gets your money back from airlines, banks, and subscriptions: it reads the terms, calls, files, and settles for you', goal:'Scale: as big as it can get', time:'Full-time from day one', bg:'Consumer-rights lawyer; six years, thousands of claims by hand', edge:'ops' });
-  $('#hintr').textContent='Preview · a founder Rebel already knows';
-  (async()=>{ const g=gen(profileHTML()); g.querySelectorAll('.fix').forEach(b=>b.style.display='none'); await sleep(600); await field(); })();
-}
-function restart(){
-  started=true; follow=true; pending=null; S.chosen=null; S.noidea=false; S.idea=S.goal=S.time=S.bg=S.edge='';
-  flow.innerHTML=''; $('#chips').innerHTML=''; $('#answer').classList.remove('done'); $('#pcount').textContent='0 / 4'; $('#hintr').textContent='Rebel keeps up either way';
-  if('speechSynthesis' in window) speechSynthesis.cancel();
-  window.scrollTo({top:ROOT.getBoundingClientRect().top+window.scrollY-40,behavior:'smooth'});
-  setTimeout(start, 500);
-}
-new IntersectionObserver(([e])=>{ if(e.isIntersecting) preview(); },{threshold:0.25}).observe(ROOT);
-ROOT.addEventListener('click',()=>{ follow=true; },{once:true});
-document.querySelectorAll('[data-intake]').forEach(a=>a.addEventListener('click',e=>{ e.preventDefault(); restart(); }));
-
+new IntersectionObserver(([e])=>{ if(e.isIntersecting&&!started){ started=true; preview(); } },{threshold:0.25}).observe(ROOT);
 })();
 </script>
 </body>

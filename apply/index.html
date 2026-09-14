@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply · Mutiny</title>
+<meta name="description" content="A small number of founders go first. Apply to talk to Rebel-1.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f3f1eb'/%3E%3Cpath d='M5 22 C 11 6, 15 6, 21 16 S 27 22, 29 12' fill='none' stroke='%2315130f' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  .sent{ display:none; }
+  .sent h2{ max-width:22ch; }
+  form.sending .cta{ opacity:.6; pointer-events:none; }
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="bar"><a class="mark" href="/">Mutiny<small>Private</small></a><span>San Francisco</span></div>
+<main>
+  <div class="grid">
+    <div class="c-1-5">
+      <h1>A small number of founders go first.</h1>
+      <p class="copy">Founders are admitted in order of arrival. When it's your turn, you get a link, and Rebel-1 gets to know you: the idea, what you want from it, and the life it has to fit inside. Then it reads your field and shows you where you'd win.</p>
+      <p class="copy">Bring the idea, or don't. Rebel is good with either.</p>
+    </div>
+    <div class="c-7-12">
+      <form id="apply" class="fields" novalidate>
+        <div class="field"><label for="name">Your name</label><input id="name" name="name" autocomplete="name" placeholder="First and last" required maxlength="120"></div>
+        <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="Where the link should go" required maxlength="200"></div>
+        <div class="field"><label for="idea">The idea, if there is one</label><textarea id="idea" name="idea" placeholder="A sentence or two. Rough is fine." maxlength="1200"></textarea></div>
+        <div class="field"><label>Where you are</label>
+          <div class="choices">
+            <label><input type="radio" name="stage" value="Just an idea" checked><span>Just an idea</span></label>
+            <label><input type="radio" name="stage" value="Something built"><span>Something built</span></label>
+            <label><input type="radio" name="stage" value="Revenue already"><span>Revenue already</span></label>
+            <label><input type="radio" name="stage" value="No idea yet"><span>No idea yet</span></label>
+          </div>
+        </div>
+        <div class="hp" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>
+        <div>
+          <button class="cta" type="submit">Apply<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></button>
+          <p class="note" id="note">You'll hear from Mutiny. Nobody else will.</p>
+        </div>
+      </form>
+      <div class="sent" id="sent">
+        <h2>You're in line.</h2>
+        <p class="copy">Founders are admitted in order of arrival. When it's your turn, a link to Rebel-1 lands in your inbox. Until then, nothing to do.</p>
+        <p class="note done" id="sentnote"></p>
+      </div>
+    </div>
+  </div>
+</main>
+<footer><span>Mutiny</span><span>San Francisco, 2026 <a href="/" style="margin-left:24px">Home</a></span></footer>
+<script src="../assets/config.js"></script>
+<script>
+(() => {
+  const f=document.getElementById('apply'), note=document.getElementById('note');
+  const q=new URLSearchParams(location.search); if(q.get('email')) f.email.value=q.get('email');
+  f.addEventListener('submit', async e=>{
+    e.preventDefault();
+    const body={name:f.name.value.trim(), email:f.email.value.trim(), idea:f.idea.value.trim(), stage:f.stage.value, website:f.website.value};
+    if(!body.name){ note.textContent='Tell us your name.'; note.className='note bad'; f.name.focus(); return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(body.email)){ note.textContent='That email doesn\'t look right.'; note.className='note bad'; f.email.focus(); return; }
+    f.classList.add('sending'); note.textContent='Sending…'; note.className='note';
+    try{
+      const r=await fetch(window.MUTINY_API+'/applications',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(j.error||'That didn\'t go through. Try again.');
+      f.style.display='none'; const s=document.getElementById('sent'); s.style.display='block';
+      document.getElementById('sentnote').textContent=`Signed as ${body.email}.`;
+    }catch(err){ f.classList.remove('sending'); note.textContent=err.message; note.className='note bad'; }
+  });
+})();
+</script>
+</body>
+</html>

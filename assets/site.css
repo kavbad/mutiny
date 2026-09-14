@@ -1,0 +1,50 @@
+/* Mutiny: shared chrome for the pages beside the landing (apply, intake, admin). */
+:root{
+  --paper:#f2f0ea; --ink:#141210;
+  --ink-72:rgba(20,18,16,.72); --ink-48:rgba(20,18,16,.48); --ink-28:rgba(20,18,16,.28);
+  --rule:rgba(20,18,16,.14); --orange:#D85A30; --orange-deep:#B9481F;
+  --ease:cubic-bezier(.22,.72,.12,1); --g:clamp(20px, 3vw, 48px); --u:8px;
+}
+*{ box-sizing:border-box; margin:0; }
+html{ scroll-behavior:smooth; }
+body{ background:var(--paper); color:var(--ink); font-family:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif; font-weight:400; font-feature-settings:"kern","liga","ss01"; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; min-height:100dvh; display:flex; flex-direction:column; }
+::selection{ background:var(--ink); color:var(--paper); }
+a{ color:inherit; text-decoration:none; }
+.grain{ position:fixed; inset:-20%; z-index:6; pointer-events:none; opacity:.32; mix-blend-mode:multiply; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.bar{ display:flex; justify-content:space-between; align-items:baseline; font-size:14px; line-height:20px; color:var(--ink-48); padding:calc(var(--u)*3) var(--g) 0; }
+.bar .mark{ color:var(--ink); font-weight:500; letter-spacing:-.005em; }
+.bar .mark small{ font-weight:400; font-size:14px; color:var(--ink-48); margin-left:12px; }
+.bar a:hover{ color:var(--ink); }
+.bar .go{ color:var(--orange); font-weight:500; }
+main{ flex:1; padding:clamp(48px, 8vw, 120px) var(--g) clamp(64px, 8vw, 120px); }
+.grid{ display:grid; grid-template-columns:repeat(12, minmax(0,1fr)); column-gap:clamp(16px, 1.6vw, 24px); }
+.c-1-5{ grid-column:1 / span 5; } .c-1-7{ grid-column:1 / span 7; } .c-7-12{ grid-column:7 / span 6; } .c-1-12{ grid-column:1 / -1; }
+h1,h2{ font-size:clamp(28px, 3.1vw, 48px); line-height:1.06; font-weight:500; letter-spacing:-.03em; max-width:18ch; margin-bottom:calc(var(--u)*3); text-wrap:balance; }
+.copy{ font-size:clamp(16px, 1.2vw, 19px); line-height:1.5; color:var(--ink-72); max-width:44ch; }
+.copy + .copy{ margin-top:calc(var(--u)*1.5); }
+.note{ font-size:14px; line-height:20px; color:var(--ink-48); margin-top:calc(var(--u)*2); min-height:20px; }
+.note.done{ color:var(--ink); }
+.note.bad{ color:var(--orange-deep); }
+.cta{ display:inline-flex; align-items:center; gap:14px; background:var(--orange); color:var(--paper); border:0; border-radius:4px; cursor:pointer; padding:0 22px 0 26px; height:60px; font:inherit; font-size:clamp(17px, 1.3vw, 20px); font-weight:500; letter-spacing:-.012em; transition:background .25s var(--ease), transform .25s var(--ease); box-shadow:0 1px 0 rgba(20,18,16,.08), 0 10px 30px -14px rgba(216,90,48,.55); }
+.cta svg{ width:22px; height:22px; transition:transform .35s var(--ease); }
+.cta:hover{ background:var(--orange-deep); } .cta:hover svg{ transform:translateX(4px); } .cta:active{ transform:translateY(1px); }
+.cta:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+.cta[disabled]{ opacity:.6; cursor:default; }
+/* the form: underlined fields, no card chrome */
+.fields{ display:flex; flex-direction:column; gap:calc(var(--u)*4); max-width:560px; }
+.field label{ display:block; font-size:13px; line-height:20px; color:var(--ink-48); margin-bottom:2px; }
+.field input, .field textarea{ width:100%; background:transparent; border:0; border-bottom:1px solid var(--ink-28); border-radius:0; padding:calc(var(--u)*1) 0 calc(var(--u)*1.25); font:inherit; font-size:clamp(18px, 1.45vw, 22px); letter-spacing:-.01em; color:var(--ink); outline:none; caret-color:var(--ink); transition:border-color .3s; resize:vertical; }
+.field textarea{ font-size:clamp(16px, 1.2vw, 19px); min-height:3.2em; line-height:1.4; }
+.field input:focus, .field textarea:focus{ border-bottom-color:var(--ink); }
+.field input::placeholder, .field textarea::placeholder{ color:var(--ink-28); }
+.choices{ display:flex; flex-wrap:wrap; gap:8px; }
+.choices label{ border:1px solid var(--ink-28); border-radius:999px; padding:10px 15px; font-size:15px; cursor:pointer; color:var(--ink-72); }
+.choices input{ position:absolute; opacity:0; width:0; height:0; }
+.choices input:checked + span{ color:var(--paper); }
+.choices label:has(input:checked){ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+.choices label:has(input:focus-visible){ outline:2px solid var(--orange); outline-offset:2px; }
+.hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+footer{ padding:calc(var(--u)*3) var(--g) calc(var(--u)*4); border-top:1px solid var(--rule); font-size:13px; line-height:20px; color:var(--ink-48); display:flex; justify-content:space-between; gap:24px; }
+@media (max-width:960px){ .c-1-5,.c-1-7,.c-7-12{ grid-column:1 / -1; } .grid{ row-gap:calc(var(--u)*5); } }
+@media (max-width:600px){ .cta{ height:56px; width:100%; justify-content:space-between; } footer{ flex-direction:column; gap:4px; } }
+@media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
