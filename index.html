@@ -346,19 +346,26 @@
   #days .scrub{ position:relative; height:340vh; }
   #days .stage{ position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; isolation:isolate; }
   #days .stage canvas{ position:absolute; inset:0; width:100%; height:100%; }
-  #days .hud{ position:absolute; inset:0; padding:calc(var(--u)*3) var(--g); display:grid; grid-template-rows:auto 1fr auto; pointer-events:none; z-index:1; text-shadow:0 0 10px var(--paper), 0 0 3px var(--paper), 0 0 1px var(--paper); }
+  #days .scrim{ position:absolute; inset:0; pointer-events:none; z-index:1;
+    background:
+      linear-gradient(90deg, var(--paper) 0%, var(--paper) 27%, rgba(242,240,234,.88) 40%, rgba(242,240,234,0) 60%),
+      linear-gradient(180deg, var(--paper) 0%, rgba(242,240,234,.9) 6%, rgba(242,240,234,0) 15%),
+      linear-gradient(0deg, var(--paper) 0%, rgba(242,240,234,.9) 8%, rgba(242,240,234,0) 20%); }
+  #days .hud{ position:absolute; inset:0; padding:calc(var(--u)*3) var(--g); display:grid; grid-template-rows:auto 1fr auto; pointer-events:none; z-index:2; }
   #days .hud .top{ display:flex; justify-content:space-between; align-items:baseline; font-size:14px; line-height:20px; color:var(--ink-48); }
-  #days .day{ font-size:clamp(28px, 3.1vw, 48px); line-height:1; font-weight:500; letter-spacing:-.03em; color:var(--ink); font-variant-numeric:tabular-nums; }
-  #days .life{ align-self:center; max-width:34ch; }
-  #days .life p{ font-size:clamp(16px, 1.2vw, 19px); line-height:1.45; margin-bottom:calc(var(--u)*2); opacity:0; transform:translateY(6px); transition:opacity .6s var(--ease), transform .6s var(--ease); }
+  #days .day{ font-size:clamp(28px, 3.1vw, 48px); line-height:1; font-weight:500; letter-spacing:-.03em; color:var(--ink); }
+  #days .life{ align-self:center; max-width:38ch; }
+  #days .life p{ font-size:clamp(15px, 1.1vw, 18px); line-height:1.4; margin-bottom:calc(var(--u)*1.75); opacity:0; transform:translateY(6px); transition:opacity .6s var(--ease), transform .6s var(--ease), color .6s; color:var(--ink-48); }
   #days .life p.on{ opacity:1; transform:none; }
+  #days .life p.now{ color:var(--ink); font-size:clamp(17px, 1.35vw, 22px); letter-spacing:-.012em; }
   #days .life .d{ display:block; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); margin-bottom:2px; }
   #days .counters{ display:flex; gap:clamp(24px, 5vw, 72px); font-variant-numeric:tabular-nums; }
   #days .counters .n{ font-size:clamp(32px, 3.6vw, 60px); line-height:1; font-weight:500; letter-spacing:-.03em; }
   #days .counters .l{ font-size:13px; line-height:20px; color:var(--ink-48); margin-top:6px; }
   #days .hud .bottom{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; }
   #days .hud .bottom .src{ font-size:13px; line-height:20px; color:var(--ink-48); max-width:36ch; text-align:right; }
-  @media (max-width:600px){ #days .hud .bottom{ flex-direction:column; align-items:flex-start; } #days .hud .bottom .src{ text-align:left; } #days .life{ max-width:none; } }
+  @media (max-width:600px){ #days .hud .bottom{ flex-direction:column; align-items:flex-start; } #days .hud .bottom .src{ text-align:left; } #days .life{ max-width:none; }
+    #days .scrim{ background:linear-gradient(90deg, var(--paper) 0%, var(--paper) 62%, rgba(242,240,234,0) 100%), linear-gradient(180deg, var(--paper) 0%, rgba(242,240,234,0) 16%), linear-gradient(0deg, var(--paper) 0%, rgba(242,240,234,0) 22%); } }
 
   /* the figure */
   figure{ position:relative; }
@@ -521,6 +528,7 @@
       <div class="stage">
         <canvas id="days-terrain" aria-hidden="true"></canvas>
         <canvas id="days-path" aria-hidden="true"></canvas>
+        <div class="scrim" aria-hidden="true"></div>
         <div class="hud">
           <div class="top"><span class="day" id="day">Day 0</span><span>The first 1,000 days</span></div>
           <div class="life" id="life"></div>
@@ -711,7 +719,7 @@ function Terrain(terrainCanvas, pathCanvas, opt){
     float minor = 1.0 - smoothstep(0.0, fw*1.25, d);
     float v5 = v/5.0; float f5 = fract(v5), d5 = min(f5, 1.0-f5); float fw5 = fwidth(v5);
     float major = 1.0 - smoothstep(0.0, fw5*1.9, d5);
-    float a = max(minor*0.42, major*0.78);
+    float a = max(minor*0.42*smoothstep(0.08, 0.32, u_zoom), major*0.78);
     // keep the type clear: soft rectangle
     vec2 dv = max(vec2(u_clear.x - s.x, s.x - (u_clear.x + u_clear.z)), 0.0) + max(vec2(u_clear.y - s.y, s.y - (u_clear.y + u_clear.w)), 0.0);
     float dd = length(vec2(max(dv.x, dv.y), 0.0));
@@ -846,7 +854,7 @@ function Terrain(terrainCanvas, pathCanvas, opt){
     if (on){
       if (!reduce && !scrub){ t+=dt*o.drift; walk(dt); }
       clearRect();
-      gl.uniform1f(u.t,t); gl.uniform2f(u.off,off[0],off[1]); gl.uniform1f(u.zoom,zoom); gl.uniform1f(u.levels, o.levels*(0.4+0.6*Math.min(1,zoom)));
+      gl.uniform1f(u.t,t); gl.uniform2f(u.off,off[0],off[1]); gl.uniform1f(u.zoom,zoom); gl.uniform1f(u.levels, o.levels*Math.max(0.45, Math.pow(Math.min(1,zoom),0.5)));
       gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
       drawPath();
     }
@@ -860,7 +868,7 @@ function Terrain(terrainCanvas, pathCanvas, opt){
     // the whole life, up front: walk until the company is o.weeks old
     let guard=0; while (life.co.week < o.weeks && guard++ < 60000) walk(1/30);
     S = trail.length; let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for (const q of trail){ if(q.x<x0)x0=q.x; if(q.y<y0)y0=q.y; if(q.x>x1)x1=q.x; if(q.y>y1)y1=q.y; }
-    bbox={x0,y0,x1,y1}; zEnd = Math.min(0.14, (W*0.34)/Math.max(1,(x1-x0)), (H*0.5)/Math.max(1,(y1-y0)));
+    bbox={x0,y0,x1,y1}; zEnd = Math.max(0.2, Math.min(0.34, (W*0.46)/Math.max(1,(x1-x0)), (H*0.62)/Math.max(1,(y1-y0))));
     setProgress(0);
   }
   requestAnimationFrame(frame);
@@ -871,8 +879,8 @@ function Terrain(terrainCanvas, pathCanvas, opt){
     const hp = trail[endIdx];
     const zp = Math.max(0, (p-0.12)/0.88); zoom = 1 + (zEnd-1)*ease(zp);
     // camera: follow the head, then settle on the whole climb sitting in the lower left of a much larger map
-    const cx = hp.x - (W*0.45)/zoom, cy = hp.y - (H*0.5)/zoom;
-    const fx = bbox.x0 - (W*0.08)/zoom, fy = bbox.y1 - (H*0.72)/zoom;
+    const cx = hp.x - (W*0.62)/zoom, cy = hp.y - (H*0.5)/zoom;
+    const fx = bbox.x1 - (W*0.92)/zoom, fy = bbox.y1 - (H*0.70)/zoom;
     const k = ease(Math.max(0,(p-0.6)/0.4));
     off[0] = cx + (fx-cx)*k; off[1] = cy + (fy-cy)*k;
   }
@@ -1182,11 +1190,14 @@ function mountDays(){
   api.setProgress(1); const full=api.stats(); api.setProgress(0);
   const firstDay = full.firstCustomerWeek ? full.firstCustomerWeek*7 : 49;
   const LINES=[
-    { day:0,   t:'You have an idea.' },
-    { day:firstDay, t:'First paying customer. You still have your day job.' },
-    { day:212, t:'You quit your job.' },
-    { day:600, t:'You start a second company.' },
-    { day:960, t:'There is a lot more map.' },
+    { day:0,        t:'You have an idea.' },
+    { day:firstDay, t:'First paying customer, signed while you were at work.' },
+    { day:212,      t:'You quit your job.' },
+    { day:340,      t:'It out-earns the job you quit.' },
+    { day:505,      t:'A competitor asks how big your team is. You never reply.' },
+    { day:660,      t:'You take two weeks off. Nothing breaks.' },
+    { day:815,      t:'Someone offers to buy it. You read the number twice and say no.' },
+    { day:960,      t:'And this is one corner of the map.' },
   ];
   life.innerHTML=LINES.map(l=>'<p data-day="'+l.day+'"><span class="d">Day '+l.day.toLocaleString()+'</span>'+l.t+'</p>').join('');
   const ps=[...life.querySelectorAll('p')];
@@ -1197,7 +1208,8 @@ function mountDays(){
     const p=Math.max(0,Math.min(1,-r.top/total)); if (p===last) return; last=p;
     api.setProgress(p); const s=api.stats(); const day=Math.round(p*1000);
     dayEl.textContent='Day '+fmt(day); cy.textContent=fmt(s.you); cf.textContent=fmt(s.fleet);
-    ps.forEach(el=>el.classList.toggle('on', day>=Number(el.dataset.day)));
+    let latest=-1; ps.forEach((el,k)=>{ const on=day>=Number(el.dataset.day); el.classList.toggle('on',on); if(on) latest=k; });
+    ps.forEach((el,k)=>el.classList.toggle('now', k===latest));
   }
   addEventListener('scroll', update, {passive:true}); addEventListener('resize', ()=>{ last=-1; update(); }); update();
 }
