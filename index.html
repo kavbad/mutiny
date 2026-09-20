@@ -280,6 +280,61 @@
 @media (max-width:820px){.dgrid{grid-template-columns:1fr}.opts{grid-template-columns:1fr}.opt{min-height:0}.roster{grid-template-columns:repeat(2,1fr)}.artifact .grid{grid-template-columns:1fr}.rows .row{grid-template-columns:90px 1fr auto}}
 
 
+  /* ---------- the terrain, explained ---------- */
+  .fig .ann{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+  .fig .ann line{ stroke:var(--ink); stroke-width:1; }
+  .fig .ann circle{ fill:none; stroke:var(--ink); stroke-width:1.2; }
+  .fig .ann text{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; fill:var(--ink); paint-order:stroke; stroke:var(--paper); stroke-width:5px; stroke-linejoin:round; }
+  .specimen{ margin-top:calc(var(--u)*4); border-top:1px solid var(--ink); padding-top:calc(var(--u)*1.5); font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:12px; line-height:1.55; color:var(--ink-72); }
+  .specimen .k{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); }
+  .specimen .eyebrow{ display:flex; justify-content:space-between; gap:16px; padding-bottom:10px; }
+  .specimen .row{ display:grid; grid-template-columns:120px 1fr; gap:16px; padding:7px 0; border-top:1px solid var(--rule); }
+  .specimen b{ color:var(--ink); font-weight:500; }
+  .specimen .q{ color:var(--ink); }
+  .scale{ margin-top:calc(var(--u)*3); font-size:13px; line-height:20px; color:var(--ink-48); }
+
+  /* ---------- the loop ---------- */
+  .loop svg{ width:100%; height:auto; display:block; overflow:visible; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; }
+  .loop .ring{ fill:none; stroke:var(--ink); stroke-width:1.2; }
+  .loop .ring.back{ stroke:var(--orange); stroke-width:1.8; }
+  .loop .spoke{ fill:none; stroke:var(--ink-28); stroke-width:1; stroke-dasharray:3 4; }
+  .loop .spoke.back{ stroke:var(--orange); stroke-dasharray:none; stroke-width:1.4; }
+  .loop .node circle{ fill:var(--paper); stroke:var(--ink); stroke-width:1.2; transition:fill .35s, r .35s; }
+  .loop .node.lit circle{ fill:var(--ink); }
+  .loop .node text{ font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; fill:var(--ink); }
+  .loop .node .sub{ font-family:"Schibsted Grotesk",sans-serif; font-size:12.5px; letter-spacing:-.005em; text-transform:none; fill:var(--ink-72); }
+  .loop .core circle{ fill:var(--ink); }
+  .loop .core text{ fill:var(--paper); font-size:11px; letter-spacing:.06em; text-transform:uppercase; text-anchor:middle; }
+  .loop .core .sub{ fill:var(--ink-48); font-family:"Schibsted Grotesk",sans-serif; font-size:12.5px; text-transform:none; letter-spacing:0; }
+  .loop .unit rect{ fill:var(--paper); stroke:var(--ink-28); transition:fill .25s, stroke .25s; }
+  .loop .unit text{ font-size:10px; letter-spacing:.06em; text-transform:uppercase; fill:var(--ink-72); transition:fill .25s; }
+  .loop .unit.lit rect{ fill:var(--orange); stroke:var(--orange); }
+  .loop .unit.lit text{ fill:var(--paper); }
+  .loop .pulse{ fill:var(--orange); }
+  .loop .halo{ fill:none; stroke:var(--orange); stroke-width:1; opacity:.45; }
+  .loop .arc-label{ font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; fill:var(--orange-deep); }
+  .loop .count{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); margin-top:calc(var(--u)*2); display:flex; justify-content:space-between; gap:16px; font-variant-numeric:tabular-nums; }
+  .loop .count b{ color:var(--ink); font-weight:500; }
+
+  /* ---------- day 0 to day 1,000 ---------- */
+  #days{ padding:0; }
+  #days .scrub{ position:relative; height:340vh; }
+  #days .stage{ position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; isolation:isolate; }
+  #days .stage canvas{ position:absolute; inset:0; width:100%; height:100%; }
+  #days .hud{ position:absolute; inset:0; padding:calc(var(--u)*3) var(--g); display:grid; grid-template-rows:auto 1fr auto; pointer-events:none; z-index:1; text-shadow:0 0 10px var(--paper), 0 0 3px var(--paper), 0 0 1px var(--paper); }
+  #days .hud .top{ display:flex; justify-content:space-between; align-items:baseline; font-size:14px; line-height:20px; color:var(--ink-48); }
+  #days .day{ font-size:clamp(28px, 3.1vw, 48px); line-height:1; font-weight:500; letter-spacing:-.03em; color:var(--ink); font-variant-numeric:tabular-nums; }
+  #days .life{ align-self:center; max-width:34ch; }
+  #days .life p{ font-size:clamp(16px, 1.2vw, 19px); line-height:1.45; margin-bottom:calc(var(--u)*2); opacity:0; transform:translateY(6px); transition:opacity .6s var(--ease), transform .6s var(--ease); }
+  #days .life p.on{ opacity:1; transform:none; }
+  #days .life .d{ display:block; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); margin-bottom:2px; }
+  #days .counters{ display:flex; gap:clamp(24px, 5vw, 72px); font-variant-numeric:tabular-nums; }
+  #days .counters .n{ font-size:clamp(32px, 3.6vw, 60px); line-height:1; font-weight:500; letter-spacing:-.03em; }
+  #days .counters .l{ font-size:13px; line-height:20px; color:var(--ink-48); margin-top:6px; }
+  #days .hud .bottom{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; }
+  #days .hud .bottom .src{ font-size:13px; line-height:20px; color:var(--ink-48); max-width:36ch; text-align:right; }
+  @media (max-width:600px){ #days .hud .bottom{ flex-direction:column; align-items:flex-start; } #days .hud .bottom .src{ text-align:left; } #days .life{ max-width:none; } }
+
   /* the figure */
   figure{ position:relative; }
   .model{ position:relative; width:100%; aspect-ratio:3/2; overflow:hidden; }
@@ -401,6 +456,57 @@
     </div>
   </section>
 
+  <section id="model">
+    <div class="grid">
+      <div class="c-1-5">
+        <h2>The terrain was never decoration.</h2>
+        <p class="copy">The ground under the headline is Rebel-1's view of a field. Elevation is predicted outcome. A contour line joins every decision that ends equally well. The path climbs because Rebel-1 keeps choosing the next move with the highest ground behind it.</p>
+        <p class="copy">Beside it, one record of the kind the model learns from: a company's state at a moment, the decision it made, and what was measured six and eighteen months later.</p>
+        <p class="scale">Thousands of companies. Millions of decisions. Each one joined to what happened next.</p>
+      </div>
+      <figure class="c-7-12 fig">
+        <div class="model" aria-label="The world model as terrain, annotated: elevation is predicted outcome, contours join decisions that end equally well, the path takes the highest ground."><canvas id="fig-terrain"></canvas><canvas id="fig-path"></canvas><svg class="ann" id="fig-ann" aria-hidden="true"></svg></div>
+        <figcaption><span>Fig. 1 · The field, as Rebel-1 sees it.</span><span>Live. The same ground as the headline.</span></figcaption>
+        <div class="specimen" id="specimen"></div>
+      </figure>
+    </div>
+  </section>
+
+  <section id="loop">
+    <div class="grid">
+      <div class="c-1-5">
+        <h2>The loop.</h2>
+        <p class="copy">What runs for each company, around the clock. Read the company's state. Generate candidate moves. Play each one forward against Rebel-1. Act through the fleet. Measure what happened. Write it back to the ledger.</p>
+        <p class="copy">The last arc is the one that matters. Every outcome returns to Rebel-1, so the model guiding your company tomorrow has seen more than it had today.</p>
+        <p class="copy">This runs for your company every hour, whether you're watching or asleep.</p>
+      </div>
+      <div class="c-7-12 loop">
+        <svg id="loop-svg" viewBox="0 0 700 420" aria-label="The loop: read state, generate moves, play forward against Rebel-1, act through the fleet, measure, write back to the ledger, which returns to Rebel-1."></svg>
+        <div class="count"><span>Cycles since you arrived · <b id="cycles">0</b></span><span>One pulse, one cycle</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="days">
+    <div class="scrub" id="scrub">
+      <div class="stage">
+        <canvas id="days-terrain" aria-hidden="true"></canvas>
+        <canvas id="days-path" aria-hidden="true"></canvas>
+        <div class="hud">
+          <div class="top"><span class="day" id="day">Day 0</span><span>Day 0 to day 1,000</span></div>
+          <div class="life" id="life"></div>
+          <div class="bottom">
+            <div class="counters">
+              <div><div class="n" id="c-you">0</div><div class="l">moves you made</div></div>
+              <div><div class="n" id="c-fleet">0</div><div class="l">moves the fleet made</div></div>
+            </div>
+            <div class="src">Counted from the same engine that draws the path. From 0, or wherever you are, to infinity.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="go" class="close">
     <div class="grid">
       <div class="c-1-7">
@@ -437,90 +543,11 @@ document.querySelectorAll('form.sign').forEach(f => {
   });
 });
 
-// ---------- the terrain ----------
-// The world model, drawn as ground: a living topographic map in ink. One path reads the terrain and climbs.
-// Contours are drawn on the GPU from a height field; the path walks the same field on the CPU.
-function Terrain(terrainCanvas, pathCanvas, opt){
-  const o = Object.assign({ seed:5, scale:520, levels:30, scroll:26, walk:64, clear:null, drift:1, headAt:.5, startY:.58 }, opt||{});
-  const gl = terrainCanvas.getContext('webgl2', { antialias:true, alpha:true, premultipliedAlpha:true });
-  const px = pathCanvas.getContext('2d');
-  if (!gl) return;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const mulberry = a => () => { a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
-  const rnd = mulberry(o.seed);
-
-  // shared noise lattice: 256x256 random values, sampled identically by the shader and the walker
-  const N = 256, lattice = new Float32Array(N*N); for (let i=0;i<N*N;i++) lattice[i] = rnd();
-  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, N, N, 0, gl.RED, gl.FLOAT, lattice);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-
-  const vs = `#version 300 es
-  in vec2 a; void main(){ gl_Position = vec4(a,0.,1.); }`;
-  const fs = `#version 300 es
-  precision highp float;
-  uniform vec2 u_res, u_off; uniform float u_t, u_scale, u_levels, u_dpr; uniform vec4 u_clear; uniform sampler2D u_lat;
-  out vec4 o;
-  float lat(vec2 i){ return texelFetch(u_lat, ivec2(mod(i, 256.0)), 0).r; }
-  float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
-    float a=lat(i), b=lat(i+vec2(1,0)), c=lat(i+vec2(0,1)), d=lat(i+vec2(1,1));
-    return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
-  float height(vec2 w, float t){
-    vec2 p = w / u_scale;
-    vec2 q = p + 0.08*vec2(vn(p*1.7 + t*0.011), vn(p*1.7 + 11.3 - t*0.009));   // slow warp: the ground breathes
-    return 0.52*vn(q) + 0.26*vn(q*2.03 + 7.1) + 0.13*vn(q*4.1 + 2.7) + 0.065*vn(q*8.3 + 5.5) + 0.03*vn(q*16.7 + 9.1);
-  }
-  void main(){
-    vec2 s = vec2(gl_FragCoord.x, u_res.y - gl_FragCoord.y) / u_dpr;   // css px, y down
-    vec2 w = s + u_off;
-    float h = height(w, u_t);
-    float v = h * u_levels;
-    float fw = fwidth(v);
-    float f = fract(v), d = min(f, 1.0 - f);
-    float minor = 1.0 - smoothstep(0.0, fw*1.25, d);
-    float v5 = v/5.0; float f5 = fract(v5), d5 = min(f5, 1.0-f5); float fw5 = fwidth(v5);
-    float major = 1.0 - smoothstep(0.0, fw5*1.9, d5);
-    float a = max(minor*0.42, major*0.78);
-    // keep the type clear: soft rectangle
-    vec2 dv = max(vec2(u_clear.x - s.x, s.x - (u_clear.x + u_clear.z)), 0.0) + max(vec2(u_clear.y - s.y, s.y - (u_clear.y + u_clear.w)), 0.0);
-    float dd = length(vec2(max(dv.x, dv.y), 0.0));
-    float dist = length(max(vec2(max(u_clear.x - s.x, s.x - (u_clear.x+u_clear.z)), max(u_clear.y - s.y, s.y - (u_clear.y+u_clear.w))), 0.0));
-    a *= mix(0.16, 1.0, smoothstep(0.0, 110.0, dist));
-    o = vec4(vec3(20.,18.,16.)/255.0 * a, a);
-  }`;
-  const sh=(t,src)=>{const x=gl.createShader(t); gl.shaderSource(x,src); gl.compileShader(x); if(!gl.getShaderParameter(x,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(x)); return x;};
-  const prog=gl.createProgram(); gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(prog); gl.useProgram(prog);
-  const vb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,vb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-  const loc=gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-  const U=n=>gl.getUniformLocation(prog,n); const u={res:U('u_res'),off:U('u_off'),t:U('u_t'),scale:U('u_scale'),levels:U('u_levels'),dpr:U('u_dpr'),clear:U('u_clear'),lat:U('u_lat')};
-  gl.uniform1i(u.lat,0); gl.uniform1f(u.scale,o.scale); gl.uniform1f(u.levels,o.levels);
-
-  // the same field on the CPU
-  const L=(x,y)=>lattice[(((y%N)+N)%N)*N + (((x%N)+N)%N)];
-  const sm=t=>t*t*(3-2*t);
-  function vn(x,y){ const i=Math.floor(x), j=Math.floor(y); const fx=sm(x-i), fy=sm(y-j); const a=L(i,j),b=L(i+1,j),c=L(i,j+1),d=L(i+1,j+1); return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy; }
-  function height(wx,wy,t){ const p=[wx/o.scale, wy/o.scale]; const q=[p[0]+0.08*vn(p[0]*1.7+t*0.011,p[1]*1.7+t*0.011), p[1]+0.08*vn(p[0]*1.7+11.3-t*0.009,p[1]*1.7+11.3-t*0.009)];
-    return 0.52*vn(q[0],q[1])+0.26*vn(q[0]*2.03+7.1,q[1]*2.03+7.1)+0.13*vn(q[0]*4.1+2.7,q[1]*4.1+2.7)+0.065*vn(q[0]*8.3+5.5,q[1]*8.3+5.5)+0.03*vn(q[0]*16.7+9.1,q[1]*16.7+9.1); }
-
-  let W=0,H=0,dpr=1, off=[0,0], t=0, trail=[], head=null, marks=[], last=performance.now(), on=true, keep=null;
-  function size(){
-    dpr=Math.min(devicePixelRatio||1,2); const r=terrainCanvas.getBoundingClientRect(); W=r.width; H=r.height;
-    for (const c of [terrainCanvas,pathCanvas]){ c.width=Math.round(W*dpr); c.height=Math.round(H*dpr); }
-    px.setTransform(dpr,0,0,dpr,0,0); gl.viewport(0,0,terrainCanvas.width,terrainCanvas.height);
-    gl.uniform2f(u.res,terrainCanvas.width,terrainCanvas.height); gl.uniform1f(u.dpr,dpr);
-    if (!head){ head={x:W*0.04, y:H*o.startY, ang:0.1}; trail=[{x:head.x,y:head.y}]; }
-  }
-  function clearRect(){
-    if (!o.clear) { gl.uniform4f(u.clear,-9999,-9999,0,0); return; }
-    const el=o.clear(); if(!el){ gl.uniform4f(u.clear,-9999,-9999,0,0); return; }
-    const r=el.getBoundingClientRect(), hr=terrainCanvas.getBoundingClientRect();
-    let x0=r.left-hr.left, y0=r.top-hr.top, x1=r.right-hr.left, y1=r.bottom-hr.top;
-    const el2=o.clear2 && o.clear2(); if (el2){ const q=el2.getBoundingClientRect(); x0=Math.min(x0,q.left-hr.left); y0=Math.min(y0,q.top-hr.top); x1=Math.max(x1,q.right-hr.left); y1=Math.max(y1,q.bottom-hr.top); }
-    keep={x0:x0-20,y0:y0-12,x1:x1+20,y1:y1+12};
-    gl.uniform4f(u.clear, keep.x0, keep.y0, keep.x1-keep.x0, keep.y1-keep.y0);
-  }
-  // ---------- the company, as a life ----------
+// ---------- the company, as a life ----------
+// Three voices ride the path. Ink: a decision. Orange: the engine did it. Green: the result, in money and growth.
+// The company has a state (age, revenue, customers, reach) that grows as the trail advances, so every number is
+// consistent with the last. This one engine feeds the hero path, the figure, the ledger specimen, and the counters.
+function Life(rnd){
   // Three voices ride the path. Ink: a decision. Orange: the engine did it. Green: the result, in money and growth.
   // The company has a state (age, revenue, customers, reach) that grows as the trail advances, so every number is
   // consistent with the last, and it can run for thousands of messages without repeating a life.
@@ -608,8 +635,97 @@ function Terrain(terrainCanvas, pathCanvas, opt){
   }
   // tempo: a young company is quiet; things happen faster as it grows
   const cadence = () => opening.length ? 6.5 + rnd()*1.5 : co.stage===0 ? 5.0 + rnd()*1.8 : co.stage===1 ? 3.2 + rnd()*1.2 : 2.1 + rnd()*0.9;
+  return { next: nextDecision, cadence, co, fmt$, fmtN, opening: () => opening.length };
+}
+// ---------- the terrain ----------
+// The world model, drawn as ground: a living topographic map in ink. One path reads the terrain and climbs.
+// Contours are drawn on the GPU from a height field; the path walks the same field on the CPU.
+const mulberry = a => () => { a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
+function Terrain(terrainCanvas, pathCanvas, opt){
+  const o = Object.assign({ seed:5, scale:520, levels:30, scroll:26, walk:64, clear:null, drift:1, headAt:.5, startY:.58, mode:'live', weeks:143 }, opt||{});
+  const gl = terrainCanvas.getContext('webgl2', { antialias:true, alpha:true, premultipliedAlpha:true });
+  const px = pathCanvas.getContext('2d');
+  if (!gl) return null;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rnd = mulberry(o.seed);
+  const scrub = o.mode === 'scrub';
+
+  // shared noise lattice: 256x256 random values, sampled identically by the shader and the walker
+  const N = 256, lattice = new Float32Array(N*N); for (let i=0;i<N*N;i++) lattice[i] = rnd();
+  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, N, N, 0, gl.RED, gl.FLOAT, lattice);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+  const vs = `#version 300 es
+  in vec2 a; void main(){ gl_Position = vec4(a,0.,1.); }`;
+  const fs = `#version 300 es
+  precision highp float;
+  uniform vec2 u_res, u_off; uniform float u_t, u_scale, u_levels, u_dpr, u_zoom; uniform vec4 u_clear; uniform sampler2D u_lat;
+  out vec4 o;
+  float lat(vec2 i){ return texelFetch(u_lat, ivec2(mod(i, 256.0)), 0).r; }
+  float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+    float a=lat(i), b=lat(i+vec2(1,0)), c=lat(i+vec2(0,1)), d=lat(i+vec2(1,1));
+    return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
+  float height(vec2 w, float t){
+    vec2 p = w / u_scale;
+    vec2 q = p + 0.08*vec2(vn(p*1.7 + t*0.011), vn(p*1.7 + 11.3 - t*0.009));   // slow warp: the ground breathes
+    return 0.52*vn(q) + 0.26*vn(q*2.03 + 7.1) + 0.13*vn(q*4.1 + 2.7) + 0.065*vn(q*8.3 + 5.5) + 0.03*vn(q*16.7 + 9.1);
+  }
+  void main(){
+    vec2 s = vec2(gl_FragCoord.x, u_res.y - gl_FragCoord.y) / u_dpr;   // css px, y down
+    vec2 w = s / u_zoom + u_off;
+    float h = height(w, u_t);
+    float v = h * u_levels;
+    float fw = fwidth(v);
+    float f = fract(v), d = min(f, 1.0 - f);
+    float minor = 1.0 - smoothstep(0.0, fw*1.25, d);
+    float v5 = v/5.0; float f5 = fract(v5), d5 = min(f5, 1.0-f5); float fw5 = fwidth(v5);
+    float major = 1.0 - smoothstep(0.0, fw5*1.9, d5);
+    float a = max(minor*0.42, major*0.78);
+    // keep the type clear: soft rectangle
+    vec2 dv = max(vec2(u_clear.x - s.x, s.x - (u_clear.x + u_clear.z)), 0.0) + max(vec2(u_clear.y - s.y, s.y - (u_clear.y + u_clear.w)), 0.0);
+    float dd = length(vec2(max(dv.x, dv.y), 0.0));
+    float dist = length(max(vec2(max(u_clear.x - s.x, s.x - (u_clear.x+u_clear.z)), max(u_clear.y - s.y, s.y - (u_clear.y+u_clear.w))), 0.0));
+    a *= mix(0.16, 1.0, smoothstep(0.0, 110.0, dist));
+    o = vec4(vec3(20.,18.,16.)/255.0 * a, a);
+  }`;
+  const sh=(t,src)=>{const x=gl.createShader(t); gl.shaderSource(x,src); gl.compileShader(x); if(!gl.getShaderParameter(x,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(x)); return x;};
+  const prog=gl.createProgram(); gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(prog); gl.useProgram(prog);
+  const vb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,vb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const U=n=>gl.getUniformLocation(prog,n); const u={res:U('u_res'),off:U('u_off'),t:U('u_t'),scale:U('u_scale'),levels:U('u_levels'),dpr:U('u_dpr'),clear:U('u_clear'),lat:U('u_lat'),zoom:U('u_zoom')};
+  gl.uniform1i(u.lat,0); gl.uniform1f(u.scale,o.scale); gl.uniform1f(u.levels,o.levels); gl.uniform1f(u.zoom,1);
+
+  // the same field on the CPU
+  const L=(x,y)=>lattice[(((y%N)+N)%N)*N + (((x%N)+N)%N)];
+  const sm=t=>t*t*(3-2*t);
+  function vn(x,y){ const i=Math.floor(x), j=Math.floor(y); const fx=sm(x-i), fy=sm(y-j); const a=L(i,j),b=L(i+1,j),c=L(i,j+1),d=L(i+1,j+1); return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy; }
+  function height(wx,wy,t){ const p=[wx/o.scale, wy/o.scale]; const q=[p[0]+0.08*vn(p[0]*1.7+t*0.011,p[1]*1.7+t*0.011), p[1]+0.08*vn(p[0]*1.7+11.3-t*0.009,p[1]*1.7+11.3-t*0.009)];
+    return 0.52*vn(q[0],q[1])+0.26*vn(q[0]*2.03+7.1,q[1]*2.03+7.1)+0.13*vn(q[0]*4.1+2.7,q[1]*4.1+2.7)+0.065*vn(q[0]*8.3+5.5,q[1]*8.3+5.5)+0.03*vn(q[0]*16.7+9.1,q[1]*16.7+9.1); }
+
+  let W=0,H=0,dpr=1, off=[0,0], t=0, trail=[], head=null, marks=[], last=performance.now(), on=true, keep=null, zoom=1;
+  // scrub mode: the whole life is computed up front and scrolled through
+  let S=0, endIdx=0, stepCount=0, bbox=null, zEnd=.1;
+  function size(){
+    dpr=Math.min(devicePixelRatio||1,2); const r=terrainCanvas.getBoundingClientRect(); W=r.width; H=r.height;
+    for (const c of [terrainCanvas,pathCanvas]){ c.width=Math.round(W*dpr); c.height=Math.round(H*dpr); }
+    px.setTransform(dpr,0,0,dpr,0,0); gl.viewport(0,0,terrainCanvas.width,terrainCanvas.height);
+    gl.uniform2f(u.res,terrainCanvas.width,terrainCanvas.height); gl.uniform1f(u.dpr,dpr);
+    if (!head){ head={x:W*0.04, y:H*o.startY, ang:0.1}; trail=[{x:head.x,y:head.y}]; }
+  }
+  function clearRect(){
+    if (!o.clear) { gl.uniform4f(u.clear,-9999,-9999,0,0); return; }
+    const el=o.clear(); if(!el){ gl.uniform4f(u.clear,-9999,-9999,0,0); return; }
+    const r=el.getBoundingClientRect(), hr=terrainCanvas.getBoundingClientRect();
+    let x0=r.left-hr.left, y0=r.top-hr.top, x1=r.right-hr.left, y1=r.bottom-hr.top;
+    const el2=o.clear2 && o.clear2(); if (el2){ const q=el2.getBoundingClientRect(); x0=Math.min(x0,q.left-hr.left); y0=Math.min(y0,q.top-hr.top); x1=Math.max(x1,q.right-hr.left); y1=Math.max(y1,q.bottom-hr.top); }
+    keep={x0:x0-20,y0:y0-12,x1:x1+20,y1:y1+12};
+    gl.uniform4f(u.clear, keep.x0, keep.y0, keep.x1-keep.x0, keep.y1-keep.y0);
+  }
+  const life = Life(rnd);
   let current = null, labelAge = 0, sinceDecision = 0, nextIn = 6.5;
-  current = nextDecision();
+  current = life.next();
   let lastSide = 1;
   function walk(dt){
     // the path is a trail, not a bulldozer: it runs along the contour it is on and climbs by switchbacks.
@@ -624,8 +740,8 @@ function Terrain(terrainCanvas, pathCanvas, opt){
     const score=(x,y)=> x*0.9 + (x*hx+y*hy)*0.6;
     const side = score(cx,cy) >= score(-cx,-cy) ? 1 : -1;
     if (side !== lastSide && (marks.length===0 || Math.hypot(head.x-marks[marks.length-1].x, head.y-marks[marks.length-1].y)>150)){
-      marks.push({x:head.x,y:head.y,ang:Math.atan2(-side*cy,-side*cx),len:22+rnd()*36,text:current,flip:marks.length%2});   // a fork: the decision is made here
-      current = nextDecision(); labelAge = 0; sinceDecision = 0; nextIn = cadence();
+      marks.push({x:head.x,y:head.y,ang:Math.atan2(-side*cy,-side*cx),len:22+rnd()*36,text:current,flip:marks.length%2,step:stepCount,week:life.co.week});   // a fork: the decision is made here
+      current = life.next(); labelAge = 0; sinceDecision = 0; nextIn = life.cadence();
     }
     lastSide = side; cx*=side; cy*=side;
     let dx = 0.72*cx + 0.22*ux + 0.42;                                          // along + up + onward
@@ -643,27 +759,32 @@ function Terrain(terrainCanvas, pathCanvas, opt){
     // decisions come whether or not the ground forks: a company decides constantly
     if (sinceDecision > nextIn && (marks.length===0 || Math.hypot(head.x-marks[marks.length-1].x, head.y-marks[marks.length-1].y)>150)){
       const sideStub = rnd()<.5?-1:1;
-      marks.push({x:head.x,y:head.y,ang:head.ang+sideStub*(0.9+rnd()*0.8),len:16+rnd()*26,text:current,flip:marks.length%2});
-      current = nextDecision(); labelAge = 0; sinceDecision = 0; nextIn = cadence();
+      marks.push({x:head.x,y:head.y,ang:head.ang+sideStub*(0.9+rnd()*0.8),len:16+rnd()*26,text:current,flip:marks.length%2,step:stepCount,week:life.co.week});
+      current = life.next(); labelAge = 0; sinceDecision = 0; nextIn = life.cadence();
     }
-    trail.push({x:head.x,y:head.y}); if (trail.length>5000) trail.shift();
+    trail.push({x:head.x,y:head.y}); stepCount++;
+    if (scrub) return;
+    if (trail.length>5000) trail.shift();
     const sx=head.x-off[0]; if (sx>W*o.headAt) off[0]+= (sx-W*o.headAt)*Math.min(1,dt*3);
     marks = marks.filter(m=>m.x-off[0]>-80);
     while (trail.length && trail[0].x-off[0] < -40) trail.shift();
   }
+  const SX = x => (x-off[0])*zoom, SY = y => (y-off[1])*zoom;
   function drawPath(){
     px.clearRect(0,0,W,H); px.strokeStyle='#D85A30'; px.fillStyle='#D85A30'; px.lineCap='round'; px.lineJoin='round';
+    const hp = scrub ? (trail[Math.min(endIdx, trail.length-1)] || head) : head;
+    const vis = scrub ? marks.filter(m=>m.step<=endIdx) : marks;
     // roads not taken
     px.globalAlpha=.4; px.lineWidth=1.2;
-    for (const m of marks){ px.beginPath(); px.moveTo(m.x-off[0],m.y); px.lineTo(m.x-off[0]+Math.cos(m.ang)*m.len, m.y+Math.sin(m.ang)*m.len); px.stroke(); }
+    for (const m of vis){ px.beginPath(); px.moveTo(SX(m.x),SY(m.y)); px.lineTo(SX(m.x)+Math.cos(m.ang)*m.len*zoom, SY(m.y)+Math.sin(m.ang)*m.len*zoom); px.stroke(); }
     // the path
-    px.globalAlpha=1; px.lineWidth=2.6; px.beginPath();
-    let started=false;
-    for (const q of trail){ const x=q.x-off[0]; if (x<-10){ continue; } if(!started){ px.moveTo(x,q.y); started=true; } else px.lineTo(x,q.y); }
+    px.globalAlpha=1; px.lineWidth=scrub? Math.max(1.2, 2.6*Math.sqrt(zoom)) : 2.6; px.beginPath();
+    let started=false; const n = scrub ? Math.min(endIdx+1, trail.length) : trail.length;
+    for (let i=0;i<n;i++){ const q=trail[i]; const x=SX(q.x); if (x<-10 && !scrub){ continue; } if(!started){ px.moveTo(x,SY(q.y)); started=true; } else px.lineTo(x,SY(q.y)); }
     px.stroke();
-    for (const m of marks){ px.beginPath(); px.arc(m.x-off[0],m.y,2.6,0,6.2832); px.fill(); }
+    for (const m of vis){ px.beginPath(); px.arc(SX(m.x),SY(m.y),Math.max(1.2,2.6*zoom),0,6.2832); px.fill(); }
     // the decisions, stamped where they were made; the current one rides with the head
-    if (o.labels){
+    if (o.labels && zoom > 0.55){
       px.font = '500 12.5px "Schibsted Grotesk", sans-serif'; px.textBaseline='alphabetic';
       px.lineJoin='round'; px.lineWidth=4; px.strokeStyle='#f2f0ea';
       const setFont = k => { px.font = (k==='a' ? 'italic 400' : '500') + ' ' + (W < 600 ? '11.5px' : '12.5px') + ' "Schibsted Grotesk", sans-serif'; };
@@ -680,22 +801,23 @@ function Terrain(terrainCanvas, pathCanvas, opt){
         px.globalAlpha=al; px.fillStyle = k==='a' ? '#B9481F' : k==='r' ? '#2E7D5B' : '#141210'; px.fillText(item.text,tx,y);
         if (k==='a') check(x, y, al); if (k==='r') rise(x, y, al);
       };
-      for (const m of marks){ if (!m.text) continue; const x=m.x-off[0]+12, y=m.flip? m.y+24 : m.y-14; const sx=m.x-off[0]; const far=Math.max(0, Math.min(1, (W*0.55-sx)/(W*0.45))); const edge=Math.max(0, Math.min(1, (sx-40)/120)); label(m.text, x, y, .62*(1-far*0.7)*edge); }
-      const a = Math.min(1, labelAge/0.5); const lastFlip = marks.length ? marks[marks.length-1].flip : 1; const x=head.x-off[0]+16, y= lastFlip ? head.y-14 : head.y+24;
-      label(current, x, y, a);
+      const zf = scrub ? Math.max(0, Math.min(1, (zoom-0.55)/0.35)) : 1;
+      for (const m of vis){ if (!m.text) continue; const sx=SX(m.x), sy=SY(m.y); if (sx<-200||sx>W+200||sy<-40||sy>H+40) continue; const x=sx+12, y=m.flip? sy+24 : sy-14; const far=scrub?0:Math.max(0, Math.min(1, (W*0.55-sx)/(W*0.45))); const edge=Math.max(0, Math.min(1, (sx-40)/120)); label(m.text, x, y, .62*(1-far*0.7)*edge*zf); }
+      if (!scrub){ const a = Math.min(1, labelAge/0.5); const lastFlip = marks.length ? marks[marks.length-1].flip : 1; const x=SX(head.x)+16, y= lastFlip ? SY(head.y)-14 : SY(head.y)+24; label(current, x, y, a); }
       px.globalAlpha=1; px.fillStyle='#D85A30'; px.strokeStyle='#D85A30'; px.lineWidth=2.6;
     }
-    px.beginPath(); px.arc(head.x-off[0],head.y,4,0,6.2832); px.fill();
-    px.strokeStyle='#f2f0ea'; px.lineWidth=1.6; px.beginPath(); px.arc(head.x-off[0],head.y,4,0,6.2832); px.stroke();
-    px.strokeStyle='#D85A30'; px.globalAlpha=.35; px.lineWidth=1; px.beginPath(); px.arc(head.x-off[0],head.y,10,0,6.2832); px.stroke(); px.globalAlpha=1;
+    const hx=SX(hp.x), hy=SY(hp.y);
+    px.beginPath(); px.arc(hx,hy,4,0,6.2832); px.fill();
+    px.strokeStyle='#f2f0ea'; px.lineWidth=1.6; px.beginPath(); px.arc(hx,hy,4,0,6.2832); px.stroke();
+    px.strokeStyle='#D85A30'; px.globalAlpha=.35; px.lineWidth=1; px.beginPath(); px.arc(hx,hy,10,0,6.2832); px.stroke(); px.globalAlpha=1;
   }
   new IntersectionObserver(([e])=>{ on=e.isIntersecting; },{threshold:0}).observe(terrainCanvas);
   function frame(now){
     const dt=Math.min(0.05,(now-last)/1000); last=now;
     if (on){
-      if (!reduce){ t+=dt*o.drift; walk(dt); }
+      if (!reduce && !scrub){ t+=dt*o.drift; walk(dt); }
       clearRect();
-      gl.uniform1f(u.t,t); gl.uniform2f(u.off,off[0],off[1]);
+      gl.uniform1f(u.t,t); gl.uniform2f(u.off,off[0],off[1]); gl.uniform1f(u.zoom,zoom); gl.uniform1f(u.levels, o.levels*(0.4+0.6*Math.min(1,zoom)));
       gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
       drawPath();
     }
@@ -704,13 +826,163 @@ function Terrain(terrainCanvas, pathCanvas, opt){
   let rt; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(size,120); }); size();
   // know where the type sits, then give the path a history before the page opens
   clearRect();
-  for (let i=0;i<420;i++){ t+=1/60; walk(1/60); }
+  if (!scrub){ for (let i=0;i<420;i++){ t+=1/60; walk(1/60); } }
+  else {
+    // the whole life, up front: walk until the company is o.weeks old
+    let guard=0; while (life.co.week < o.weeks && guard++ < 60000) walk(1/30);
+    S = trail.length; let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for (const q of trail){ if(q.x<x0)x0=q.x; if(q.y<y0)y0=q.y; if(q.x>x1)x1=q.x; if(q.y>y1)y1=q.y; }
+    bbox={x0,y0,x1,y1}; zEnd = Math.min(0.14, (W*0.34)/Math.max(1,(x1-x0)), (H*0.5)/Math.max(1,(y1-y0)));
+    setProgress(0);
+  }
   requestAnimationFrame(frame);
+  function ease(p){ return p<.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2; }
+  function setProgress(p){
+    if (!scrub || !S) return;
+    p = Math.max(0, Math.min(1, p)); endIdx = Math.floor(p*(S-1));
+    const hp = trail[endIdx];
+    const zp = Math.max(0, (p-0.12)/0.88); zoom = 1 + (zEnd-1)*ease(zp);
+    // camera: follow the head, then settle on the whole climb sitting in the lower left of a much larger map
+    const cx = hp.x - (W*0.45)/zoom, cy = hp.y - (H*0.5)/zoom;
+    const fx = bbox.x0 - (W*0.08)/zoom, fy = bbox.y1 - (H*0.72)/zoom;
+    const k = ease(Math.max(0,(p-0.6)/0.4));
+    off[0] = cx + (fx-cx)*k; off[1] = cy + (fy-cy)*k;
+  }
+  function stats(){
+    const vis = scrub ? marks.filter(m=>m.step<=endIdx) : marks; let d=0,a=0,r=0, first=null;
+    for (const m of vis){ const k=m.text&&m.text.kind; if(k==='d')d++; else if(k==='a')a++; else if(k==='r'){ r++; if(first==null) first=m.week; } }
+    return { you:d, fleet:a, results:r, firstCustomerWeek:first, week: scrub ? (marks.filter(m=>m.step<=endIdx).slice(-1)[0]||{}).week||0 : life.co.week };
+  }
+  return { setProgress, stats, life, head: () => ({ x: SX(head.x), y: SY(head.y) }), size: () => ({W,H}), marks: () => marks };
 }
 document.fonts.ready.then(()=>{
   Terrain(document.getElementById('terrain'), document.getElementById('path'), { seed:5, startY:.2, headAt:.5, labels:true, walk:78, clear:()=>document.querySelector('.hero .aside'), clear2:()=>document.querySelector('.hero h1') });
   Terrain(document.getElementById('model-terrain'), document.getElementById('model-path'), { seed:29, scale:260, levels:22, walk:40, headAt:.62, startY:.5, labels:true });
+  // the terrain, explained: the same ground as the headline, annotated like a figure
+  const fig = Terrain(document.getElementById('fig-terrain'), document.getElementById('fig-path'), { seed:5, scale:300, levels:24, walk:44, headAt:.6, startY:.5, labels:true });
+  if (fig) annotateFig(fig);
+  mountSpecimen();
+  mountLoop();
+  mountDays();
 });
+
+// ---------- fig. 1: annotations that track the live figure ----------
+function annotateFig(fig){
+  const svg=document.getElementById('fig-ann'); const ns='http://www.w3.org/2000/svg';
+  const mk=(t,a)=>{ const e=document.createElementNS(ns,t); for(const k in a) e.setAttribute(k,a[k]); svg.appendChild(e); return e; };
+  const items=[
+    { t:'Elevation · predicted outcome',                              at:(W,H)=>({x:W*.80,y:H*.20}), lab:(W,H)=>({x:W*.42,y:H*.09, anchor:'start'}) },
+    { t:'A contour · decisions that end equally well',                at:(W,H)=>({x:W*.28,y:H*.80}), lab:(W,H)=>({x:W*.06,y:H*.94, anchor:'start'}) },
+    { t:'The path · the next move with the highest ground behind it', at:null, lab:null },
+  ].map(it=>({ ...it, c:mk('circle',{r:3.5}), l:mk('line',{}), x:mk('text',{}) }));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function draw(){
+    const {W,H}=fig.size(); if (W && H){ svg.setAttribute('viewBox', '0 0 '+W+' '+H);
+      for (const it of items){
+        let p, l;
+        if (it.at){ p=it.at(W,H); l=it.lab(W,H); }
+        else { p=fig.head(); const right = p.x < W*0.55; l={ x: Math.max(12, Math.min(W-12, p.x + (right? 34 : -34))), y: Math.max(18, Math.min(H-8, p.y - 30)), anchor: right?'start':'end' }; }
+        it.c.setAttribute('cx',p.x); it.c.setAttribute('cy',p.y);
+        it.l.setAttribute('x1',p.x); it.l.setAttribute('y1',p.y); it.l.setAttribute('x2',l.x); it.l.setAttribute('y2',l.y+4);
+        it.x.setAttribute('x',l.x); it.x.setAttribute('y',l.y); it.x.setAttribute('text-anchor',l.anchor); it.x.textContent=it.t;
+      }
+    }
+    if (!reduce) requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ---------- the ledger specimen: one record, from the same engine ----------
+function mountSpecimen(){
+  const el=document.getElementById('specimen'); if(!el) return;
+  const life=Life(mulberry(5)); const snaps=[];
+  for (let i=0;i<240;i++){ const m=life.next(); const c=life.co; snaps.push({ week:c.week, customers:c.customers, mrr:c.mrr, stage:c.stage, kind:m.kind, text:m.text }); if (c.week>200) break; }
+  const i=snaps.findIndex(s=>s.kind==='d' && s.week>=20); if(i<1) return;
+  const dec=snaps[i], st=snaps[i-1]; const at=w=>snaps.find(s=>s.week>=w)||snaps[snaps.length-1];
+  const s6=at(dec.week+26), s18=at(dec.week+78); const f$=life.fmt$, fN=life.fmtN;
+  const stage=['early','growing','scaling'][st.stage]||'early';
+  const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  el.innerHTML='<div class="eyebrow"><span class="k">Specimen · one ledger record</span><span class="k">generated by the engine that draws the path</span></div>'
+    +'<div class="row"><span class="k">Company · t</span><span><b>co-0005</b> · week '+st.week+' · stage '+stage+'</span></div>'
+    +'<div class="row"><span class="k">State at t</span><span>'+fN(st.customers)+' customers · '+f$(st.mrr)+' MRR</span></div>'
+    +'<div class="row"><span class="k">Decision</span><span class="q">“'+esc(dec.text)+'”</span></div>'
+    +'<div class="row"><span class="k">Measured · +6 mo</span><span>week '+s6.week+' · <b>'+fN(s6.customers)+' customers · '+f$(s6.mrr)+' MRR</b></span></div>'
+    +'<div class="row"><span class="k">Measured · +18 mo</span><span>week '+s18.week+' · <b>'+fN(s18.customers)+' customers · '+f$(s18.mrr)+' MRR</b></span></div>';
+}
+
+// ---------- the loop: what runs for each company, around the clock ----------
+function mountLoop(){
+  const svg=document.getElementById('loop-svg'); if(!svg) return; const ns='http://www.w3.org/2000/svg';
+  const mk=(t,a,parent)=>{ const e=document.createElementNS(ns,t); for(const k in a) e.setAttribute(k,a[k]); (parent||svg).appendChild(e); return e; };
+  const d='M120 50 H540 A40 40 0 0 1 580 90 V330 A40 40 0 0 1 540 370 H100 A40 40 0 0 1 60 330 V90 A40 40 0 0 1 100 50 Z';
+  const ring=mk('path',{class:'ring',d}); const L=ring.getTotalLength();
+  const NODES=[
+    { f:0.000, t:'Read',         s:"the company's state", side:'top' },
+    { f:0.127, t:'Generate',     s:'candidate moves',     side:'top' },
+    { f:0.255, t:'Play forward', s:'against Rebel-1',     side:'top' },
+    { f:0.384, t:'Act',          s:'through the fleet',   side:'rightout' },
+    { f:0.640, t:'Measure',      s:'what happened',       side:'bottom' },
+    { f:0.768, t:'Write back',   s:'to the ledger',       side:'bottom' },
+  ];
+  // the return: from the ledger back around to the start, and into Rebel-1
+  const back=mk('path',{class:'ring back',d}); back.setAttribute('stroke-dasharray', (L*(1-0.768))+' '+L); back.setAttribute('stroke-dashoffset', -(L*0.768));
+  const C={x:320,y:210};
+  const pf=ring.getPointAtLength(0.255*L), wb=ring.getPointAtLength(0.768*L);
+  mk('line',{class:'spoke',x1:pf.x,y1:pf.y,x2:C.x,y2:C.y});
+  mk('line',{class:'spoke back',x1:wb.x,y1:wb.y,x2:C.x,y2:C.y});
+  mk('text',{class:'arc-label',x:48,y:210,'text-anchor':'middle',transform:'rotate(-90 48 210)'}).textContent='every outcome returns to Rebel-1';
+  const core=mk('g',{class:'core'}); mk('circle',{cx:C.x,cy:C.y,r:27},core); mk('text',{x:C.x,y:C.y+4},core).textContent='Rebel-1'; mk('text',{class:'sub',x:C.x,y:C.y+48,'text-anchor':'middle'},core).textContent='the world model';
+  const nodes=NODES.map(n=>{ const p=ring.getPointAtLength(n.f*L); const g=mk('g',{class:'node'}); mk('circle',{cx:p.x,cy:p.y,r:6},g);
+    const lab=mk('text',{},g), sub=mk('text',{class:'sub'},g); lab.textContent=n.t; sub.textContent=n.s;
+    if(n.side==='top'){ lab.setAttribute('x',p.x); lab.setAttribute('y',p.y-26); sub.setAttribute('x',p.x); sub.setAttribute('y',p.y-12); lab.setAttribute('text-anchor','middle'); sub.setAttribute('text-anchor','middle'); }
+    else if(n.side==='bottom'){ lab.setAttribute('x',p.x); lab.setAttribute('y',p.y+22); sub.setAttribute('x',p.x); sub.setAttribute('y',p.y+36); lab.setAttribute('text-anchor','middle'); sub.setAttribute('text-anchor','middle'); }
+    else { lab.setAttribute('x',p.x+16); lab.setAttribute('y',p.y-4); sub.setAttribute('x',p.x+16); sub.setAttribute('y',p.y+11); lab.setAttribute('text-anchor','start'); sub.setAttribute('text-anchor','start'); }
+    return { ...n, g, len:n.f*L }; });
+  const UNITS=['code','outbound','books','contracts','support'];
+  const units=UNITS.map((u,i)=>{ const g=mk('g',{class:'unit'}); const x=452,y=92+i*28; mk('rect',{x,y,width:100,height:20,rx:4},g); const t=mk('text',{x:x+9,y:y+14},g); t.textContent=u; return g; });
+  const fleetLab=mk('text',{x:552,y:246,class:'arc-label','text-anchor':'end'}); fleetLab.textContent='the fleet, around your gaps'; fleetLab.setAttribute('fill','var(--ink-48)');
+  const halo=mk('circle',{class:'halo',r:11}), pulse=mk('circle',{class:'pulse',r:5});
+  const cyc=document.getElementById('cycles'); const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PERIOD=9000; const t0=performance.now(); let vis=false;
+  new IntersectionObserver(([e])=>{ vis=e.isIntersecting; },{threshold:0}).observe(svg);
+  function place(len){ const p=ring.getPointAtLength(len); pulse.setAttribute('cx',p.x); pulse.setAttribute('cy',p.y); halo.setAttribute('cx',p.x); halo.setAttribute('cy',p.y);
+    for (const n of nodes){ const dlen=(len-n.len+L)%L; n.g.classList.toggle('lit', dlen < 46); }
+    const fa=0.384, fb=0.640, f=len/L; const inAct=f>=fa&&f<fb; const k=inAct?Math.floor((f-fa)/(fb-fa)*UNITS.length):-1;
+    units.forEach((u,i)=>u.classList.toggle('lit', inAct && i<=k)); }
+  if (reduce){ place(0); return; }
+  function frame(now){ if (vis){ const el=now-t0; place((el/PERIOD*L)%L); cyc.textContent=String(Math.floor(el/PERIOD)); } requestAnimationFrame(frame); }
+  requestAnimationFrame(frame);
+}
+
+// ---------- day 0 to day 1,000: the visitor's own future, scrolled ----------
+function mountDays(){
+  const scrub=document.getElementById('scrub'); if(!scrub) return;
+  const api=Terrain(document.getElementById('days-terrain'), document.getElementById('days-path'), { seed:11, scale:440, levels:26, walk:64, startY:.5, labels:true, mode:'scrub', weeks:143, drift:0 });
+  if(!api) return;
+  const life=document.getElementById('life'), dayEl=document.getElementById('day'), cy=document.getElementById('c-you'), cf=document.getElementById('c-fleet');
+  // the founder's life, in the margin. the first-customer day comes from the engine; the rest is the life the company has to fit inside.
+  api.setProgress(1); const full=api.stats(); api.setProgress(0);
+  const firstDay = full.firstCustomerWeek ? full.firstCustomerWeek*7 : 49;
+  const LINES=[
+    { day:0,   t:"The idea that's been in your notes for four years." },
+    { day:firstDay, t:'First customer, signed while you were at your day job.' },
+    { day:212, t:'You resign.' },
+    { day:600, t:'A second company on the same board.' },
+    { day:960, t:'The ground you climbed is one corner of the map.' },
+  ];
+  life.innerHTML=LINES.map(l=>'<p data-day="'+l.day+'"><span class="d">Day '+l.day.toLocaleString()+'</span>'+l.t+'</p>').join('');
+  const ps=[...life.querySelectorAll('p')];
+  const fmt=n=>n.toLocaleString();
+  let last=-1;
+  function update(){
+    const r=scrub.getBoundingClientRect(); const vh=innerHeight; const total=r.height-vh; if(total<=0) return;
+    const p=Math.max(0,Math.min(1,-r.top/total)); if (p===last) return; last=p;
+    api.setProgress(p); const s=api.stats(); const day=Math.round(p*1000);
+    dayEl.textContent='Day '+fmt(day); cy.textContent=fmt(s.you); cf.textContent=fmt(s.fleet);
+    ps.forEach(el=>el.classList.toggle('on', day>=Number(el.dataset.day)));
+  }
+  addEventListener('scroll', update, {passive:true}); addEventListener('resize', ()=>{ last=-1; update(); }); update();
+}
+
 
 </script>
 <script>
