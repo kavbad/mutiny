@@ -280,18 +280,51 @@
 @media (max-width:820px){.dgrid{grid-template-columns:1fr}.opts{grid-template-columns:1fr}.opt{min-height:0}.roster{grid-template-columns:repeat(2,1fr)}.artifact .grid{grid-template-columns:1fr}.rows .row{grid-template-columns:90px 1fr auto}}
 
 
-  /* ---------- the terrain, explained ---------- */
-  .fig .ann{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
-  .fig .ann line{ stroke:var(--ink); stroke-width:1; }
-  .fig .ann circle{ fill:none; stroke:var(--ink); stroke-width:1.2; }
-  .fig .ann text{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; fill:var(--ink); paint-order:stroke; stroke:var(--paper); stroke-width:5px; stroke-linejoin:round; }
-  .specimen{ margin-top:calc(var(--u)*4); border-top:1px solid var(--ink); padding-top:calc(var(--u)*1.5); font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:12px; line-height:1.55; color:var(--ink-72); }
-  .specimen .k{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); }
-  .specimen .eyebrow{ display:flex; justify-content:space-between; gap:16px; padding-bottom:10px; }
-  .specimen .row{ display:grid; grid-template-columns:120px 1fr; gap:16px; padding:7px 0; border-top:1px solid var(--rule); }
-  .specimen b{ color:var(--ink); font-weight:500; }
-  .specimen .q{ color:var(--ink); }
-  .scale{ margin-top:calc(var(--u)*3); font-size:13px; line-height:20px; color:var(--ink-48); }
+  /* ---------- the whole company: the manifest ---------- */
+  #jobs .head{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; margin-bottom:calc(var(--u)*4); }
+  #jobs .head h2{ margin-bottom:0; max-width:24ch; }
+  #jobs .head .copy{ margin-top:calc(var(--u)*2); }
+  .toggle{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:transparent; border:1px solid var(--ink-28); border-radius:999px; padding:12px 18px; cursor:pointer; transition:background .25s, color .25s, border-color .25s; white-space:nowrap; }
+  .toggle:hover{ border-color:var(--ink); }
+  .toggle.on{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .toggle:focus-visible{ outline:2px solid var(--orange); outline-offset:3px; }
+  .manifest{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:12.5px; line-height:1.5; border-top:1px solid var(--ink); }
+  .fn{ display:grid; grid-template-columns:200px minmax(0,1fr); column-gap:clamp(16px, 3vw, 48px); border-bottom:1px solid var(--rule); padding:14px 0 12px; }
+  .fn.fold{ display:none; }
+  .fnh{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); padding-top:6px; position:sticky; top:16px; align-self:start; }
+  .fnh b{ display:block; font-weight:400; color:var(--ink-28); margin-top:2px; }
+  .fnh .n-you, .only-you .fnh .n-all{ display:none; }
+  .only-you .fnh .n-you{ display:block; }
+  .jobs{ min-width:0; }
+  .job{ display:grid; grid-template-rows:1fr; opacity:1; transition:grid-template-rows .45s var(--ease), opacity .3s var(--ease); transition-delay:calc(var(--i, 0) * 4ms); }
+  .job > .in{ overflow:hidden; min-height:0; }
+  .only-you .job:not(.you){ grid-template-rows:0fr; opacity:0; pointer-events:none; }
+  .job .line{ display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:16px; align-items:baseline; width:100%; padding:5px 0; background:none; border:0; font:inherit; color:inherit; text-align:left; cursor:pointer; }
+  .job .line:focus-visible{ outline:2px solid var(--orange); outline-offset:2px; }
+  .job .t{ color:var(--ink); transition:color .5s; }
+  .job .via{ color:var(--ink-48); white-space:nowrap; }
+  .job .tag{ color:var(--ink-48); font-size:10.5px; letter-spacing:.04em; white-space:nowrap; }
+  .job .tag::before{ content:"Rebel-1 · "; }
+  .job.done .t{ color:var(--orange-deep); font-style:italic; }
+  .job.done .t::before{ content:"✓ "; font-style:normal; }
+  .job .yb{ display:inline-block; font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--orange-deep); border:1px solid rgba(216,90,48,.5); border-radius:4px; padding:1px 5px; margin-left:8px; vertical-align:1px; }
+  .job .detail{ display:none; padding:6px 0 14px; color:var(--ink-72); max-width:72ch; }
+  .job.open .detail{ display:block; }
+  .job.open .line .t{ color:var(--ink); }
+  .job .detail .k{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); display:block; margin:6px 0 2px; }
+  .job .detail p{ font-family:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif; font-size:15px; line-height:1.5; }
+  .manifest-foot{ margin-top:calc(var(--u)*3); font-size:13px; line-height:20px; color:var(--ink-48); display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+  .manifest-foot a{ color:var(--ink); border-bottom:1px solid var(--ink-28); }
+  .manifest-foot a:hover{ border-bottom-color:var(--ink); }
+  @media (max-width:820px){
+    .fn{ grid-template-columns:1fr; row-gap:6px; }
+    .fnh{ position:static; }
+    .job .line{ grid-template-columns:1fr; gap:2px; padding:8px 0; }
+    .job .via{ white-space:normal; }
+    .job .tag{ white-space:normal; }
+    #jobs .head .toggle{ width:100%; text-align:center; }
+    .manifest-foot{ flex-direction:column; gap:6px; }
+  }
 
   /* ---------- the loop ---------- */
   .loop svg{ width:100%; height:auto; display:block; overflow:visible; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; }
@@ -456,20 +489,16 @@
     </div>
   </section>
 
-  <section id="model">
-    <div class="grid">
-      <div class="c-1-5">
-        <h2>The terrain was never decoration.</h2>
-        <p class="copy">The ground under the headline is Rebel-1's view of a field. Elevation is predicted outcome. A contour line joins every decision that ends equally well. The path climbs because Rebel-1 keeps choosing the next move with the highest ground behind it.</p>
-        <p class="copy">Beside it, one record of the kind the model learns from: a company's state at a moment, the decision it made, and what was measured six and eighteen months later.</p>
-        <p class="scale">Thousands of companies. Millions of decisions. Each one joined to what happened next.</p>
+  <section id="jobs">
+    <div class="head">
+      <div>
+        <h2>A company is <span id="jobs-total">0</span> jobs. <span id="jobs-you">0</span> of them are yours.</h2>
+        <p class="copy">Every job a company has to do, in the order a company meets them. Every line is decided with Rebel-1 and done by the fleet, except the ones marked as yours.</p>
       </div>
-      <figure class="c-7-12 fig">
-        <div class="model" aria-label="The world model as terrain, annotated: elevation is predicted outcome, contours join decisions that end equally well, the path takes the highest ground."><canvas id="fig-terrain"></canvas><canvas id="fig-path"></canvas><svg class="ann" id="fig-ann" aria-hidden="true"></svg></div>
-        <figcaption><span>Fig. 1 · The field, as Rebel-1 sees it.</span><span>Live. The same ground as the headline.</span></figcaption>
-        <div class="specimen" id="specimen"></div>
-      </figure>
+      <button class="toggle" id="jobs-toggle" aria-pressed="false">Show only what needs you</button>
     </div>
+    <div class="manifest" id="manifest" aria-live="polite"></div>
+    <div class="manifest-foot"><span>Every line above is decided with Rebel-1. <a href="/report/">Read the technical report.</a></span><span>Open a line to see the decision behind it.</span></div>
   </section>
 
   <section id="loop">
@@ -857,56 +886,226 @@ function Terrain(terrainCanvas, pathCanvas, opt){
 document.fonts.ready.then(()=>{
   Terrain(document.getElementById('terrain'), document.getElementById('path'), { seed:5, startY:.2, headAt:.5, labels:true, walk:78, clear:()=>document.querySelector('.hero .aside'), clear2:()=>document.querySelector('.hero h1') });
   Terrain(document.getElementById('model-terrain'), document.getElementById('model-path'), { seed:29, scale:260, levels:22, walk:40, headAt:.62, startY:.5, labels:true });
-  // the terrain, explained: the same ground as the headline, annotated like a figure
-  const fig = Terrain(document.getElementById('fig-terrain'), document.getElementById('fig-path'), { seed:5, scale:300, levels:24, walk:44, headAt:.6, startY:.5, labels:true });
-  if (fig) annotateFig(fig);
-  mountSpecimen();
+  mountJobs();
   mountLoop();
   mountDays();
 });
 
-// ---------- fig. 1: annotations that track the live figure ----------
-function annotateFig(fig){
-  const svg=document.getElementById('fig-ann'); const ns='http://www.w3.org/2000/svg';
-  const mk=(t,a)=>{ const e=document.createElementNS(ns,t); for(const k in a) e.setAttribute(k,a[k]); svg.appendChild(e); return e; };
-  const items=[
-    { t:'Elevation · predicted outcome',                              at:(W,H)=>({x:W*.80,y:H*.20}), lab:(W,H)=>({x:W*.42,y:H*.09, anchor:'start'}) },
-    { t:'A contour · decisions that end equally well',                at:(W,H)=>({x:W*.28,y:H*.80}), lab:(W,H)=>({x:W*.06,y:H*.94, anchor:'start'}) },
-    { t:'The path · the next move with the highest ground behind it', at:null, lab:null },
-  ].map(it=>({ ...it, c:mk('circle',{r:3.5}), l:mk('line',{}), x:mk('text',{}) }));
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function draw(){
-    const {W,H}=fig.size(); if (W && H){ svg.setAttribute('viewBox', '0 0 '+W+' '+H);
-      for (const it of items){
-        let p, l;
-        if (it.at){ p=it.at(W,H); l=it.lab(W,H); }
-        else { p=fig.head(); const right = p.x < W*0.55; l={ x: Math.max(12, Math.min(W-12, p.x + (right? 34 : -34))), y: Math.max(18, Math.min(H-8, p.y - 30)), anchor: right?'start':'end' }; }
-        it.c.setAttribute('cx',p.x); it.c.setAttribute('cy',p.y);
-        it.l.setAttribute('x1',p.x); it.l.setAttribute('y1',p.y); it.l.setAttribute('x2',l.x); it.l.setAttribute('y2',l.y+4);
-        it.x.setAttribute('x',l.x); it.x.setAttribute('y',l.y); it.x.setAttribute('text-anchor',l.anchor); it.x.textContent=it.t;
-      }
-    }
-    if (!reduce) requestAnimationFrame(draw);
-  }
-  draw();
-}
+// ---------- the whole company: the manifest ----------
+// Every job a company has to do, grouped by function in the order a company meets them.
+// Each line: [task, what it connects to, the decision behind it, what the companies that chose it went on to do, needs the founder?]
+// Prune this list to what the fleet can do at launch before it ships. The comparable-decision counts are placeholders until the ledger supplies them.
+const MANIFEST = [
+ ['Incorporation and entity', [
+  ['Choose the entity and the state', 'Stripe Atlas', 'Delaware C-corp over an LLC when outside capital is the plan; LLC when it isn\'t.', 'C-corps raised on standard paper without re-papering. LLCs that later raised spent a quarter converting.'],
+  ['File the Delaware C-corp', 'Stripe Atlas', 'File through Atlas rather than a law firm for a standard formation.', 'Formed in days for a fixed fee; the firm route cost ten times as much for the same documents.'],
+  ['Sign the incorporation documents', 'DocuSign', 'The founder signs; nothing about the entity is delegated.', 'Companies whose founders read what they signed avoided the cap-table surprises that cost others a round.', true],
+  ['Get the EIN', 'IRS', 'Apply the day the entity exists, before the bank.', 'Banking, payroll, and Stripe all waited on this number; doing it first cleared a week.'],
+  ['Adopt bylaws and board consents', 'Clerky', 'Standard forms, no custom terms at formation.', 'Custom bylaws at formation were rewritten at the first financing almost every time.'],
+  ['Issue founder stock with vesting', 'Carta', 'Four years, one-year cliff, for every founder including solo founders.', 'Founders without vesting who split lost the company or the cofounder\'s shares; those with it kept both.'],
+  ['File the 83(b) election within 30 days', 'IRS', 'File it, certified mail, on formation day.', 'Missing the window turned vesting stock into an annual tax bill; nobody who filed regretted it.'],
+  ['Register a foreign qualification where you operate', 'State portals', 'Register in the operating state once there is an office or payroll there.', 'Unregistered companies paid penalties and back fees when they hired their first employee.'],
+  ['Set up the cap table', 'Carta', 'Carta from day one rather than a spreadsheet.', 'Spreadsheet cap tables broke at the first SAFE; the fix took weeks of legal time.'],
+  ['Appoint a registered agent', 'Stripe Atlas', 'Use the agent bundled with formation.', 'Companies that let the agent lapse missed service of process and lost default judgments.'],
+ ]],
+ ['Banking and payments', [
+  ['Open the business bank account', 'Mercury', 'A software-first bank over a branch bank.', 'Accounts opened in days and connected to books and Stripe automatically; branch accounts took weeks and manual exports.'],
+  ['Pass identity verification for the account', 'Mercury', 'The founder does this personally; it cannot be delegated by law.', 'Applications with complete founder documents cleared in a day; incomplete ones stalled for weeks.', true],
+  ['Set up the merchant account', 'Stripe', 'Stripe for card payments from day one.', 'Companies that started on Stripe never migrated; those on a cheaper processor migrated within a year.'],
+  ['Turn on ACH and wire payouts', 'Stripe', 'Enable bank transfers before the first enterprise invoice.', 'Enterprise customers paid by wire or not at all; card-only companies chased invoices.'],
+  ['Issue corporate cards with limits', 'Mercury', 'Cards per agent and per function, each with a monthly limit.', 'Limits caught runaway spend within a day; unlimited cards discovered it at month end.'],
+  ['Connect the bank to the books', 'QuickBooks', 'Live bank feed, reconciled weekly.', 'Weekly reconciliation kept the books closeable in an hour; monthly took a day.'],
+  ['Set up payroll', 'Gusto', 'Payroll provider before the first hire, not after.', 'Late payroll setup meant late first paychecks and a bad first week for the hire.'],
+  ['Collect sales tax where required', 'Stripe Tax', 'Automate collection from the first sale.', 'Companies that ignored it owed years of uncollected tax at their first audit.'],
+  ['Handle chargebacks and disputes', 'Stripe', 'Respond to every dispute with the evidence Stripe asks for, within the window.', 'Companies that answered disputes won most; those that ignored them lost the money and the processor\'s trust.'],
+  ['Set up international payments', 'Stripe', 'Accept local payment methods in each market as it opens.', 'Card-only checkout in Europe converted at half the rate of local methods.'],
+ ]],
+ ['Compliance and privacy', [
+  ['Draft the privacy policy', 'Termly', 'A plain-language policy that says what is actually collected.', 'Policies copied from other companies failed the first customer security review.'],
+  ['Publish the cookie and consent notice', 'Termly', 'Consent banner only where the law requires one.', 'Global banners cost conversion for no legal benefit outside Europe.'],
+  ['Set up SOC 2 monitoring from day one', 'Vanta', 'Continuous monitoring before the first enterprise conversation.', 'Companies with monitoring on passed audits in months; those that started later spent a year.'],
+  ['Complete the SOC 2 Type I', 'Vanta', 'Type I first, Type II after twelve months of evidence.', 'Type I unblocked mid-market deals; enterprise waited for Type II either way.'],
+  ['Answer security questionnaires', 'Vanta Trust Center', 'Publish a trust page so most questionnaires answer themselves.', 'Trust pages cut questionnaire time from days to hours.'],
+  ['Map data flows and subprocessors', 'Vanta', 'Keep a live subprocessor list, published.', 'Companies without one rewrote their DPA at every enterprise deal.'],
+  ['Sign data processing agreements', 'Ironclad', 'Standard DPA offered proactively to every customer that asks.', 'Proactive DPAs shortened procurement by weeks.'],
+  ['Handle data subject requests', 'Support inbox', 'A documented process with a 30-day clock.', 'Companies with a process met the deadline every time; ad hoc handling missed it.'],
+  ['Set retention and deletion policies', 'Internal', 'Delete what isn\'t needed on a schedule.', 'Smaller data footprints made breaches smaller and audits shorter.'],
+  ['File beneficial ownership and annual reports', 'State portals', 'Calendar every filing at formation.', 'Missed annual reports led to administrative dissolution for several companies.'],
+ ]],
+ ['Contracts and legal', [
+  ['Draft the terms of service', 'Ironclad', 'Standard terms with a clear limitation of liability.', 'Companies with standard terms closed self-serve without legal review on the customer side.'],
+  ['Draft the master services agreement', 'Ironclad', 'One MSA with an order form, not a contract per customer.', 'One paper meant renewals took minutes instead of negotiations.'],
+  ['Set the contract approval threshold', 'Internal', 'The founder sets a dollar threshold above which every contract needs their signature.', 'Founders who set it low early raised it as trust grew; none regretted starting low.', true],
+  ['Redline customer contracts', 'Ironclad', 'Accept standard redlines, escalate anything touching liability or IP.', 'Fast redlines won deals from slower competitors; the escalations protected the company.'],
+  ['Sign vendor agreements', 'DocuSign', 'Annual terms only where the discount beats the flexibility.', 'Monthly SaaS terms until product-market fit saved most companies money on abandoned tools.'],
+  ['Register the trademark', 'USPTO', 'File the word mark in the core class once the name is settled.', 'Companies that waited found the mark taken and renamed at a cost.'],
+  ['Assign IP from every contributor', 'Clerky', 'IP assignment signed before any code is written by anyone.', 'Missing assignments surfaced in diligence and delayed or killed rounds.'],
+  ['Draft the contractor agreement', 'Ironclad', 'One template, IP assignment included.', 'Templates kept contractor onboarding to a day.'],
+  ['Handle the first legal notice', 'Counsel', 'Read it the day it arrives and respond within the stated window with counsel.', 'Ignored notices became lawsuits; answered ones mostly ended there.'],
+  ['Keep the minute book and consents current', 'Clerky', 'Record every board action when it happens.', 'Current records made diligence a formality.'],
+ ]],
+ ['Product and engineering', [
+  ['Choose the positioning', 'Rebel-1', 'The founder chooses, against the field Rebel-1 reads, with Rebel-1\'s pick marked.', 'Companies positioned against the field before building shipped the right first product; the rest rebuilt.', true],
+  ['Choose the stack', 'GitHub', 'Boring, well-documented, with one language where possible.', 'Boring stacks shipped faster and hired easier; novel stacks spent the first year on tooling.'],
+  ['Set up the repository, CI, and staging', 'GitHub', 'CI and a staging environment before the first feature.', 'Teams with staging shipped daily; teams without broke production weekly.'],
+  ['Ship v1 to a private URL', 'Vercel', 'A private v1 in weeks, not a public launch.', 'Private v1s found the first customers before the public saw a rough product.'],
+  ['Instrument activation before growth', 'PostHog', 'Measure the first aha moment before spending on acquisition.', 'Companies that measured activation first fixed onboarding before wasting paid spend.'],
+  ['Build the integrations customers ask for', 'GitHub', 'The one integration the most customers name, then the next.', 'One deep integration beat five shallow ones for retention.'],
+  ['Write the docs from the code', 'Mintlify', 'Docs generated and updated with every release.', 'Live docs cut support tickets by a third.'],
+  ['Fix what the funnel shows', 'PostHog', 'Fix the biggest drop-off each week.', 'Weekly funnel fixes compounded into conversion doubling over a year.'],
+  ['Run the pricing and onboarding experiments', 'PostHog', 'One experiment at a time, run to significance.', 'One-at-a-time testing found real winners; parallel tests found noise.'],
+  ['Ship the mobile view', 'Vercel', 'Responsive web before a native app.', 'Native apps before fit were rewritten; responsive web served the first thousand customers.'],
+  ['Review and merge every pull request', 'GitHub', 'Every change reviewed, small, and reversible.', 'Small reversible changes kept incidents short.'],
+  ['Run the on-call rotation', 'PagerDuty', 'Alerts routed to the agent on call, escalation to the founder only for outages.', 'Founders woken only for outages stayed rested and made better calls.'],
+ ]],
+ ['Design and brand', [
+  ['Name the company and check the mark', 'USPTO', 'A name that survives a trademark search and a domain search.', 'Names chosen before the search were renamed; names chosen after weren\'t.'],
+  ['Approve the brand', 'Figma', 'The founder approves the name, mark, and voice before anything ships under it.', 'Brands the founder chose held; brands delegated entirely were replaced within a year.', true],
+  ['Design the mark and the type', 'Figma', 'One typeface, one accent, one mark.', 'Restraint aged well; brand systems with five colors were simplified later.'],
+  ['Build the design system', 'Figma', 'Components shared between product and site from day one.', 'Shared systems kept product and marketing from drifting apart.'],
+  ['Write the voice and tone guide', 'Notion', 'Two pages, with examples, used by every agent that writes.', 'A written voice kept a hundred emails sounding like one company.'],
+  ['Design the landing page', 'Figma', 'One page, one promise, one call to action.', 'Single-promise pages converted better than feature lists at every stage.'],
+  ['Produce the launch assets', 'Figma', 'A small set of assets reused everywhere.', 'Reuse made launch weeks cheap.'],
+  ['Design the onboarding', 'Figma', 'First aha in under five minutes.', 'Five-minute onboarding retained twice as many trials as guided tours.'],
+  ['Maintain the icon and illustration set', 'Figma', 'One drawn style, grown as needed.', 'Consistent illustration read as a bigger company than it was.'],
+ ]],
+ ['Infrastructure and security', [
+  ['Buy the domain and set DNS', 'Cloudflare', 'Domain on a registrar with DNS you control by API.', 'API-managed DNS made every later change a minute instead of a ticket.'],
+  ['Provision hosting and the database', 'Vercel', 'Managed hosting and managed Postgres until scale demands otherwise.', 'Managed infrastructure served the first years without an ops hire.'],
+  ['Set up backups and test a restore', 'Supabase', 'Daily backups, restore tested monthly.', 'Tested restores were the difference between an outage and a lost company.'],
+  ['Configure SSO and role-based access', 'WorkOS', 'SSO available on the enterprise tier from the first deal that asks.', 'SSO on request closed enterprise deals that otherwise stalled.'],
+  ['Rotate secrets and keys', '1Password', 'Every secret in a vault, rotated on a schedule and on any departure.', 'Vaulted secrets contained incidents; scattered ones widened them.'],
+  ['Set up monitoring and alerting', 'Datadog', 'Alert on what customers feel, not on every metric.', 'Customer-facing alerts caught real outages; metric alerts caused fatigue.'],
+  ['Run the incident and write the postmortem', 'PagerDuty', 'Every incident gets a blameless write-up within a day.', 'Written postmortems stopped repeat incidents.'],
+  ['Provision regions for data residency', 'Cloudflare', 'A second region only when a signed customer requires it.', 'Early multi-region spending was wasted; contract-driven regions paid for themselves.'],
+  ['Cut infrastructure spend', 'Datadog', 'Review spend monthly, kill what nothing uses.', 'Monthly reviews kept infrastructure under a tenth of revenue.'],
+  ['Pass the customer security review', 'Vanta Trust Center', 'Answer from the trust page and the SOC 2 report.', 'Prepared companies passed in days.'],
+  ['Handle the outage', 'PagerDuty', 'Status page first, fix second, postmortem third.', 'Companies that communicated during outages kept the customers; silent ones lost them.'],
+ ]],
+ ['Marketing', [
+  ['Write the positioning statement', 'Rebel-1', 'One sentence: who it\'s for, what it does, why it wins.', 'Companies with one sentence spent less on every campaign after it.'],
+  ['Launch on the pain, not the feature', 'Product Hunt', 'The launch headline names the customer\'s problem.', 'Pain-led launches drove signups; feature-led launches drove visits.'],
+  ['Run the first three landing-page tests', 'Vercel', 'Three audiences, three pages, one week.', 'The winning audience was rarely the founder\'s first guess.'],
+  ['Set up the referral loop', 'Internal', 'Referrals built into the product where customers already share.', 'In-product referrals outperformed referral programs bolted on later.'],
+  ['Build the email list and the sequence', 'Resend', 'Five onboarding emails, written once, improved monthly.', 'Onboarding sequences lifted activation by double digits.'],
+  ['Decide on paid acquisition', 'Google Ads', 'Paid only after organic proves the message.', 'Paid spend before the message worked bought expensive churn.'],
+  ['Run the partner and integration marketing', 'Zapier', 'Co-market every integration with the partner.', 'Partner launches brought customers at near-zero cost.'],
+  ['Collect and publish customer proof', 'Internal', 'Ask every happy customer for a quote at the moment of the win.', 'Proof asked for at the win moment converted; proof asked later didn\'t arrive.'],
+  ['Attend or skip the conference', 'Internal', 'Skip until customers say where they gather.', 'Early conferences cost more than they returned.'],
+ ]],
+ ['SEO and AEO', [
+  ['Set up the site for crawling and indexing', 'Google Search Console', 'Sitemap, canonical URLs, and structured data from the first page.', 'Sites indexed correctly from launch ranked months earlier.'],
+  ['Research the queries customers actually use', 'Ahrefs', 'Target the questions customers type, not the category term.', 'Question-led pages ranked faster and converted better than category pages.'],
+  ['Publish the answer pages', 'Vercel', 'One page per real question, answered plainly and completely.', 'Complete answers earned featured snippets and answer-engine citations.'],
+  ['Get cited by answer engines', 'Internal', 'Structure pages so an answer engine can quote them: a clear claim, then the evidence.', 'Pages with quotable claims were cited; pages with marketing copy were not.'],
+  ['Own the category term early', 'Ahrefs', 'Name the category once and use it everywhere.', 'Companies that named their category defined how it was searched.'],
+  ['Build the comparison and alternative pages', 'Vercel', 'Honest comparisons against every competitor customers name.', 'Honest comparison pages won the searches competitors ran ads on.'],
+  ['Earn the first links', 'Internal', 'Publish something worth linking to before asking for links.', 'Original data and tools earned links; outreach alone didn\'t.'],
+  ['Fix technical SEO issues weekly', 'Ahrefs', 'A weekly crawl, every error fixed.', 'Weekly fixes kept rankings from decaying quietly.'],
+  ['Track rankings and citations', 'Ahrefs', 'Track the questions, not vanity keywords.', 'Question tracking showed real pipeline; keyword tracking showed noise.'],
+ ]],
+ ['Content and social', [
+  ['Write the technical report', 'Notion', 'Publish the depth document early and keep it current.', 'A real technical document was the most-shared page for most technical companies.'],
+  ['Publish the changelog', 'Vercel', 'Every release noted publicly, in plain words.', 'Public changelogs reassured buyers that the product was alive.'],
+  ['Write the weekly post', 'Substack', 'One post a week from what was learned that week.', 'Weekly posts compounded into the main organic channel within a year.'],
+  ['Run the LinkedIn presence', 'LinkedIn', 'Founder voice, three posts a week, no scheduling tools that show.', 'Founder posts outperformed company posts by an order of magnitude.'],
+  ['Run the X presence', 'X', 'Only where customers are; otherwise skip.', 'Presence where customers weren\'t cost time and returned nothing.'],
+  ['Publish the case studies', 'Vercel', 'One per customer win, with numbers the customer approved.', 'Case studies with numbers closed deals; case studies without were ignored.'],
+  ['Answer questions in the communities', 'Reddit', 'Answer helpfully where the question is asked; never pitch.', 'Helpful answers brought customers for years; pitches got removed.'],
+  ['Produce the demo video', 'Loom', 'Two minutes, real product, no music.', 'Short real demos converted; produced videos didn\'t move numbers.'],
+  ['Repurpose every piece across channels', 'Internal', 'One piece, four formats.', 'Repurposing quadrupled reach at no cost.'],
+ ]],
+ ['Outbound and sales', [
+  ['Define the ideal customer from the first wins', 'HubSpot', 'Profile the customers who activated fastest, not the biggest logos.', 'Fast-activating profiles renewed; logo-chasing churned.'],
+  ['Build the target list', 'Apollo', 'Two hundred accounts that match the profile, verified.', 'Verified lists bounced under 3%; bought lists bounced a quarter.'],
+  ['Send the first 200 outbound', 'Gmail', 'Short, specific, one ask, sent from a real inbox.', 'Specific emails booked meetings at ten times the rate of templates.'],
+  ['Book and run the first calls', 'Cal.com', 'The founder takes the first twenty calls; the fleet books and prepares them.', 'Founders who took early calls found the real pitch; delegated calls found the wrong one.'],
+  ['Run the demo', 'Zoom', 'Show the customer\'s own problem solved, not the feature tour.', 'Problem-first demos closed; tours didn\'t.'],
+  ['Write the proposal and the order form', 'Ironclad', 'One-page order form against the MSA.', 'One-page orders signed in days; long proposals in months.'],
+  ['Negotiate the enterprise deal', 'Internal', 'Hold price, give on terms that cost nothing.', 'Companies that held price kept margin; discounting became permanent.'],
+  ['Run the free pilot with a paid rollout', 'Internal', 'Free pilot with a signed rollout price up front.', 'Pilots with pre-agreed rollouts converted; open-ended pilots stalled.'],
+  ['Follow up until yes or no', 'HubSpot', 'Every open deal touched weekly until it closes or dies.', 'Weekly follow-up recovered a third of stalled deals.'],
+  ['Hand off to onboarding', 'HubSpot', 'Onboarding starts the day the order is signed.', 'Same-day onboarding cut early churn in half.'],
+ ]],
+ ['CRM and pipeline', [
+  ['Set up the CRM', 'HubSpot', 'CRM before the first outbound, with the stages defined.', 'Deals tracked from the first email closed at twice the rate of deals tracked later.'],
+  ['Sync every deal from email and calendar', 'HubSpot', 'Automatic logging, no manual entry.', 'Automatic logging kept the pipeline true; manual pipelines were fiction within a month.'],
+  ['Define the pipeline stages and exit criteria', 'HubSpot', 'Five stages, each with a written exit criterion.', 'Written criteria made forecasts land within ten percent.'],
+  ['Score and route inbound leads', 'HubSpot', 'Route by fit, respond within the hour.', 'Hour-one responses converted several times better than next-day.'],
+  ['Forecast the quarter', 'HubSpot', 'Weighted pipeline, reviewed weekly.', 'Weekly forecasts caught misses early enough to act.'],
+  ['Run the renewal and expansion motion', 'HubSpot', 'Renewal conversation ninety days out, expansion at the moment of a win.', 'Early renewals held net retention above one hundred percent.'],
+  ['Clean the data monthly', 'HubSpot', 'Merge duplicates, archive dead deals.', 'Clean data kept every report trustworthy.'],
+  ['Write the weekly pipeline review', 'Notion', 'One page, every number reconciled to the CRM.', 'Reconciled reviews ended the arguments about whose number was right.'],
+ ]],
+ ['Pricing and billing', [
+  ['Set the price', 'Rebel-1', 'The founder sets the price, with Rebel-1\'s read of the field and the recommended anchor.', 'Founders who set prices against the field priced higher and churned less than those who guessed.', true],
+  ['Publish the pricing', 'Vercel', 'Prices on the site, no "contact us" below enterprise.', 'Published pricing brought better-qualified leads and shorter sales cycles.'],
+  ['Choose the model: seat, usage, or flat', 'Rebel-1', 'Price on the unit the customer already counts.', 'Prices aligned to how customers counted value renewed; misaligned ones were renegotiated.'],
+  ['Set up subscriptions and invoicing', 'Stripe Billing', 'Stripe Billing for self-serve and invoices for enterprise.', 'One billing system served both motions without a rebuild.'],
+  ['Add the self-serve tier', 'Stripe Billing', 'A tier a customer can buy without a call.', 'Self-serve tiers became the top of the enterprise funnel.'],
+  ['Default to annual contracts', 'Stripe Billing', 'Annual by default, monthly available at a premium.', 'Annual defaults improved cash and retention together.'],
+  ['Run the price change', 'Stripe Billing', 'Raise prices for new customers first, grandfather existing ones for a year.', 'Staged increases held retention; abrupt ones caused churn spikes.'],
+  ['Handle failed payments and dunning', 'Stripe Billing', 'Automated retries and plain emails for two weeks before cancellation.', 'Dunning recovered most failed payments; silence lost them.'],
+  ['Reconcile revenue monthly', 'QuickBooks', 'Stripe to books, every month, to the dollar.', 'Reconciled revenue made fundraising diligence a formality.'],
+ ]],
+ ['Support', [
+  ['Set up the inbox and the help center', 'Intercom', 'One shared inbox, one help center, from the first customer.', 'One inbox meant nothing was missed; scattered email lost tickets.'],
+  ['Answer every inbound within the hour', 'Intercom', 'Hour-one response, always, with a real answer or a real timeline.', 'Fast first responses drove the best reviews and the most referrals.'],
+  ['Answer the 3 a.m. ticket', 'Intercom', 'The support agent answers overnight; anything it can\'t resolve is queued for the morning with context.', 'Overnight answers retained international customers who otherwise left for a competitor in their timezone.'],
+  ['Write the help articles from the tickets', 'Intercom', 'Every repeated question becomes an article that week.', 'Article-driven support cut ticket volume as the company grew.'],
+  ['Escalate what needs a human', 'Slack', 'Clear rules for what goes to the founder: refunds above a threshold, anger, legal words.', 'Clear escalation kept founders out of routine tickets and in the ones that mattered.'],
+  ['Train the support agent on past tickets', 'Intercom', 'Retrain monthly on resolved tickets.', 'Monthly retraining kept resolution rates rising.'],
+  ['Run the customer advisory call', 'Zoom', 'Quarterly, five customers, written up and shared.', 'Advisory calls shaped roadmaps that customers then bought.'],
+  ['Track resolution time and satisfaction', 'Intercom', 'Two numbers, reviewed weekly.', 'Weekly review kept support quality from decaying quietly.'],
+  ['Handle the refund request', 'Stripe', 'Refund fast below the threshold, ask why above it.', 'Fast refunds turned unhappy customers into references more often than arguments did.'],
+ ]],
+ ['Books and tax', [
+  ['Set up the chart of accounts', 'QuickBooks', 'A standard SaaS chart, not a custom one.', 'Standard charts let any accountant read the books.'],
+  ['Reconcile the month', 'QuickBooks', 'Close every month within five business days.', 'Five-day closes kept decisions based on real numbers.'],
+  ['Run payroll and file payroll taxes', 'Gusto', 'Automated filings in every state with an employee.', 'Automated filings avoided the penalties that manual ones collected.'],
+  ['File and remit sales tax', 'Stripe Tax', 'Register where thresholds are crossed, remit automatically.', 'Automatic remittance kept companies clean at their first audit.'],
+  ['Prepare the annual tax return', 'Pilot', 'Books closed by January, return filed by the deadline, extensions only when needed.', 'On-time returns avoided penalties and kept fundraising diligence clean.'],
+  ['File the Delaware franchise tax', 'Delaware', 'Use the assumed par value method every year.', 'The default method produced five-figure bills; the assumed par value method produced hundreds.'],
+  ['Claim the R&D tax credit', 'Pilot', 'Claim it from the first year with engineering payroll.', 'Credits offset payroll tax for companies that claimed them; unclaimed credits were lost.'],
+  ['Track runway and burn weekly', 'QuickBooks', 'One number the founder sees every Monday.', 'Founders who saw runway weekly never ran out by surprise.'],
+  ['Manage accounts payable', 'Mercury', 'Pay on terms, never late, never early.', 'On-terms payment kept vendors and cash both happy.'],
+  ['Prepare the board and investor report', 'Notion', 'Monthly, same format, every number reconciled.', 'Consistent reports built the trust that made the next round easy.'],
+ ]],
+ ['Analytics', [
+  ['Set up product analytics', 'PostHog', 'Event tracking on the five actions that matter, from day one.', 'Five well-chosen events answered more questions than hundreds of auto-captured ones.'],
+  ['Define activation, retention, and revenue metrics', 'PostHog', 'One definition each, written down, never changed silently.', 'Stable definitions made trends real; shifting ones made them noise.'],
+  ['Build the weekly dashboard', 'PostHog', 'One screen, seven numbers.', 'One-screen dashboards were read; deep dashboards were not.'],
+  ['Run the cohort retention analysis', 'PostHog', 'Monthly cohorts, reviewed monthly.', 'Cohort curves predicted the business a year out.'],
+  ['Attribute revenue to channels', 'HubSpot', 'First touch and last touch, both, honestly.', 'Honest attribution killed the channels that only looked good.'],
+  ['Run the churn analysis', 'PostHog', 'Every churned customer gets a reason recorded.', 'Recorded reasons found the fixable causes.'],
+  ['Report unit economics', 'QuickBooks', 'Payback, gross margin, and net retention, monthly.', 'Companies that knew their unit economics raised on their terms.'],
+  ['Write back every outcome to the ledger', 'Rebel-1', 'Every decision and what followed, recorded for the world model.', 'The companies whose outcomes were recorded got better recommendations the next time.'],
+ ]],
+];
 
-// ---------- the ledger specimen: one record, from the same engine ----------
-function mountSpecimen(){
-  const el=document.getElementById('specimen'); if(!el) return;
-  const life=Life(mulberry(5)); const snaps=[];
-  for (let i=0;i<240;i++){ const m=life.next(); const c=life.co; snaps.push({ week:c.week, customers:c.customers, mrr:c.mrr, stage:c.stage, kind:m.kind, text:m.text }); if (c.week>200) break; }
-  const i=snaps.findIndex(s=>s.kind==='d' && s.week>=20); if(i<1) return;
-  const dec=snaps[i], st=snaps[i-1]; const at=w=>snaps.find(s=>s.week>=w)||snaps[snaps.length-1];
-  const s6=at(dec.week+26), s18=at(dec.week+78); const f$=life.fmt$, fN=life.fmtN;
-  const stage=['early','growing','scaling'][st.stage]||'early';
-  const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  el.innerHTML='<div class="eyebrow"><span class="k">Specimen · one ledger record</span><span class="k">generated by the engine that draws the path</span></div>'
-    +'<div class="row"><span class="k">Company · t</span><span><b>co-0005</b> · week '+st.week+' · stage '+stage+'</span></div>'
-    +'<div class="row"><span class="k">State at t</span><span>'+fN(st.customers)+' customers · '+f$(st.mrr)+' MRR</span></div>'
-    +'<div class="row"><span class="k">Decision</span><span class="q">“'+esc(dec.text)+'”</span></div>'
-    +'<div class="row"><span class="k">Measured · +6 mo</span><span>week '+s6.week+' · <b>'+fN(s6.customers)+' customers · '+f$(s6.mrr)+' MRR</b></span></div>'
-    +'<div class="row"><span class="k">Measured · +18 mo</span><span>week '+s18.week+' · <b>'+fN(s18.customers)+' customers · '+f$(s18.mrr)+' MRR</b></span></div>';
+function mountJobs(){
+  const root=document.getElementById('manifest'); if(!root) return;
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // placeholder count, stable per line, until the ledger supplies the real number
+  const count=s=>{ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return 40+((h>>>0)%860); };
+  let total=0, you=0, i=0; const jobs=[];
+  root.innerHTML=MANIFEST.map(([fn,tasks])=>{
+    const hasYou=tasks.some(t=>t[4]);
+    const rows=tasks.map(([t,via,d,o,isYou])=>{ total++; if(isYou) you++; const idx=i++; return `<div class="job${isYou?' you':''}" style="--i:${idx}" data-i="${idx}"><div class="in"><button class="line" type="button" aria-expanded="false"><span class="t">${esc(t)}${isYou?'<span class="yb">you</span>':''}</span><span class="via">${esc(via)}</span><span class="tag">${count(t)} comparable decisions</span></button><div class="detail"><span class="k">What was chosen</span><p>${esc(d)}</p><span class="k">What those companies went on to do</span><p>${esc(o)}</p></div></div></div>`; }).join('');
+    const ny=tasks.filter(t=>t[4]).length; return `<div class="fn${hasYou?' has-you':''}"><div class="fnh">${esc(fn)}<b class="n-all">${tasks.length} jobs</b><b class="n-you">${ny} of ${tasks.length} yours</b></div><div class="jobs">${rows}</div></div>`;
+  }).join('');
+  document.getElementById('jobs-total').textContent=String(total);
+  document.getElementById('jobs-you').textContent=String(you);
+  root.querySelectorAll('.job').forEach(j=>jobs.push(j));
+  root.addEventListener('click',e=>{ const b=e.target.closest('.line'); if(!b) return; const j=b.closest('.job'); const open=!j.classList.contains('open'); root.querySelectorAll('.job.open').forEach(x=>{ x.classList.remove('open'); x.querySelector('.line').setAttribute('aria-expanded','false'); }); j.classList.toggle('open',open); b.setAttribute('aria-expanded',String(open)); });
+  const btn=document.getElementById('jobs-toggle'); let only=false;
+  btn.addEventListener('click',()=>{ only=!only; root.classList.toggle('only-you',only); btn.classList.toggle('on',only); btn.setAttribute('aria-pressed',String(only)); btn.textContent=only?'Show the whole company':'Show only what needs you';
+    root.querySelectorAll('.fn').forEach(f=>{ if(!f.classList.contains('has-you')){ if(only) setTimeout(()=>f.classList.add('fold'), 500); else f.classList.remove('fold'); } }); });
+  // lines tick over quietly, in the receipt style already on the page
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches; if(reduce) return;
+  let vis=false; new IntersectionObserver(([e])=>{ vis=e.isIntersecting; },{threshold:0}).observe(root);
+  const done=[];
+  setInterval(()=>{ if(!vis) return; const pool=jobs.filter(j=>!j.classList.contains('done')&&!j.classList.contains('you')&&(!only)); if(!pool.length) return; const j=pool[Math.floor(Math.random()*pool.length)]; j.classList.add('done'); done.push(j); if(done.length>14){ const old=done.shift(); old.classList.remove('done'); } }, 2200);
 }
 
 // ---------- the loop: what runs for each company, around the clock ----------
