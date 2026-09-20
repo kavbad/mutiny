@@ -280,51 +280,65 @@
 @media (max-width:820px){.dgrid{grid-template-columns:1fr}.opts{grid-template-columns:1fr}.opt{min-height:0}.roster{grid-template-columns:repeat(2,1fr)}.artifact .grid{grid-template-columns:1fr}.rows .row{grid-template-columns:90px 1fr auto}}
 
 
-  /* ---------- the whole company: the manifest ---------- */
-  #jobs .head{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; margin-bottom:calc(var(--u)*4); }
-  #jobs .head h2{ margin-bottom:0; max-width:24ch; }
-  #jobs .head .copy{ margin-top:calc(var(--u)*2); }
+  /* ---------- the whole company: a rule made of jobs ---------- */
+  #jobs .grid{ align-items:end; margin-bottom:calc(var(--u)*7); }
+  #jobs h2{ margin-bottom:0; max-width:22ch; }
+  #jobs .aside .copy{ max-width:40ch; }
+  #jobs .aside .toggle{ margin-top:calc(var(--u)*3); }
   .toggle{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:transparent; border:1px solid var(--ink-28); border-radius:999px; padding:12px 18px; cursor:pointer; transition:background .25s, color .25s, border-color .25s; white-space:nowrap; }
   .toggle:hover{ border-color:var(--ink); }
   .toggle.on{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
   .toggle:focus-visible{ outline:2px solid var(--orange); outline-offset:3px; }
-  .manifest{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:12.5px; line-height:1.5; border-top:1px solid var(--ink); }
-  .fn{ display:grid; grid-template-columns:200px minmax(0,1fr); column-gap:clamp(16px, 3vw, 48px); border-bottom:1px solid var(--rule); padding:14px 0 12px; }
-  .fn.fold{ display:none; }
-  .fnh{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); padding-top:6px; position:sticky; top:16px; align-self:start; }
-  .fnh b{ display:block; font-weight:400; color:var(--ink-28); margin-top:2px; }
-  .fnh .n-you, .only-you .fnh .n-all{ display:none; }
-  .only-you .fnh .n-you{ display:block; }
-  .jobs{ min-width:0; }
-  .job{ display:grid; grid-template-rows:1fr; opacity:1; transition:grid-template-rows .45s var(--ease), opacity .3s var(--ease); transition-delay:calc(var(--i, 0) * 4ms); }
-  .job > .in{ overflow:hidden; min-height:0; }
-  .only-you .job:not(.you){ grid-template-rows:0fr; opacity:0; pointer-events:none; }
-  .job .line{ display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:16px; align-items:baseline; width:100%; padding:5px 0; background:none; border:0; font:inherit; color:inherit; text-align:left; cursor:pointer; }
-  .job .line:focus-visible{ outline:2px solid var(--orange); outline-offset:2px; }
-  .job .t{ color:var(--ink); transition:color .5s; }
-  .job .via{ color:var(--ink-48); white-space:nowrap; }
-  .job .tag{ color:var(--ink-48); font-size:10.5px; letter-spacing:.04em; white-space:nowrap; }
-  .job .tag::before{ content:"Rebel-1 · "; }
-  .job.done .t{ color:var(--orange-deep); font-style:italic; }
-  .job.done .t::before{ content:"✓ "; font-style:normal; }
-  .job .yb{ display:inline-block; font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--orange-deep); border:1px solid rgba(216,90,48,.5); border-radius:4px; padding:1px 5px; margin-left:8px; vertical-align:1px; }
-  .job .detail{ display:none; padding:6px 0 14px; color:var(--ink-72); max-width:72ch; }
-  .job.open .detail{ display:block; }
-  .job.open .line .t{ color:var(--ink); }
-  .job .detail .k{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); display:block; margin:6px 0 2px; }
-  .job .detail p{ font-family:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif; font-size:15px; line-height:1.5; }
-  .manifest-foot{ margin-top:calc(var(--u)*3); font-size:13px; line-height:20px; color:var(--ink-48); display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+  .rule{ position:relative; height:330px; margin-top:24px; cursor:crosshair; touch-action:pan-y; user-select:none; }
+  .rule .base{ position:absolute; left:0; right:0; top:220px; height:1px; background:var(--ink); }
+  .tick{ position:absolute; top:0; width:0; height:220px; left:var(--x, 0px); }
+  .tick i{ position:absolute; left:0; bottom:0; width:1px; height:56px; background:var(--ink); opacity:.78; transform-origin:bottom; transition:transform .55s var(--ease), height .25s var(--ease), background .35s, opacity .35s, width .25s; transition-delay:0s, 0s, 0s, 0s, 0s; }
+  .tick.you i{ height:132px; width:1.5px; background:var(--orange); opacity:1; }
+  .tick.done i{ background:var(--orange); opacity:1; }
+  .tick.hot i{ height:168px; width:2px; opacity:1; }
+  .tick.you.hot i{ background:var(--orange-deep); }
+  .tick .lab{ position:absolute; left:6px; white-space:nowrap; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--orange-deep); line-height:1; transition:opacity .4s; }
+  .tick .lab::before{ content:""; position:absolute; left:-6px; top:50%; width:5px; height:1px; background:var(--orange); }
+  .tick .lab{ bottom:var(--lb, 144px); }
+  .tick .lab[style*="--lbf: 1"], .tick .lab[style*="--lbf:1"]{ left:auto; right:6px; }
+  .tick .lab[style*="--lbf: 1"]::before, .tick .lab[style*="--lbf:1"]::before{ left:auto; right:-6px; }
+  .tick.fleet .lab{ display:none; }
+  .fns{ position:absolute; left:0; right:0; top:232px; transition:opacity .4s; }
+  .fns .f{ position:absolute; transform:translateX(-50%); white-space:nowrap; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-48); line-height:1; }
+  .fns .f::before{ content:""; position:absolute; left:50%; top:-10px; width:1px; height:6px; background:var(--ink-28); }
+  .fns .f.hot{ color:var(--ink); }
+  /* the fold: the fleet's ticks fall away in a wave, the six spread out to stand alone on the rule */
+  .rule.only .tick.fleet i{ transform:scaleY(0); opacity:0; transition-delay:calc(var(--i) * 3ms), 0s, 0s, calc(var(--i) * 3ms), 0s; }
+  .rule.only .tick.fleet{ pointer-events:none; }
+  .rule .tick.you{ transition:left .9s var(--ease); }
+  .rule.only .tick.you{ left:var(--lx); transition-delay:.45s; }
+  .rule.only .fns{ opacity:0; }
+  .rule.only .tick.you .lab{ bottom:var(--lbo, 144px); }
+  .rule.only .tick.you .lab[style*="--lbof: 1"], .rule.only .tick.you .lab[style*="--lbof:1"]{ left:auto; right:6px; }
+  .rule.only .tick.you .lab[style*="--lbof: 0"], .rule.only .tick.you .lab[style*="--lbof:0"]{ left:6px; right:auto; }
+  .readout{ min-height:112px; margin-top:calc(var(--u)*1); display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
+  .readout .meta{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); min-height:14px; }
+  .readout .meta b{ color:var(--ink); font-weight:500; }
+  .readout .meta .yb{ color:var(--orange-deep); border:1px solid rgba(216,90,48,.5); border-radius:4px; padding:1px 5px; margin-left:6px; }
+  .readout .job{ font-size:clamp(20px, 1.8vw, 26px); line-height:1.15; letter-spacing:-.015em; font-weight:500; }
+  .readout .what{ font-size:15px; line-height:1.5; color:var(--ink-72); max-width:72ch; }
+  .readout .what em{ font-style:normal; color:var(--ink); }
+  .manifest-foot{ margin-top:calc(var(--u)*4); padding-top:calc(var(--u)*2); border-top:1px solid var(--rule); font-size:13px; line-height:20px; color:var(--ink-48); display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; }
   .manifest-foot a{ color:var(--ink); border-bottom:1px solid var(--ink-28); }
   .manifest-foot a:hover{ border-bottom-color:var(--ink); }
-  @media (max-width:820px){
-    .fn{ grid-template-columns:1fr; row-gap:6px; }
-    .fnh{ position:static; }
-    .job .line{ grid-template-columns:1fr; gap:2px; padding:8px 0; }
-    .job .via{ white-space:normal; }
-    .job .tag{ white-space:normal; }
-    #jobs .head .toggle{ width:100%; text-align:center; }
+  @media (max-width:960px){ #jobs .grid{ row-gap:calc(var(--u)*3); } }
+  @media (max-width:600px){
+    .rule{ height:260px; }
+    .rule .base{ top:190px; } .tick{ height:190px; }
+    .tick i{ height:44px; } .tick.you i{ height:104px; } .tick.hot i{ height:130px; }
+    .tick .lab{ writing-mode:vertical-rl; transform:rotate(180deg); left:-4px; transform-origin:center; }
+    .tick .lab::before{ display:none; }
+    .tick .lab, .rule.only .tick.you .lab{ bottom:112px !important; left:-4px !important; right:auto !important; }
+    .fns{ display:none; }
+    #jobs .aside .toggle{ width:100%; text-align:center; }
     .manifest-foot{ flex-direction:column; gap:6px; }
   }
+  @media (prefers-reduced-motion:reduce){ .tick i, .tick.you, .fns{ transition:none !important; } }
 
   /* ---------- the loop ---------- */
   .loop svg{ width:100%; height:auto; display:block; overflow:visible; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; }
@@ -490,15 +504,24 @@
   </section>
 
   <section id="jobs">
-    <div class="head">
-      <div>
-        <h2>A company is <span id="jobs-total">0</span> jobs. <span id="jobs-you">0</span> of them are yours.</h2>
-        <p class="copy">Every job a company has to do, in the order a company meets them. Every line is decided with Rebel-1 and done by the fleet, except the ones marked as yours.</p>
+    <div class="grid">
+      <div class="c-1-7"><h2>A company is <span id="jobs-total">0</span> jobs. <span id="jobs-you">0</span> of them are yours.</h2></div>
+      <div class="c-9-12 aside">
+        <p class="copy">Every line on the rule is a job. The fleet does the ink ones, each decided with Rebel-1. The orange ones need you.</p>
+        <button class="toggle" id="jobs-toggle" aria-pressed="false">Show only what needs you</button>
       </div>
-      <button class="toggle" id="jobs-toggle" aria-pressed="false">Show only what needs you</button>
     </div>
-    <div class="manifest" id="manifest" aria-live="polite"></div>
-    <div class="manifest-foot"><span>Every line above is decided with Rebel-1. <a href="/report/">Read the technical report.</a></span><span>Open a line to see the decision behind it.</span></div>
+    <div class="rule" id="rule" aria-label="A rule made of every job a company has to do, grouped by function. Six are the founder's.">
+      <div class="base"></div>
+      <div id="ticks"></div>
+      <div class="fns" id="fns"></div>
+    </div>
+    <div class="readout" id="readout" aria-live="polite">
+      <div class="meta">Run along the rule. Each line is a job.</div>
+      <div class="job">&nbsp;</div>
+      <div class="what"></div>
+    </div>
+    <div class="manifest-foot"><span>Every line on the rule is decided with Rebel-1. <a href="/report/">Read the technical report.</a></span><span>Press a line to hold it.</span></div>
   </section>
 
   <section id="loop">
@@ -1084,28 +1107,70 @@ const MANIFEST = [
 ];
 
 function mountJobs(){
-  const root=document.getElementById('manifest'); if(!root) return;
+  const rule=document.getElementById('rule'); if(!rule) return;
+  const ticksEl=document.getElementById('ticks'), fnsEl=document.getElementById('fns'), readout=document.getElementById('readout');
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   // placeholder count, stable per line, until the ledger supplies the real number
   const count=s=>{ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return 40+((h>>>0)%860); };
-  let total=0, you=0, i=0; const jobs=[];
-  root.innerHTML=MANIFEST.map(([fn,tasks])=>{
-    const hasYou=tasks.some(t=>t[4]);
-    const rows=tasks.map(([t,via,d,o,isYou])=>{ total++; if(isYou) you++; const idx=i++; return `<div class="job${isYou?' you':''}" style="--i:${idx}" data-i="${idx}"><div class="in"><button class="line" type="button" aria-expanded="false"><span class="t">${esc(t)}${isYou?'<span class="yb">you</span>':''}</span><span class="via">${esc(via)}</span><span class="tag">${count(t)} comparable decisions</span></button><div class="detail"><span class="k">What was chosen</span><p>${esc(d)}</p><span class="k">What those companies went on to do</span><p>${esc(o)}</p></div></div></div>`; }).join('');
-    const ny=tasks.filter(t=>t[4]).length; return `<div class="fn${hasYou?' has-you':''}"><div class="fnh">${esc(fn)}<b class="n-all">${tasks.length} jobs</b><b class="n-you">${ny} of ${tasks.length} yours</b></div><div class="jobs">${rows}</div></div>`;
-  }).join('');
-  document.getElementById('jobs-total').textContent=String(total);
-  document.getElementById('jobs-you').textContent=String(you);
-  root.querySelectorAll('.job').forEach(j=>jobs.push(j));
-  root.addEventListener('click',e=>{ const b=e.target.closest('.line'); if(!b) return; const j=b.closest('.job'); const open=!j.classList.contains('open'); root.querySelectorAll('.job.open').forEach(x=>{ x.classList.remove('open'); x.querySelector('.line').setAttribute('aria-expanded','false'); }); j.classList.toggle('open',open); b.setAttribute('aria-expanded',String(open)); });
-  const btn=document.getElementById('jobs-toggle'); let only=false;
-  btn.addEventListener('click',()=>{ only=!only; root.classList.toggle('only-you',only); btn.classList.toggle('on',only); btn.setAttribute('aria-pressed',String(only)); btn.textContent=only?'Show the whole company':'Show only what needs you';
-    root.querySelectorAll('.fn').forEach(f=>{ if(!f.classList.contains('has-you')){ if(only) setTimeout(()=>f.classList.add('fold'), 500); else f.classList.remove('fold'); } }); });
-  // lines tick over quietly, in the receipt style already on the page
+  // flatten
+  const jobs=[]; const groups=[];
+  MANIFEST.forEach(([fn,tasks],g)=>{ const start=jobs.length; tasks.forEach(([t,via,d,o,you])=>jobs.push({t,via,d,o,you:!!you,fn,g,i:jobs.length})); groups.push({fn,start,end:jobs.length-1}); });
+  const yours=jobs.filter(j=>j.you);
+  document.getElementById('jobs-total').textContent=String(jobs.length);
+  document.getElementById('jobs-you').textContent=String(yours.length);
+  // build
+  let labIdx=0;
+  ticksEl.innerHTML=jobs.map(j=>`<div class="tick ${j.you?'you':'fleet'}" style="--i:${j.i}" data-i="${j.i}"><i></i>${j.you?`<span class="lab">${esc(j.t)}</span>`:''}</div>`).join('');
+  fnsEl.innerHTML=groups.map((g,k)=>`<span class="f" data-g="${k}">${esc(g.fn)}</span>`).join('');
+  const tickEls=[...ticksEl.children], fnEls=[...fnsEl.children];
+  // layout: even spacing with a small gap between functions
+  let xs=[];
+  function layout(){
+    const W=rule.clientWidth; const gap=Math.max(6, Math.min(16, W*0.011)); const avail=W-gap*(groups.length-1); const s=avail/jobs.length;
+    xs=[]; let x=s/2, gi=0;
+    jobs.forEach((j,i)=>{ if(i>groups[gi].end){ gi++; x+=gap; } xs.push(x); tickEls[i].style.setProperty('--x', x.toFixed(2)+'px'); x+=s; });
+    // function labels: centered under their group, measured, first free row of three
+    const fends=[-1e9,-1e9,-1e9,-1e9];
+    groups.forEach((g,k)=>{ const cx=(xs[g.start]+xs[g.end])/2; const w=fnEls[k].offsetWidth+10; let x0=cx-w/2; if(x0<0) x0=0; if(x0+w>W) x0=W-w;
+      let r=fends.findIndex(e=>e<x0); if(r<0){ r=fends.indexOf(Math.min(...fends)); x0=Math.max(x0, fends[r]+8); if(x0+w>W) x0=W-w; }
+      fends[r]=Math.max(fends[r],x0+w);
+      fnEls[k].style.left=(x0+w/2).toFixed(2)+'px'; fnEls[k].style.top=(r*18)+'px'; });
+    yours.forEach((j,k)=>{ tickEls[j.i].style.setProperty('--lx', (W*(k+0.5)/yours.length).toFixed(2)+'px'); });
+    // the six labels: measure each, take the first row where it fits, in both layouts; flip to the left near the right edge
+    const rows=[144,174,204,234];
+    const place=(getX, prop)=>{ const ends=rows.map(()=>-1e9);
+      yours.forEach((j,k)=>{ const lab=tickEls[j.i].querySelector('.lab'); const w=lab.offsetWidth+8; let x=getX(j,k); let flip=false; if(x+w>W){ flip=true; }
+        const x0=flip? x-w : x, x1=flip? x : x+w; let r=ends.findIndex(e=>e<x0-6); if(r<0) r=rows.length-1; ends[r]=Math.max(ends[r],x1);
+        lab.style.setProperty(prop, rows[r]+'px'); lab.style.setProperty(prop+'f', flip?'1':'0'); }); };
+    place((j,k)=>xs[j.i], '--lb'); place((j,k)=>W*(k+0.5)/yours.length, '--lbo');
+  }
+  layout(); let rt; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(layout,120); });
+  // readout
+  const meta=readout.querySelector('.meta'), jobEl=readout.querySelector('.job'), what=readout.querySelector('.what');
+  let hot=-1, held=-1;
+  function show(i){
+    if(i===hot) return;
+    if(hot>=0){ tickEls[hot].classList.remove('hot'); fnEls[jobs[hot].g].classList.remove('hot'); }
+    hot=i; if(i<0){ meta.textContent='Run along the rule. Each line is a job.'; jobEl.innerHTML='&nbsp;'; what.textContent=''; return; }
+    const j=jobs[i]; tickEls[i].classList.add('hot'); fnEls[j.g].classList.add('hot');
+    meta.innerHTML=`${esc(j.fn)} · <b>${esc(j.via)}</b> · Rebel-1 · ${count(j.t)} comparable decisions${j.you?'<span class="yb">you</span>':''}`;
+    jobEl.textContent=j.t;
+    what.innerHTML=`<em>${esc(j.d)}</em> ${esc(j.o)}`;
+  }
+  let only=false;
+  function nearest(clientX){ const r=rule.getBoundingClientRect(); const x=clientX-r.left; let best=-1, bd=1e9;
+    if(only){ yours.forEach((j,k)=>{ const lx=parseFloat(tickEls[j.i].style.getPropertyValue('--lx')); const d=Math.abs(lx-x); if(d<bd){ bd=d; best=j.i; } }); return best; }
+    for(let i=0;i<xs.length;i++){ const d=Math.abs(xs[i]-x); if(d<bd){ bd=d; best=i; } } return best; }
+  rule.addEventListener('pointermove',e=>{ if(held>=0) return; show(nearest(e.clientX)); });
+  rule.addEventListener('pointerleave',()=>{ if(held<0) show(-1); });
+  rule.addEventListener('click',e=>{ const i=nearest(e.clientX); if(held===i){ held=-1; show(i); } else { held=i; show(i); } });
+  // the fold
+  const btn=document.getElementById('jobs-toggle');
+  btn.addEventListener('click',()=>{ only=!only; rule.classList.toggle('only',only); btn.classList.toggle('on',only); btn.setAttribute('aria-pressed',String(only)); btn.textContent=only?'Show the whole company':'Show only what needs you'; held=-1; show(-1); });
+  // receipts land, quietly
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches; if(reduce) return;
-  let vis=false; new IntersectionObserver(([e])=>{ vis=e.isIntersecting; },{threshold:0}).observe(root);
-  const done=[];
-  setInterval(()=>{ if(!vis) return; const pool=jobs.filter(j=>!j.classList.contains('done')&&!j.classList.contains('you')&&(!only)); if(!pool.length) return; const j=pool[Math.floor(Math.random()*pool.length)]; j.classList.add('done'); done.push(j); if(done.length>14){ const old=done.shift(); old.classList.remove('done'); } }, 2200);
+  let vis=false; new IntersectionObserver(([e])=>{ vis=e.isIntersecting; },{threshold:0}).observe(rule);
+  setInterval(()=>{ if(!vis||only) return; const pool=tickEls.filter(t=>t.classList.contains('fleet')&&!t.classList.contains('done')); if(!pool.length) return; const t=pool[Math.floor(Math.random()*pool.length)]; t.classList.add('done'); setTimeout(()=>t.classList.remove('done'), 2600); }, 900);
 }
 
 // ---------- the loop: what runs for each company, around the clock ----------
