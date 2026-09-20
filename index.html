@@ -282,7 +282,7 @@
 
   /* ---------- the whole company: one job at a time ---------- */
   .jobs-head{ align-items:start; }
-  #jobs h2{ margin-bottom:0; max-width:14ch; }
+  #jobs h2{ margin-bottom:0; max-width:12ch; font-variant-numeric:tabular-nums; }
   #jobs .jobs-head .copy{ max-width:44ch; padding-top:.5em; }
   .stage{ margin-top:clamp(56px, 8vw, 120px); }
   .st-meta{ display:flex; align-items:baseline; gap:20px; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); font-variant-numeric:tabular-nums; }
@@ -484,10 +484,10 @@
   <section id="jobs">
     <div class="grid jobs-head">
       <div class="c-1-5">
-        <h2>Six times, it stops for you.</h2>
+        <h2><span id="jobs-total">0</span> jobs. <span id="jobs-you">0</span> are yours.</h2>
       </div>
       <div class="c-7-12">
-        <p class="copy">A company is <span id="jobs-total">0</span> jobs. The fleet does <span id="jobs-fleet">0</span> of them, decided with Rebel-1, in the order a company meets them. When one needs your hand, it stops.</p>
+        <p class="copy">This is every job it takes to run a company, in the order they come up. AI agents do <span id="jobs-fleet">0</span> of them. Six need a decision from you, so it stops and asks.</p>
       </div>
     </div>
     <div class="stage" id="stage" aria-live="polite">
@@ -496,22 +496,22 @@
       <div class="st-via" id="st-via">&nbsp;</div>
       <div class="st-bar"><b id="st-fill"></b><span id="st-marks"></span></div>
       <p class="st-why" id="st-why">&nbsp;</p>
-      <div class="st-hand"><span class="say">Yours.</span><button class="act" id="jobs-act" type="button">Decide →</button></div>
+      <div class="st-hand"><span class="say">Your call</span><button class="act" id="jobs-act" type="button">Decide →</button></div>
     </div>
-    <p class="st-foot">Every job is decided with Rebel-1. <a href="/report/">Read the technical report.</a></p>
+    <p class="st-foot">Rebel-1 decides how each job gets done. <a href="/report/">Read the technical report.</a></p>
   </section>
 
   <section id="loop">
     <div class="grid">
       <div class="c-1-5">
-        <h2>The loop.</h2>
-        <p class="copy">What runs for each company, around the clock. Read the company's state. Generate candidate moves. Play each one forward against Rebel-1. Act through the fleet. Measure what happened. Write it back to the ledger.</p>
-        <p class="copy">The last arc is the one that matters. Every outcome returns to Rebel-1, so the model guiding your company tomorrow has seen more than it had today.</p>
-        <p class="copy">This runs for your company every hour, whether you're watching or asleep.</p>
+        <h2>How it runs.</h2>
+        <p class="copy">Every hour, for every company: look at where things stand, list the possible next moves, test each one with Rebel-1, do the best one, check what happened, and record it.</p>
+        <p class="copy">The record goes back into Rebel-1. So it knows more about your company each week than it did the week before.</p>
+        <p class="copy">It runs while you sleep.</p>
       </div>
       <div class="c-7-12 loop">
-        <svg id="loop-svg" viewBox="0 0 700 420" aria-label="The loop: read state, generate moves, play forward against Rebel-1, act through the fleet, measure, write back to the ledger, which returns to Rebel-1."></svg>
-        <div class="count"><span>Cycles since you arrived · <b id="cycles">0</b></span><span>One pulse, one cycle</span></div>
+        <svg id="loop-svg" viewBox="0 0 700 420" aria-label="How it runs: look at where things stand, list the next moves, test each with Rebel-1, do the best one, check what happened, record the result, which goes back into Rebel-1."></svg>
+        <div class="count"><span>Loops since you opened this page · <b id="cycles">0</b></span><span>About one a minute, slowed down so you can see it</span></div>
       </div>
     </div>
   </section>
@@ -522,14 +522,14 @@
         <canvas id="days-terrain" aria-hidden="true"></canvas>
         <canvas id="days-path" aria-hidden="true"></canvas>
         <div class="hud">
-          <div class="top"><span class="day" id="day">Day 0</span><span>Day 0 to day 1,000</span></div>
+          <div class="top"><span class="day" id="day">Day 0</span><span>The first 1,000 days</span></div>
           <div class="life" id="life"></div>
           <div class="bottom">
             <div class="counters">
-              <div><div class="n" id="c-you">0</div><div class="l">moves you made</div></div>
-              <div><div class="n" id="c-fleet">0</div><div class="l">moves the fleet made</div></div>
+              <div><div class="n" id="c-you">0</div><div class="l">decisions you made</div></div>
+              <div><div class="n" id="c-fleet">0</div><div class="l">jobs the agents did</div></div>
             </div>
-            <div class="src">Counted from the same engine that draws the path. From 0, or wherever you are, to infinity.</div>
+            <div class="src">Counted by the same simulation that draws the path.</div>
           </div>
         </div>
       </div>
@@ -1091,7 +1091,7 @@ function mountJobs(){
   const jobs=[]; MANIFEST.forEach(([fn,tasks])=>{ tasks.forEach(([t,via,d,o,you])=>jobs.push({t,via,d,o,you:!!you,fn,i:jobs.length})); });
   const yours=jobs.filter(j=>j.you);
   document.getElementById('jobs-total').textContent=String(jobs.length);
-  document.getElementById('jobs-fleet').textContent=String(jobs.length-yours.length);
+  document.getElementById('jobs-fleet').textContent=String(jobs.length-yours.length); document.getElementById('jobs-you').textContent=String(yours.length);
   const $=id=>document.getElementById(id);
   const countEl=$('st-count'), fnEl=$('st-fn'), jobEl=$('st-job'), viaEl=$('st-via'), whyEl=$('st-why'), fill=$('st-fill'), marks=$('st-marks'), act=$('jobs-act'), six=$('jobs-toggle');
   const VERB={Sign:'Sign it',Pass:'Verify',Set:'Set it',Choose:'Choose',Approve:'Approve'};
@@ -1114,7 +1114,7 @@ function mountJobs(){
   function step(){
     if(!vis||waiting) return;
     const s=seq();
-    if(pos>=s.length){ countEl.textContent=`${s.length} / ${s.length}`; fnEl.textContent='Every job, done'; jobEl.textContent=`${yours.length} of them were yours. Then it starts again.`; jobEl.classList.remove('flip'); void jobEl.offsetWidth; jobEl.classList.add('flip'); viaEl.innerHTML='A company never finishes.'; later(()=>{ markEls.forEach(m=>m.classList.remove('done','wait')); pos=0; progress(0); step(); }, 3200); return; }
+    if(pos>=s.length){ countEl.textContent=`${s.length} / ${s.length}`; fnEl.textContent='Done'; jobEl.textContent=`${s.length} jobs. ${yours.length} needed you.`; jobEl.classList.remove('flip'); void jobEl.offsetWidth; jobEl.classList.add('flip'); viaEl.innerHTML='It starts over.'; later(()=>{ markEls.forEach(m=>m.classList.remove('done','wait')); pos=0; progress(0); step(); }, 3200); return; }
     const i=s[pos]; render(i); const j=jobs[i];
     if(j.you){ waiting=true; stage.classList.add('yours'); const m=markEls.find(x=>x.dataset.i==String(i)); if(m) m.classList.add('wait'); act.textContent=verb(j); return; }
     pos++; later(step, only? 1200 : 300);
@@ -1135,12 +1135,12 @@ function mountLoop(){
   const d='M120 50 H540 A40 40 0 0 1 580 90 V330 A40 40 0 0 1 540 370 H100 A40 40 0 0 1 60 330 V90 A40 40 0 0 1 100 50 Z';
   const ring=mk('path',{class:'ring',d}); const L=ring.getTotalLength();
   const NODES=[
-    { f:0.000, t:'Read',         s:"the company's state", side:'top' },
-    { f:0.127, t:'Generate',     s:'candidate moves',     side:'top' },
-    { f:0.255, t:'Play forward', s:'against Rebel-1',     side:'top' },
-    { f:0.384, t:'Act',          s:'through the fleet',   side:'rightout' },
-    { f:0.640, t:'Measure',      s:'what happened',       side:'bottom' },
-    { f:0.768, t:'Write back',   s:'to the ledger',       side:'bottom' },
+    { f:0.000, t:'Look',   s:'at where things stand', side:'top' },
+    { f:0.127, t:'List',   s:'the next moves',        side:'top' },
+    { f:0.255, t:'Test',   s:'each one with Rebel-1', side:'top' },
+    { f:0.384, t:'Do',     s:'the best one',          side:'rightout' },
+    { f:0.640, t:'Check',  s:'what happened',         side:'bottom' },
+    { f:0.768, t:'Record', s:'the result',            side:'bottom' },
   ];
   // the return: from the ledger back around to the start, and into Rebel-1
   const back=mk('path',{class:'ring back',d}); back.setAttribute('stroke-dasharray', (L*(1-0.768))+' '+L); back.setAttribute('stroke-dashoffset', -(L*0.768));
@@ -1148,8 +1148,8 @@ function mountLoop(){
   const pf=ring.getPointAtLength(0.255*L), wb=ring.getPointAtLength(0.768*L);
   mk('line',{class:'spoke',x1:pf.x,y1:pf.y,x2:C.x,y2:C.y});
   mk('line',{class:'spoke back',x1:wb.x,y1:wb.y,x2:C.x,y2:C.y});
-  mk('text',{class:'arc-label',x:48,y:210,'text-anchor':'middle',transform:'rotate(-90 48 210)'}).textContent='every outcome returns to Rebel-1';
-  const core=mk('g',{class:'core'}); mk('circle',{cx:C.x,cy:C.y,r:27},core); mk('text',{x:C.x,y:C.y+4},core).textContent='Rebel-1'; mk('text',{class:'sub',x:C.x,y:C.y+48,'text-anchor':'middle'},core).textContent='the world model';
+  mk('text',{class:'arc-label',x:48,y:210,'text-anchor':'middle',transform:'rotate(-90 48 210)'}).textContent='results go back into Rebel-1';
+  const core=mk('g',{class:'core'}); mk('circle',{cx:C.x,cy:C.y,r:27},core); mk('text',{x:C.x,y:C.y+4},core).textContent='Rebel-1'; mk('text',{class:'sub',x:C.x,y:C.y+48,'text-anchor':'middle'},core).textContent='the model that predicts outcomes';
   const nodes=NODES.map(n=>{ const p=ring.getPointAtLength(n.f*L); const g=mk('g',{class:'node'}); mk('circle',{cx:p.x,cy:p.y,r:6},g);
     const lab=mk('text',{},g), sub=mk('text',{class:'sub'},g); lab.textContent=n.t; sub.textContent=n.s;
     if(n.side==='top'){ lab.setAttribute('x',p.x); lab.setAttribute('y',p.y-26); sub.setAttribute('x',p.x); sub.setAttribute('y',p.y-12); lab.setAttribute('text-anchor','middle'); sub.setAttribute('text-anchor','middle'); }
@@ -1158,7 +1158,7 @@ function mountLoop(){
     return { ...n, g, len:n.f*L }; });
   const UNITS=['code','outbound','books','contracts','support'];
   const units=UNITS.map((u,i)=>{ const g=mk('g',{class:'unit'}); const x=452,y=92+i*28; mk('rect',{x,y,width:100,height:20,rx:4},g); const t=mk('text',{x:x+9,y:y+14},g); t.textContent=u; return g; });
-  const fleetLab=mk('text',{x:552,y:246,class:'arc-label','text-anchor':'end'}); fleetLab.textContent='the fleet, around your gaps'; fleetLab.setAttribute('fill','var(--ink-48)');
+  const fleetLab=mk('text',{x:552,y:246,class:'arc-label','text-anchor':'end'}); fleetLab.textContent='the agents that do the work'; fleetLab.setAttribute('fill','var(--ink-48)');
   const halo=mk('circle',{class:'halo',r:11}), pulse=mk('circle',{class:'pulse',r:5});
   const cyc=document.getElementById('cycles'); const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const PERIOD=9000; const t0=performance.now(); let vis=false;
@@ -1182,11 +1182,11 @@ function mountDays(){
   api.setProgress(1); const full=api.stats(); api.setProgress(0);
   const firstDay = full.firstCustomerWeek ? full.firstCustomerWeek*7 : 49;
   const LINES=[
-    { day:0,   t:"The idea that's been in your notes for four years." },
-    { day:firstDay, t:'First customer, signed while you were at your day job.' },
-    { day:212, t:'You resign.' },
-    { day:600, t:'A second company on the same board.' },
-    { day:960, t:'The ground you climbed is one corner of the map.' },
+    { day:0,   t:'You have an idea.' },
+    { day:firstDay, t:'First paying customer. You still have your day job.' },
+    { day:212, t:'You quit your job.' },
+    { day:600, t:'You start a second company.' },
+    { day:960, t:'There is a lot more map.' },
   ];
   life.innerHTML=LINES.map(l=>'<p data-day="'+l.day+'"><span class="d">Day '+l.day.toLocaleString()+'</span>'+l.t+'</p>').join('');
   const ps=[...life.querySelectorAll('p')];
