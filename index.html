@@ -280,69 +280,101 @@
 @media (max-width:820px){.dgrid{grid-template-columns:1fr}.opts{grid-template-columns:1fr}.opt{min-height:0}.roster{grid-template-columns:repeat(2,1fr)}.artifact .grid{grid-template-columns:1fr}.rows .row{grid-template-columns:90px 1fr auto}}
 
 
-  /* ---------- the whole company: a rule made of jobs ---------- */
-  #jobs .grid{ align-items:end; margin-bottom:calc(var(--u)*7); }
-  #jobs h2{ margin-bottom:0; max-width:22ch; }
+  /* ---------- the whole company: a line with six stations ---------- */
+  .jobs-head{ align-items:end; margin-bottom:calc(var(--u)*5); }
+  .eyebrow-m{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); margin-bottom:calc(var(--u)*2); }
+  #jobs h2{ margin-bottom:0; max-width:14ch; }
   #jobs .aside .copy{ max-width:40ch; }
   #jobs .aside .toggle{ margin-top:calc(var(--u)*3); }
   .toggle{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:transparent; border:1px solid var(--ink-28); border-radius:999px; padding:12px 18px; cursor:pointer; transition:background .25s, color .25s, border-color .25s; white-space:nowrap; }
   .toggle:hover{ border-color:var(--ink); }
   .toggle.on{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
   .toggle:focus-visible{ outline:2px solid var(--orange); outline-offset:3px; }
-  .rule{ position:relative; height:330px; margin-top:24px; cursor:crosshair; touch-action:pan-y; user-select:none; }
-  .rule .base{ position:absolute; left:0; right:0; top:220px; height:1px; background:var(--ink); }
+  .line-status{ display:flex; justify-content:space-between; align-items:baseline; gap:24px; border-top:1px solid var(--ink); padding-top:14px; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); font-variant-numeric:tabular-nums; }
+  .line-status .now{ display:flex; gap:14px; align-items:baseline; }
+  .line-status .now .k{ color:var(--ink-28); }
+  .line-status .now #jobs-now{ color:var(--ink); font-family:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif; font-size:15px; letter-spacing:-.005em; text-transform:none; font-weight:500; }
+  .line-status .tally{ display:flex; gap:22px; }
+  .line-status .tally b{ color:var(--ink); font-weight:500; }
+  .line-status .tally span:nth-child(2) b{ color:var(--orange-deep); }
+  .rule{ position:relative; height:330px; margin-top:64px; cursor:crosshair; touch-action:pan-y; user-select:none; }
+  .rule .base{ position:absolute; left:0; right:0; top:220px; height:1px; background:var(--ink-28); }
+  .rule .fill{ position:absolute; left:0; top:219px; height:3px; width:0; background:var(--orange); border-radius:2px; transition:width .22s linear; }
+  .rule .head{ position:absolute; top:220px; left:0; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 2px var(--paper); transition:left .22s linear; z-index:2; }
+  .rule .head::before{ content:""; position:absolute; inset:-9px; border-radius:50%; border:1px solid var(--orange); opacity:.45; }
+  .rule.waiting .head::before{ animation:halo2 1.8s ease-out infinite; }
+  @keyframes halo2{ 0%{ transform:scale(.7); opacity:.7 } 100%{ transform:scale(2.2); opacity:0 } }
   .tick{ position:absolute; top:0; width:0; height:220px; left:var(--x, 0px); }
-  .tick i{ position:absolute; left:0; bottom:0; width:1px; height:56px; background:var(--ink); opacity:.78; transform-origin:bottom; transition:transform .55s var(--ease), height .25s var(--ease), background .35s, opacity .35s, width .25s; transition-delay:0s, 0s, 0s, 0s, 0s; }
-  .tick.you i{ height:132px; width:1.5px; background:var(--orange); opacity:1; }
-  .tick.done i{ background:var(--orange); opacity:1; }
-  .tick.hot i{ height:168px; width:2px; opacity:1; }
-  .tick.you.hot i{ background:var(--orange-deep); }
-  .tick.wait i{ animation:tickwait 1.4s ease-in-out infinite; }
-  @keyframes tickwait{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
-  .readout .act{ justify-self:start; margin-top:6px; display:inline-flex; align-items:center; gap:10px; background:var(--orange); color:var(--paper); border:0; border-radius:4px; cursor:pointer; padding:0 18px; height:44px; font:inherit; font-size:15px; font-weight:500; letter-spacing:-.01em; box-shadow:0 1px 0 rgba(20,18,16,.08), 0 10px 30px -14px rgba(216,90,48,.55); transition:background .25s var(--ease), transform .25s var(--ease); }
-  .readout .act:hover{ background:var(--orange-deep); } .readout .act:active{ transform:translateY(1px); }
-  .readout .act:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
-  .tick .lab{ position:absolute; left:6px; white-space:nowrap; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--orange-deep); line-height:1; transition:opacity .4s; }
-  .tick .lab::before{ content:""; position:absolute; left:-6px; top:50%; width:5px; height:1px; background:var(--orange); }
-  .tick .lab{ bottom:var(--lb, 144px); }
-  .tick .lab[style*="--lbf: 1"], .tick .lab[style*="--lbf:1"]{ left:auto; right:6px; }
-  .tick .lab[style*="--lbf: 1"]::before, .tick .lab[style*="--lbf:1"]::before{ left:auto; right:-6px; }
+  .tick i{ position:absolute; left:0; bottom:0; width:1px; height:44px; background:var(--ink); opacity:.55; transform-origin:bottom; transition:transform .55s var(--ease), height .3s var(--ease), background .35s, opacity .35s, width .25s; }
+  .tick.done i{ background:var(--orange); opacity:.9; height:36px; }
+  .tick.hot i{ height:64px; width:2px; opacity:1; background:var(--ink); }
+  .tick.fleet.hot.done i{ background:var(--orange-deep); }
+  /* stations */
+  .tick.you i{ height:120px; width:1.5px; background:var(--ink); opacity:1; }
+  .tick.you::after{ content:""; position:absolute; left:-4px; top:calc(220px - 120px - 4px); width:8px; height:8px; border-radius:50%; background:var(--paper); border:1.5px solid var(--ink); transition:background .3s, border-color .3s, transform .3s var(--ease); }
+  .tick.you.done i, .tick.you.hot i{ background:var(--orange); }
+  .tick.you.done::after{ background:var(--orange); border-color:var(--orange); }
+  .tick.wait i{ background:var(--orange); }
+  .tick.wait::after{ background:var(--orange); border-color:var(--orange); transform:scale(1.4); animation:tickwait 1.4s ease-in-out infinite; }
+  @keyframes tickwait{ 0%,100%{ box-shadow:0 0 0 0 rgba(216,90,48,.45) } 50%{ box-shadow:0 0 0 8px rgba(216,90,48,0) } }
+  .rule.waiting .tick.fleet i{ opacity:.22; }
+  .rule.waiting .tick.fleet.done i{ opacity:.45; }
+  .tick .lab{ position:absolute; left:8px; bottom:var(--lb, 144px); white-space:nowrap; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-72); line-height:1; transition:color .3s, opacity .4s; }
+  .tick .lab::before{ content:""; position:absolute; left:-8px; top:50%; width:6px; height:1px; background:var(--ink-28); }
+  .tick .lab[style*="--lbf: 1"], .tick .lab[style*="--lbf:1"]{ left:auto; right:8px; }
+  .tick .lab[style*="--lbf: 1"]::before, .tick .lab[style*="--lbf:1"]::before{ left:auto; right:-8px; }
+  .tick.wait .lab{ color:var(--orange-deep); }
+  .tick.done .lab{ color:var(--orange-deep); }
+  .tick .lab::after{ content:" ✓"; opacity:0; transition:opacity .3s; }
+  .tick.done .lab::after{ opacity:1; }
   .tick.fleet .lab{ display:none; }
-  .fns{ position:absolute; left:0; right:0; top:232px; transition:opacity .4s; }
-  .fns .f{ position:absolute; transform:translateX(-50%); white-space:nowrap; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-48); line-height:1; }
-  .fns .f::before{ content:""; position:absolute; left:50%; top:-10px; width:1px; height:6px; background:var(--ink-28); }
+  .fns{ position:absolute; left:0; right:0; top:236px; transition:opacity .4s; }
+  .fns .f{ position:absolute; transform:translateX(-50%); white-space:nowrap; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-28); line-height:1; transition:color .3s; }
+  .fns .f::before{ content:""; position:absolute; left:50%; top:-12px; width:1px; height:7px; background:var(--ink-28); }
   .fns .f.hot{ color:var(--ink); }
-  /* the fold: the fleet's ticks fall away in a wave, the six spread out to stand alone on the rule */
+  .fns .f.past{ color:var(--ink-48); }
+  /* the fold: the ties fall away in a wave, the six stations spread out along an empty line */
   .rule.only .tick.fleet i{ transform:scaleY(0); opacity:0; transition-delay:calc(var(--i) * 3ms), 0s, 0s, calc(var(--i) * 3ms), 0s; }
   .rule.only .tick.fleet{ pointer-events:none; }
   .rule .tick.you{ transition:left .9s var(--ease); }
   .rule.only .tick.you{ left:var(--lx); transition-delay:.45s; }
   .rule.only .fns{ opacity:0; }
   .rule.only .tick.you .lab{ bottom:var(--lbo, 144px); }
-  .rule.only .tick.you .lab[style*="--lbof: 1"], .rule.only .tick.you .lab[style*="--lbof:1"]{ left:auto; right:6px; }
-  .rule.only .tick.you .lab[style*="--lbof: 0"], .rule.only .tick.you .lab[style*="--lbof:0"]{ left:6px; right:auto; }
-  .readout{ min-height:168px; margin-top:calc(var(--u)*1); display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
+  .rule.only .tick.you .lab[style*="--lbof: 1"], .rule.only .tick.you .lab[style*="--lbof:1"]{ left:auto; right:8px; }
+  .rule.only .tick.you .lab[style*="--lbof: 0"], .rule.only .tick.you .lab[style*="--lbof:0"]{ left:8px; right:auto; }
+  .rule.only .head, .rule.only .fill{ transition-duration:.9s; transition-timing-function:var(--ease); }
+  /* readout */
+  .readout{ min-height:190px; margin-top:calc(var(--u)*1); padding-left:0; border-left:2px solid transparent; display:grid; grid-template-columns:minmax(0,1fr); align-content:start; gap:6px; transition:border-color .35s, padding-left .35s var(--ease); }
+  .readout.yours{ border-left-color:var(--orange); padding-left:20px; }
   .readout .meta{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); min-height:14px; }
   .readout .meta b{ color:var(--ink); font-weight:500; }
   .readout .meta .yb{ color:var(--orange-deep); border:1px solid rgba(216,90,48,.5); border-radius:4px; padding:1px 5px; margin-left:6px; }
-  .readout .job{ font-size:clamp(20px, 1.8vw, 26px); line-height:1.15; letter-spacing:-.015em; font-weight:500; }
-  .readout .what{ font-size:15px; line-height:1.5; color:var(--ink-72); max-width:72ch; }
+  .readout .job{ font-size:clamp(22px, 2.2vw, 32px); line-height:1.1; letter-spacing:-.02em; font-weight:500; }
+  .readout .what{ font-size:15px; line-height:1.5; color:var(--ink-72); max-width:70ch; }
   .readout .what em{ font-style:normal; color:var(--ink); }
+  .readout .hand[hidden]{ display:none; }
+  .readout .hand{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; margin-top:10px; }
+  .readout .hand .say{ font-size:clamp(17px, 1.3vw, 20px); font-weight:500; letter-spacing:-.01em; color:var(--orange-deep); }
+  .readout .act{ display:inline-flex; align-items:center; gap:10px; background:var(--orange); color:var(--paper); border:0; border-radius:4px; cursor:pointer; padding:0 20px; height:48px; font:inherit; font-size:16px; font-weight:500; letter-spacing:-.01em; box-shadow:0 1px 0 rgba(20,18,16,.08), 0 10px 30px -14px rgba(216,90,48,.55); transition:background .25s var(--ease), transform .25s var(--ease); }
+  .readout .act:hover{ background:var(--orange-deep); } .readout .act:active{ transform:translateY(1px); }
+  .readout .act:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+  .readout.done-all .job{ color:var(--orange-deep); }
   .manifest-foot{ margin-top:calc(var(--u)*4); padding-top:calc(var(--u)*2); border-top:1px solid var(--rule); font-size:13px; line-height:20px; color:var(--ink-48); display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; }
   .manifest-foot a{ color:var(--ink); border-bottom:1px solid var(--ink-28); }
   .manifest-foot a:hover{ border-bottom-color:var(--ink); }
-  @media (max-width:960px){ #jobs .grid{ row-gap:calc(var(--u)*3); } }
+  @media (max-width:960px){ .jobs-head{ row-gap:calc(var(--u)*3); } }
   @media (max-width:600px){
-    .rule{ height:260px; }
-    .rule .base{ top:190px; } .tick{ height:190px; }
-    .tick i{ height:44px; } .tick.you i{ height:104px; } .tick.hot i{ height:130px; }
-    .tick .lab{ display:none; }
     .rule{ height:250px; }
+    .rule .base{ top:190px; } .rule .fill{ top:189px; } .rule .head{ top:190px; } .tick{ height:190px; }
+    .tick i{ height:36px; } .tick.you i{ height:96px; } .tick.you::after{ top:calc(190px - 96px - 4px); } .tick.hot i{ height:56px; }
+    .tick .lab{ display:none; }
     .fns{ display:none; }
+    .line-status{ flex-direction:column; gap:8px; }
     #jobs .aside .toggle{ width:100%; text-align:center; }
     .manifest-foot{ flex-direction:column; gap:6px; }
+    .readout.yours{ padding-left:14px; }
   }
-  @media (prefers-reduced-motion:reduce){ .tick i, .tick.you, .fns{ transition:none !important; } }
+  @media (prefers-reduced-motion:reduce){ .tick i, .tick.you, .fns, .rule .head, .rule .fill{ transition:none !important; } .rule.waiting .head::before, .tick.wait::after{ animation:none !important; } }
 
   /* ---------- the loop ---------- */
   .loop svg{ width:100%; height:auto; display:block; overflow:visible; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; }
@@ -508,25 +540,34 @@
   </section>
 
   <section id="jobs">
-    <div class="grid">
-      <div class="c-1-7"><h2>A company is <span id="jobs-total">0</span> jobs. <span id="jobs-you">0</span> of them are yours.</h2></div>
+    <div class="grid jobs-head">
+      <div class="c-1-7">
+        <p class="eyebrow-m">The whole company · <span id="jobs-total">0</span> jobs</p>
+        <h2>Six times, it stops for you.</h2>
+      </div>
       <div class="c-9-12 aside">
-        <p class="copy">Every line on the rule is a job. The fleet does the ink ones, each decided with Rebel-1. The orange ones need you.</p>
-        <button class="toggle" id="jobs-toggle" aria-pressed="false">Show only what needs you</button>
+        <p class="copy">A company is <span id="jobs-total2">0</span> jobs. The fleet does <span id="jobs-fleet">0</span> of them, decided with Rebel-1, in the order a company meets them. When one needs your hand, it stops, and waits.</p>
+        <button class="toggle" id="jobs-toggle" aria-pressed="false">Just the six</button>
       </div>
     </div>
-    <div class="rule" id="rule" aria-label="A rule made of every job a company has to do, grouped by function. Six are the founder's.">
+    <div class="line-status">
+      <div class="now"><span class="k">Now</span><span id="jobs-now">Incorporation and entity</span></div>
+      <div class="tally"><span><b id="t-fleet">0</b> fleet</span><span><b id="t-you">0</b> you</span><span><b id="t-left">0</b> to go</span></div>
+    </div>
+    <div class="rule" id="rule" aria-label="A line made of every job a company has to do. The fleet does the ties. The six stations are the founder's.">
       <div class="base"></div>
+      <div class="fill" id="fill"></div>
       <div id="ticks"></div>
       <div class="fns" id="fns"></div>
+      <div class="head" id="head"></div>
     </div>
     <div class="readout" id="readout" aria-live="polite">
       <div class="meta">It runs on its own. It stops when it needs you.</div>
       <div class="job">&nbsp;</div>
       <div class="what"></div>
-      <button class="act" id="jobs-act" type="button" hidden>Decide →</button>
+      <div class="hand" id="jobs-hand" hidden><span class="say">This one is yours.</span><button class="act" id="jobs-act" type="button">Decide →</button></div>
     </div>
-    <div class="manifest-foot"><span>Every line on the rule is decided with Rebel-1. <a href="/report/">Read the technical report.</a></span><span>It runs on its own. It stops when it needs you.</span></div>
+    <div class="manifest-foot"><span>Every job on the line is decided with Rebel-1. <a href="/report/">Read the technical report.</a></span><span>Hover to look around. It waits for you either way.</span></div>
   </section>
 
   <section id="loop">
@@ -1121,8 +1162,8 @@ function mountJobs(){
   const jobs=[]; const groups=[];
   MANIFEST.forEach(([fn,tasks],g)=>{ const start=jobs.length; tasks.forEach(([t,via,d,o,you])=>jobs.push({t,via,d,o,you:!!you,fn,g,i:jobs.length})); groups.push({fn,start,end:jobs.length-1}); });
   const yours=jobs.filter(j=>j.you);
-  document.getElementById('jobs-total').textContent=String(jobs.length);
-  document.getElementById('jobs-you').textContent=String(yours.length);
+  document.getElementById('jobs-total').textContent=String(jobs.length); document.getElementById('jobs-total2').textContent=String(jobs.length); document.getElementById('jobs-fleet').textContent=String(jobs.length-yours.length);
+  const headEl=document.getElementById('head'), fillEl=document.getElementById('fill'), nowEl=document.getElementById('jobs-now'), tF=document.getElementById('t-fleet'), tY=document.getElementById('t-you'), tL=document.getElementById('t-left'), hand=document.getElementById('jobs-hand');
   // build
   let labIdx=0;
   ticksEl.innerHTML=jobs.map(j=>`<div class="tick ${j.you?'you':'fleet'}" style="--i:${j.i}" data-i="${j.i}"><i></i>${j.you?`<span class="lab">${esc(j.t)}</span>`:''}</div>`).join('');
@@ -1142,23 +1183,27 @@ function mountJobs(){
       fnEls[k].style.left=(x0+w/2).toFixed(2)+'px'; fnEls[k].style.top=(r*18)+'px'; });
     yours.forEach((j,k)=>{ tickEls[j.i].style.setProperty('--lx', (W*(k+0.5)/yours.length).toFixed(2)+'px'); });
     // the six labels: measure each, take the first row where it fits, in both layouts; flip to the left near the right edge
-    const rows=[144,174,204,234];
+    const rows=[144,172,200,228,256];
     const place=(getX, prop)=>{ const ends=rows.map(()=>-1e9);
       yours.forEach((j,k)=>{ const lab=tickEls[j.i].querySelector('.lab'); const w=lab.offsetWidth+8; let x=getX(j,k); let flip=false; if(x+w>W){ flip=true; }
-        const x0=flip? x-w : x, x1=flip? x : x+w; let r=ends.findIndex(e=>e<x0-6); if(r<0) r=rows.length-1; ends[r]=Math.max(ends[r],x1);
+        const x0=flip? x-w : x, x1=flip? x : x+w; let r=ends.findIndex(e=>e<x0-6); if(r<0) r=ends.indexOf(Math.min(...ends)); ends[r]=Math.max(ends[r],x1);
         lab.style.setProperty(prop, rows[r]+'px'); lab.style.setProperty(prop+'f', flip?'1':'0'); }); };
     place((j,k)=>xs[j.i], '--lb'); place((j,k)=>W*(k+0.5)/yours.length, '--lbo');
   }
-  layout(); let rt; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(layout,120); });
+  layout(); let rt; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(layout,120); if(hot>=0) setTimeout(()=>moveHead(hot),140); });
   // readout
   const meta=readout.querySelector('.meta'), jobEl=readout.querySelector('.job'), what=readout.querySelector('.what'), act=document.getElementById('jobs-act');
+  const xOf=i=>only? parseFloat(tickEls[i].style.getPropertyValue('--lx')) : xs[i];
+  function moveHead(i){ const x=i<0? 0 : xOf(i); headEl.style.left=x.toFixed(1)+'px'; fillEl.style.width=x.toFixed(1)+'px'; }
+  function tally(){ let f=0,y=0; tickEls.forEach((t,i)=>{ if(t.classList.contains('done')){ if(jobs[i].you) y++; else f++; } }); const n=seq().length; tF.textContent=String(f); tY.textContent=String(y); tL.textContent=String(Math.max(0, n-f-y)); }
+  function nowFn(i){ if(i<0) return; const g=jobs[i].g; nowEl.textContent=groups[g].fn; fnEls.forEach((f,k)=>{ f.classList.toggle('past', k<g); }); }
   const IDLE='It runs on its own. It stops when it needs you.';
   let hot=-1;
   function show(i){
     if(i===hot) return;
     if(hot>=0){ tickEls[hot].classList.remove('hot'); fnEls[jobs[hot].g].classList.remove('hot'); }
     hot=i; if(i<0){ meta.textContent=IDLE; jobEl.innerHTML='&nbsp;'; what.textContent=''; return; }
-    const j=jobs[i]; tickEls[i].classList.add('hot'); fnEls[j.g].classList.add('hot');
+    const j=jobs[i]; tickEls[i].classList.add('hot'); fnEls[j.g].classList.add('hot'); moveHead(i); nowFn(i);
     meta.innerHTML=`${esc(j.fn)} · <b>${esc(j.via)}</b> · Rebel-1 · ${count(j.t)} comparable decisions${j.you?'<span class="yb">you</span>':''}`;
     jobEl.textContent=j.t;
     what.innerHTML=`<em>${esc(j.d)}</em> ${esc(j.o)}`;
@@ -1173,13 +1218,13 @@ function mountJobs(){
   function step(){
     if(!vis||hovering||waiting) return;
     const s=seq();
-    if(pos>=s.length){ show(-1); later(()=>{ tickEls.forEach(t=>t.classList.remove('done')); pos=0; step(); }, 1800); return; }
+    if(pos>=s.length){ tally(); readout.classList.add('done-all'); meta.textContent='Every job, done'; jobEl.textContent=`${s.length} of ${s.length}. ${yours.length} were yours.`; what.textContent='Then it starts again. A company never finishes.'; later(()=>{ readout.classList.remove('done-all'); tickEls.forEach(t=>t.classList.remove('done')); pos=0; moveHead(-1); tally(); show(-1); later(step, 500); }, 2600); return; }
     const i=s[pos]; show(i); const j=jobs[i];
-    if(j.you){ waiting=true; tickEls[i].classList.add('wait'); act.textContent=verb(j); act.hidden=false; return; }
-    tickEls[i].classList.add('done'); pos++; later(step, only? 900 : 210);
+    if(j.you){ waiting=true; tickEls[i].classList.add('wait'); rule.classList.add('waiting'); readout.classList.add('yours'); act.textContent=verb(j); hand.hidden=false; tally(); return; }
+    tickEls[i].classList.add('done'); tally(); pos++; later(step, only? 900 : 240);
   }
   function resolve(){
-    if(!waiting) return; const i=seq()[pos]; tickEls[i].classList.remove('wait'); tickEls[i].classList.add('done'); act.hidden=true; waiting=false; pos++; later(step, 520);
+    if(!waiting) return; const i=seq()[pos]; tickEls[i].classList.remove('wait'); tickEls[i].classList.add('done'); rule.classList.remove('waiting'); readout.classList.remove('yours'); hand.hidden=true; waiting=false; tally(); pos++; later(step, 520);
   }
   act.addEventListener('click', resolve);
   function nearest(clientX){ const r=rule.getBoundingClientRect(); const x=clientX-r.left; let best=-1, bd=1e9;
@@ -1189,8 +1234,8 @@ function mountJobs(){
   rule.addEventListener('click',e=>{ if(waiting && nearest(e.clientX)===seq()[pos]) resolve(); });
   // the fold
   const btn=document.getElementById('jobs-toggle');
-  btn.addEventListener('click',()=>{ only=!only; rule.classList.toggle('only',only); btn.classList.toggle('on',only); btn.setAttribute('aria-pressed',String(only)); btn.textContent=only?'Show the whole company':'Show only what needs you';
-    clear(); waiting=false; act.hidden=true; tickEls.forEach(t=>t.classList.remove('done','wait')); pos=0; show(-1); later(step, only? 1400 : 400); });
+  btn.addEventListener('click',()=>{ only=!only; rule.classList.toggle('only',only); btn.classList.toggle('on',only); btn.setAttribute('aria-pressed',String(only)); btn.textContent=only?'The whole company':'Just the six';
+    clear(); waiting=false; hand.hidden=true; rule.classList.remove('waiting'); readout.classList.remove('yours','done-all'); tickEls.forEach(t=>t.classList.remove('done','wait')); pos=0; show(-1); moveHead(-1); tally(); later(step, only? 1400 : 400); });
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   new IntersectionObserver(([e])=>{ vis=e.isIntersecting; if(vis && !reduce && !timer && !waiting && !hovering) later(step, 400); if(!vis) clear(); },{threshold:0.2}).observe(rule);
 }
