@@ -343,7 +343,7 @@
 
   /* ---------- day 0 to day 1,000 ---------- */
   #days{ padding:0; }
-  #days .scrub{ position:relative; height:340vh; }
+  #days .scrub{ position:relative; height:820vh; }
   #days .stage{ position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; isolation:isolate; }
   #days .stage canvas{ position:absolute; inset:0; width:100%; height:100%; }
   #days .scrim{ position:absolute; inset:0; pointer-events:none; z-index:1;
@@ -355,9 +355,11 @@
   #days .hud .top{ display:flex; justify-content:space-between; align-items:baseline; font-size:14px; line-height:20px; color:var(--ink-48); }
   #days .day{ font-size:clamp(28px, 3.1vw, 48px); line-height:1; font-weight:500; letter-spacing:-.03em; color:var(--ink); }
   #days .life{ align-self:center; max-width:38ch; }
-  #days .life p{ font-size:clamp(15px, 1.1vw, 18px); line-height:1.4; margin-bottom:calc(var(--u)*1.75); opacity:0; transform:translateY(6px); transition:opacity .6s var(--ease), transform .6s var(--ease), color .6s; color:var(--ink-48); }
-  #days .life p.on{ opacity:1; transform:none; }
-  #days .life p.now{ color:var(--ink); font-size:clamp(17px, 1.35vw, 22px); letter-spacing:-.012em; }
+  #days .life p{ font-size:clamp(15px, 1.1vw, 18px); line-height:1.4; color:var(--ink-48);
+    max-height:0; overflow:hidden; opacity:0; transform:translateY(8px); margin-bottom:0;
+    transition:opacity .55s var(--ease), transform .55s var(--ease), max-height .55s var(--ease), margin-bottom .55s var(--ease), color .55s; }
+  #days .life p.show{ max-height:8em; opacity:1; transform:none; margin-bottom:calc(var(--u)*1.75); }
+  #days .life p.now{ color:var(--ink); font-size:clamp(17px, 1.4vw, 23px); letter-spacing:-.014em; }
   #days .life .d{ display:block; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); margin-bottom:2px; }
   #days .counters{ display:flex; gap:clamp(24px, 5vw, 72px); font-variant-numeric:tabular-nums; }
   #days .counters .n{ font-size:clamp(32px, 3.6vw, 60px); line-height:1; font-weight:500; letter-spacing:-.03em; }
@@ -1183,22 +1185,44 @@ function mountLoop(){
 // ---------- day 0 to day 1,000: the visitor's own future, scrolled ----------
 function mountDays(){
   const scrub=document.getElementById('scrub'); if(!scrub) return;
-  const api=Terrain(document.getElementById('days-terrain'), document.getElementById('days-path'), { seed:11, scale:440, levels:26, walk:64, startY:.5, labels:true, mode:'scrub', weeks:143, drift:0 });
+  const api=Terrain(document.getElementById('days-terrain'), document.getElementById('days-path'), { seed:11, scale:440, levels:26, walk:64, startY:.5, labels:false, mode:'scrub', weeks:143, drift:0 });
   if(!api) return;
   const life=document.getElementById('life'), dayEl=document.getElementById('day'), cy=document.getElementById('c-you'), cf=document.getElementById('c-fleet');
   // the founder's life, in the margin. the first-customer day comes from the engine; the rest is the life the company has to fit inside.
   api.setProgress(1); const full=api.stats(); api.setProgress(0);
   const firstDay = full.firstCustomerWeek ? full.firstCustomerWeek*7 : 49;
   const LINES=[
-    { day:0,        t:'You have an idea.' },
+    { day:0,        t:'You have an idea. It has been in your notes for four years.' },
+    { day:9,        t:'Rebel reads your field. Nobody in it does the hard part.' },
+    { day:17,       t:'The name is settled. The domain cost twelve dollars.' },
+    { day:26,       t:'Incorporated. You signed it on your phone, in a parking lot.' },
+    { day:38,       t:'Version one is live, at a URL you have shown to nobody.' },
     { day:firstDay, t:'First paying customer, signed while you were at work.' },
+    { day:64,       t:'Second customer. The first one sent them.' },
+    { day:83,       t:'You stop explaining it at dinner. People get it now.' },
+    { day:106,      t:'A stranger writes to say it saved them a week.' },
+    { day:129,      t:'Nobody has cancelled yet. Partly because you are small. Still counts.' },
+    { day:152,      t:'The three in the morning question gets answered at 3:04. Not by you.' },
+    { day:181,      t:'It covers rent.' },
     { day:212,      t:'You quit your job.' },
+    { day:238,      t:'Your old manager asks what you are working on.' },
+    { day:267,      t:'First month you do not check the bank balance every morning.' },
+    { day:301,      t:'A customer asks for an integration. It ships that week.' },
     { day:340,      t:'It out-earns the job you quit.' },
-    { day:505,      t:'A competitor asks how big your team is. You never reply.' },
-    { day:660,      t:'You take two weeks off. Nothing breaks.' },
-    { day:815,      t:'Someone offers to buy it. You read the number twice and say no.' },
+    { day:379,      t:'Someone writes about you without being asked.' },
+    { day:421,      t:'You turn down a customer who would have been a headache.' },
+    { day:468,      t:'A competitor asks how big your team is. You never reply.' },
+    { day:517,      t:'You raise the price. Nobody leaves.' },
+    { day:566,      t:'A release ships while you are on a plane.' },
+    { day:618,      t:'The thing you were most afraid of happens. It is handled by morning.' },
+    { day:664,      t:'You take two weeks off. Nothing breaks.' },
+    { day:719,      t:'A company you used to admire signs up.' },
+    { day:773,      t:'Someone offers to buy it. You read the number twice.' },
+    { day:802,      t:'You say no.' },
+    { day:858,      t:'You stop calling it a project.' },
+    { day:911,      t:'Three years in. You made the calls that mattered. The rest got made without you.' },
     { day:960,      t:'And this is one corner of the map.' },
-  ];
+  ].sort((a,b)=>a.day-b.day);
   life.innerHTML=LINES.map(l=>'<p data-day="'+l.day+'"><span class="d">Day '+l.day.toLocaleString()+'</span>'+l.t+'</p>').join('');
   const ps=[...life.querySelectorAll('p')];
   const fmt=n=>n.toLocaleString();
@@ -1208,8 +1232,8 @@ function mountDays(){
     const p=Math.max(0,Math.min(1,-r.top/total)); if (p===last) return; last=p;
     api.setProgress(p); const s=api.stats(); const day=Math.round(p*1000);
     dayEl.textContent='Day '+fmt(day); cy.textContent=fmt(s.you); cf.textContent=fmt(s.fleet);
-    let latest=-1; ps.forEach((el,k)=>{ const on=day>=Number(el.dataset.day); el.classList.toggle('on',on); if(on) latest=k; });
-    ps.forEach((el,k)=>el.classList.toggle('now', k===latest));
+    let latest=-1; ps.forEach((el,k)=>{ if(day>=Number(el.dataset.day)) latest=k; });
+    ps.forEach((el,k)=>{ el.classList.toggle('show', k<=latest && k>latest-5); el.classList.toggle('now', k===latest); });
   }
   addEventListener('scroll', update, {passive:true}); addEventListener('resize', ()=>{ last=-1; update(); }); update();
 }
