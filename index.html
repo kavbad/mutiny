@@ -297,6 +297,11 @@
   .tick.done i{ background:var(--orange); opacity:1; }
   .tick.hot i{ height:168px; width:2px; opacity:1; }
   .tick.you.hot i{ background:var(--orange-deep); }
+  .tick.wait i{ animation:tickwait 1.4s ease-in-out infinite; }
+  @keyframes tickwait{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+  .readout .act{ justify-self:start; margin-top:6px; display:inline-flex; align-items:center; gap:10px; background:var(--orange); color:var(--paper); border:0; border-radius:4px; cursor:pointer; padding:0 18px; height:44px; font:inherit; font-size:15px; font-weight:500; letter-spacing:-.01em; box-shadow:0 1px 0 rgba(20,18,16,.08), 0 10px 30px -14px rgba(216,90,48,.55); transition:background .25s var(--ease), transform .25s var(--ease); }
+  .readout .act:hover{ background:var(--orange-deep); } .readout .act:active{ transform:translateY(1px); }
+  .readout .act:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
   .tick .lab{ position:absolute; left:6px; white-space:nowrap; font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--orange-deep); line-height:1; transition:opacity .4s; }
   .tick .lab::before{ content:""; position:absolute; left:-6px; top:50%; width:5px; height:1px; background:var(--orange); }
   .tick .lab{ bottom:var(--lb, 144px); }
@@ -316,7 +321,7 @@
   .rule.only .tick.you .lab{ bottom:var(--lbo, 144px); }
   .rule.only .tick.you .lab[style*="--lbof: 1"], .rule.only .tick.you .lab[style*="--lbof:1"]{ left:auto; right:6px; }
   .rule.only .tick.you .lab[style*="--lbof: 0"], .rule.only .tick.you .lab[style*="--lbof:0"]{ left:6px; right:auto; }
-  .readout{ min-height:112px; margin-top:calc(var(--u)*1); display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
+  .readout{ min-height:168px; margin-top:calc(var(--u)*1); display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
   .readout .meta{ font-family:"Spline Sans Mono",ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); min-height:14px; }
   .readout .meta b{ color:var(--ink); font-weight:500; }
   .readout .meta .yb{ color:var(--orange-deep); border:1px solid rgba(216,90,48,.5); border-radius:4px; padding:1px 5px; margin-left:6px; }
@@ -516,11 +521,12 @@
       <div class="fns" id="fns"></div>
     </div>
     <div class="readout" id="readout" aria-live="polite">
-      <div class="meta">Run along the rule. Each line is a job.</div>
+      <div class="meta">It runs on its own. It stops when it needs you.</div>
       <div class="job">&nbsp;</div>
       <div class="what"></div>
+      <button class="act" id="jobs-act" type="button" hidden>Decide →</button>
     </div>
-    <div class="manifest-foot"><span>Every line on the rule is decided with Rebel-1. <a href="/report/">Read the technical report.</a></span><span>Press a line to hold it.</span></div>
+    <div class="manifest-foot"><span>Every line on the rule is decided with Rebel-1. <a href="/report/">Read the technical report.</a></span><span>It runs on its own. It stops when it needs you.</span></div>
   </section>
 
   <section id="loop">
@@ -1145,31 +1151,48 @@ function mountJobs(){
   }
   layout(); let rt; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(layout,120); });
   // readout
-  const meta=readout.querySelector('.meta'), jobEl=readout.querySelector('.job'), what=readout.querySelector('.what');
-  let hot=-1, held=-1;
+  const meta=readout.querySelector('.meta'), jobEl=readout.querySelector('.job'), what=readout.querySelector('.what'), act=document.getElementById('jobs-act');
+  const IDLE='It runs on its own. It stops when it needs you.';
+  let hot=-1;
   function show(i){
     if(i===hot) return;
     if(hot>=0){ tickEls[hot].classList.remove('hot'); fnEls[jobs[hot].g].classList.remove('hot'); }
-    hot=i; if(i<0){ meta.textContent='Run along the rule. Each line is a job.'; jobEl.innerHTML='&nbsp;'; what.textContent=''; return; }
+    hot=i; if(i<0){ meta.textContent=IDLE; jobEl.innerHTML='&nbsp;'; what.textContent=''; return; }
     const j=jobs[i]; tickEls[i].classList.add('hot'); fnEls[j.g].classList.add('hot');
     meta.innerHTML=`${esc(j.fn)} · <b>${esc(j.via)}</b> · Rebel-1 · ${count(j.t)} comparable decisions${j.you?'<span class="yb">you</span>':''}`;
     jobEl.textContent=j.t;
     what.innerHTML=`<em>${esc(j.d)}</em> ${esc(j.o)}`;
   }
-  let only=false;
+  // the run: a cursor walks the rule on its own, the fleet ticks jobs off as it passes, and it stops on the six until you press
+  const VERB={Sign:'Sign it',Pass:'Verify',Set:'Set it',Choose:'Choose',Approve:'Approve'};
+  const verb=j=>(VERB[j.t.split(' ')[0]]||'Decide')+' →';
+  let only=false, pos=0, waiting=false, timer=null, hovering=false, vis=false;
+  const seq=()=>only? yours.map(j=>j.i) : jobs.map(j=>j.i);
+  const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+  function later(fn,ms){ clear(); timer=setTimeout(()=>{ timer=null; fn(); }, ms); }
+  function step(){
+    if(!vis||hovering||waiting) return;
+    const s=seq();
+    if(pos>=s.length){ show(-1); later(()=>{ tickEls.forEach(t=>t.classList.remove('done')); pos=0; step(); }, 1800); return; }
+    const i=s[pos]; show(i); const j=jobs[i];
+    if(j.you){ waiting=true; tickEls[i].classList.add('wait'); act.textContent=verb(j); act.hidden=false; return; }
+    tickEls[i].classList.add('done'); pos++; later(step, only? 900 : 210);
+  }
+  function resolve(){
+    if(!waiting) return; const i=seq()[pos]; tickEls[i].classList.remove('wait'); tickEls[i].classList.add('done'); act.hidden=true; waiting=false; pos++; later(step, 520);
+  }
+  act.addEventListener('click', resolve);
   function nearest(clientX){ const r=rule.getBoundingClientRect(); const x=clientX-r.left; let best=-1, bd=1e9;
-    if(only){ yours.forEach((j,k)=>{ const lx=parseFloat(tickEls[j.i].style.getPropertyValue('--lx')); const d=Math.abs(lx-x); if(d<bd){ bd=d; best=j.i; } }); return best; }
-    for(let i=0;i<xs.length;i++){ const d=Math.abs(xs[i]-x); if(d<bd){ bd=d; best=i; } } return best; }
-  rule.addEventListener('pointermove',e=>{ if(held>=0) return; show(nearest(e.clientX)); });
-  rule.addEventListener('pointerleave',()=>{ if(held<0) show(-1); });
-  rule.addEventListener('click',e=>{ const i=nearest(e.clientX); if(held===i){ held=-1; show(i); } else { held=i; show(i); } });
+    for(const i of seq()){ const lx=only? parseFloat(tickEls[i].style.getPropertyValue('--lx')) : xs[i]; const d=Math.abs(lx-x); if(d<bd){ bd=d; best=i; } } return best; }
+  rule.addEventListener('pointermove',e=>{ if(waiting) return; hovering=true; clear(); show(nearest(e.clientX)); });
+  rule.addEventListener('pointerleave',()=>{ if(!hovering) return; hovering=false; if(!waiting){ const s=seq(); show(pos<s.length? s[pos] : -1); later(step, 700); } });
+  rule.addEventListener('click',e=>{ if(waiting && nearest(e.clientX)===seq()[pos]) resolve(); });
   // the fold
   const btn=document.getElementById('jobs-toggle');
-  btn.addEventListener('click',()=>{ only=!only; rule.classList.toggle('only',only); btn.classList.toggle('on',only); btn.setAttribute('aria-pressed',String(only)); btn.textContent=only?'Show the whole company':'Show only what needs you'; held=-1; show(-1); });
-  // receipts land, quietly
-  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches; if(reduce) return;
-  let vis=false; new IntersectionObserver(([e])=>{ vis=e.isIntersecting; },{threshold:0}).observe(rule);
-  setInterval(()=>{ if(!vis||only) return; const pool=tickEls.filter(t=>t.classList.contains('fleet')&&!t.classList.contains('done')); if(!pool.length) return; const t=pool[Math.floor(Math.random()*pool.length)]; t.classList.add('done'); setTimeout(()=>t.classList.remove('done'), 2600); }, 900);
+  btn.addEventListener('click',()=>{ only=!only; rule.classList.toggle('only',only); btn.classList.toggle('on',only); btn.setAttribute('aria-pressed',String(only)); btn.textContent=only?'Show the whole company':'Show only what needs you';
+    clear(); waiting=false; act.hidden=true; tickEls.forEach(t=>t.classList.remove('done','wait')); pos=0; show(-1); later(step, only? 1400 : 400); });
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  new IntersectionObserver(([e])=>{ vis=e.isIntersecting; if(vis && !reduce && !timer && !waiting && !hovering) later(step, 400); if(!vis) clear(); },{threshold:0.2}).observe(rule);
 }
 
 // ---------- the loop: what runs for each company, around the clock ----------
