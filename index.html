@@ -413,6 +413,61 @@
     h1 > span > i{ animation:none; transform:none } .in{ animation:none; opacity:1 }
     .field::after, .sign button::after{ transition:none }
   }
+
+  /* ---------- compact on phones: the visuals lead, the type steps back ---------- */
+  @media (max-width:600px){
+    :root{ --g:18px; }
+    .bar{ font-size:13px; line-height:18px; }
+    .bar .mark small{ margin-left:8px; font-size:12px; }
+    .hero{ padding:14px 18px 16px; }
+    .hero .lockup{ padding-top:min(24vh, 210px); }
+    h1{ font-size:clamp(27px, 8.2vw, 36px); line-height:1.04; letter-spacing:-.03em; margin:0 0 12px -0.02em; }
+    .hero .aside .lede{ font-size:14.5px; line-height:1.4; max-width:none; }
+    .hero .aside .lede + .lede{ margin-top:8px; }
+    .hero .aside .cta{ margin-top:16px; }
+    .cta{ height:46px; font-size:15px; padding:0 16px 0 18px; width:auto; justify-content:flex-start; gap:12px; }
+    .cta svg{ width:18px; height:18px; }
+    .hero .note{ font-size:12.5px; line-height:18px; margin-top:10px; }
+    .hero .bar.bottom{ margin-top:18px; }
+    section{ padding:48px 18px; }
+    h2{ font-size:23px; line-height:1.1; letter-spacing:-.025em; margin-bottom:12px; max-width:none; }
+    .copy{ font-size:14.5px; line-height:1.45; }
+    .copy + .copy{ margin-top:10px; }
+    .grid{ row-gap:22px; }
+    figcaption{ font-size:12px; line-height:17px; margin-top:8px; }
+    /* the first 1,000 days */
+    #days .hud{ padding:14px 18px 16px; }
+    #days .hud .top{ font-size:12px; line-height:18px; }
+    #days .day{ font-size:22px; }
+    #days .life p{ font-size:14px; line-height:1.35; }
+    #days .life p.show{ margin-bottom:9px; max-height:6em; }
+    #days .life p.now{ font-size:16.5px; letter-spacing:-.01em; }
+    #days .life .d{ font-size:9.5px; margin-bottom:1px; }
+    /* 153 jobs */
+    .jobs-head{ row-gap:12px; }
+    #jobs h2{ max-width:none; font-size:23px; }
+    #jobs .jobs-head .copy{ padding-top:0; }
+    .stage{ margin-top:30px; }
+    .st-meta{ font-size:9.5px; gap:10px 14px; }
+    .st-job{ font-size:25px; line-height:1.06; letter-spacing:-.025em; min-height:3.2em; margin:12px 0 10px 0; max-width:none; }
+    .st-via{ font-size:9.5px; }
+    .st-bar{ margin:24px 0 20px; }
+    .st-why{ font-size:14px; line-height:1.45; min-height:0; }
+    .st-hand{ margin-top:12px; gap:12px; }
+    .act{ height:42px; font-size:14px; padding:0 16px; }
+    .st-foot{ margin-top:26px; font-size:12px; line-height:18px; }
+    /* how it runs */
+    .loop .count{ font-size:9.5px; flex-direction:column; gap:4px; margin-top:12px; }
+    /* talk to rebel-1 */
+    .intake{ height:62vh; zoom:.8; }
+    .intake .rebel{ font-size:20px; line-height:1.25; }
+    .intake .reflect{ font-size:15px; }
+    .intake .you{ font-size:15px; }
+    #what .cta{ margin-top:16px; }
+    /* close + footer */
+    .close h2{ max-width:none; }
+    footer{ padding:16px 18px 22px; font-size:12px; line-height:18px; }
+  }
 </style>
 </head>
 <body>
