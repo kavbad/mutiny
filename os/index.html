@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mutiny, Your move (section prototype v30)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2f0ea; --ink:#141210; --ink-72:rgba(20,18,16,.72); --ink-48:rgba(20,18,16,.48); --ink-28:rgba(20,18,16,.28);
+  --ash:#8d877b; --rule:rgba(20,18,16,.13);
+  --orange:#D85A30; --orange-deep:#B9481F; --orange-text:#B9481F;
+  --sans:'Schibsted Grotesk',system-ui,-apple-system,'Helvetica Neue',sans-serif;
+  --mono:'Spline Sans Mono',ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.22,.72,.12,1);
+  --u:8px; --g:clamp(20px,3vw,48px);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#141210; --ink:#f2f0ea; --ink-72:rgba(242,240,234,.74); --ink-48:rgba(242,240,234,.5); --ink-28:rgba(242,240,234,.3);
+    --ash:#8d877b; --rule:rgba(242,240,234,.14); --orange-text:#E8764E;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141210; --ink:#f2f0ea; --ink-72:rgba(242,240,234,.74); --ink-48:rgba(242,240,234,.5); --ink-28:rgba(242,240,234,.3);
+  --ash:#8d877b; --rule:rgba(242,240,234,.14); --orange-text:#E8764E;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;overflow:hidden;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+[tabindex="-1"]:focus{outline:none}
+[style*="--c"]{--ct:color-mix(in oklab,var(--c) 58%,var(--ink))}
+.k{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash)}
+
+.ym{height:100svh;display:flex;flex-direction:column;padding:calc(var(--u)*2) var(--g) calc(var(--u)*1.5);overflow:hidden}
+.top{display:flex;justify-content:space-between;align-items:center;gap:24px}
+.top-right{display:flex;gap:26px;align-items:center}
+
+
+.body{flex:1;min-height:0;display:flex;flex-direction:column;padding-top:calc(var(--u)*1)}
+.body{--padl:132px;--tray:300px}
+.divider{flex:none;position:relative;height:22px;margin:0 0 0 var(--padl);display:flex;align-items:center;justify-content:center;gap:10px;cursor:row-resize;user-select:none;touch-action:none}
+.divider::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--rule)}
+.divider .grip{width:56px;height:5px;border-radius:3px;background:var(--ink-48);position:relative;transition:background .2s,transform .2s}
+.divider:hover .grip,.divider.drag .grip{background:var(--ink);transform:scaleX(1.15)}
+.divider .dv{position:relative;width:22px;height:22px;border-radius:50%;background:var(--paper);border:1px solid var(--rule);display:grid;place-items:center;color:var(--ink-48);transition:color .2s,border-color .2s}
+.divider .dv svg{width:12px;height:12px}
+.divider .dv:hover{color:var(--ink);border-color:var(--ink)}
+.body.max .field{flex:1}
+.body.max .tray{height:0!important;padding-top:0;padding-bottom:0;overflow:hidden}
+.body.min .field{flex:0 0 0px;min-height:0;overflow:hidden}
+.body.min .tray{flex:1;height:auto!important;max-height:none!important}
+.body.min .divider .dv[data-snap="min"],.body.max .divider .dv[data-snap="max"]{display:none}
+.body.min .divider,.body.max .divider{cursor:default}
+.field{flex:1;min-height:160px;position:relative}
+.tray{flex:none;width:auto;margin:0;padding:10px 0 0 var(--padl,132px)}
+.chat{flex:none;width:auto;margin:0 calc(-1*var(--g)) calc(-1*var(--u)*1.5);padding:14px var(--g) 18px;background:color-mix(in oklab,var(--paper) 62%,#fff);border-top:1px solid var(--rule);box-shadow:0 -24px 48px -28px rgba(20,18,16,.28)}
+.chat .ask{max-width:none;margin:0 0 0 var(--padl,132px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chat{background:color-mix(in oklab,var(--paper) 80%,#fff);box-shadow:0 -24px 48px -28px rgba(0,0,0,.6)}}
+:root[data-theme="dark"] .chat{background:color-mix(in oklab,var(--paper) 80%,#fff)}
+
+/* ---- left: the one thing on screen ---- */
+.who{display:flex;align-items:baseline;gap:12px;font-size:15px}
+.who b{font-weight:500}
+.who span{color:var(--ink-48)}
+.ft{font-size:13px;color:var(--ink-48)}
+.left{min-width:0}
+.pane{animation:pane .5s var(--ease) both;width:100%}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 40px;align-items:start}
+@keyframes pane{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+[style*="--c"]{--ct:color-mix(in oklab,var(--c) 66%,var(--ink))}
+
+.pane{animation:pane .4s var(--ease) both;width:100%}
+.tray{height:var(--tray);max-height:none;overflow:auto;scrollbar-width:thin;padding:6px 0 14px var(--padl,132px);transition:height .25s var(--ease);scroll-behavior:smooth;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 22px);mask-image:linear-gradient(to bottom,transparent,#000 22px)}
+.thread{display:flex;flex-direction:column;gap:12px;padding-top:12px}
+.body.inroom{--tray:150px}
+.body.sized{--tray:var(--trayset)}
+.body.sized.inroom{--tray:var(--trayset)}
+.msg{display:grid;grid-template-columns:20px minmax(0,1fr);gap:0 10px;max-width:64%;animation:pane .35s var(--ease) both}
+.msg .av{width:20px;height:20px;border-radius:50%;background:var(--paper);border:1px solid var(--rule);display:grid;place-items:center;margin-top:1px}
+.msg .av::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--orange)}
+.msg .who{display:flex;align-items:baseline;gap:8px;font-size:12px;color:var(--ink-48);margin-top:3px}
+.msg .who b{font-weight:500;color:var(--ink)}
+.msg .who .side{white-space:nowrap}
+.msg .who .side::before{content:"\00b7";margin-right:8px}
+.msg .who .side i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:1px}
+.msg .body{margin-top:5px;padding:10px 13px;border-radius:2px 12px 12px 12px;background:color-mix(in oklab,var(--ink) 5%,var(--paper));font-size:14px;line-height:1.5;color:var(--ink)}
+.msg .body p{margin:0}
+.msg .body p+p{margin-top:8px;color:var(--ink-72)}
+.msg .body p.lead{font-weight:500}
+.msg .body p b{font-weight:500}
+.msg .body p button{font-weight:500;color:var(--ink);box-shadow:inset 0 -1px 0 var(--c)}
+.msg .body p button:hover{color:var(--ct)}
+.you{align-self:flex-end;max-width:56%;animation:pane .3s var(--ease) both}
+.you .body{padding:9px 13px;border-radius:12px 12px 2px 12px;background:var(--ink);color:var(--paper);font-size:14px;line-height:1.5}
+.replies{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;animation:pane .35s .25s var(--ease) both}
+.rp{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 13px;border-radius:999px;border:1px solid var(--ink-28);background:var(--paper);color:var(--ink);font-size:14px;font-weight:500;letter-spacing:-.01em;white-space:nowrap;transition:background .2s,color .2s,border-color .2s,transform .2s}
+.rp:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.rp:active{transform:translateY(1px)}
+.rp.p{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.rp.p:hover{background:var(--orange);border-color:var(--orange);color:#fff}
+.rp.alt{color:var(--ink-72)}
+.rp.auto{box-shadow:0 0 0 3px var(--paper),0 0 0 4px var(--ink)}
+.rp.cta{background:var(--orange);border-color:var(--orange);color:#fff;text-decoration:none}
+.rp.cta:hover{background:var(--orange-deep);border-color:var(--orange-deep)}
+.rp.cta svg{width:14px;height:14px}
+.att{margin-top:12px;animation:pane .35s .15s var(--ease) both}
+.status{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-48);font-variant-numeric:tabular-nums}
+.status b{font-weight:500;color:var(--ink)}
+.prog{height:3px;background:var(--rule);border-radius:2px;margin-top:8px;overflow:hidden;display:flex}
+.prog i{display:block;height:100%;flex:0 0 auto;background:var(--c)}
+.feed{margin:8px 0 0;padding:0;list-style:none}
+.feed li{display:grid;grid-template-columns:7px minmax(0,1fr) auto;gap:9px;align-items:center;font-size:13.5px;color:var(--ink-72);animation:pane .3s var(--ease) both}
+.feed li .dot{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.feed li .a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feed li b{font-weight:500;color:var(--ct);margin-right:6px}
+.feed li .ft{font-size:12px;color:var(--ink-48)}
+.feed li.you .dot{background:var(--ink)}
+.feed li.you b{color:var(--ink)}
+.split{display:flex;height:4px;border-radius:2px;overflow:hidden;gap:2px}
+.split i{display:block;height:100%;background:var(--c)}
+.log{position:absolute;left:var(--padl);right:0;top:64px;bottom:0;overflow:hidden;animation:pane .5s .1s var(--ease) both}
+.log ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.log li{display:grid;grid-template-columns:5em minmax(0,1fr) auto;gap:14px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13.5px}
+.log li.new .a{font-style:italic;font-weight:500;color:var(--ct)}
+.log li.new .k:first-child{color:var(--ct)}
+.log .k{margin:0}
+.ask{display:flex;align-items:center;gap:14px;height:58px;padding:0 9px 0 18px;border:1px solid var(--ink-28);border-radius:6px;background:color-mix(in oklab,var(--paper) 25%,#fff);box-shadow:0 1px 2px rgba(20,18,16,.06),0 8px 24px -16px rgba(20,18,16,.25);transition:border-color .2s,box-shadow .2s}
+.ask:focus-within{border-color:var(--ink);box-shadow:0 1px 2px rgba(20,18,16,.06),0 12px 28px -16px rgba(20,18,16,.35)}
+.ask::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--orange);flex:none}
+.ask input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:16px;color:var(--ink);outline:none}
+.ask input::placeholder{color:var(--ink-48)}
+.ask .send{width:40px;height:40px;border-radius:4px;display:grid;place-items:center;color:var(--paper);background:var(--ink);transition:background .2s,transform .2s}
+.ask .send:hover{background:var(--orange)}
+.ask .send:active{transform:translateY(1px)}
+.ask .send svg{width:18px;height:18px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ask{background:color-mix(in oklab,var(--paper) 85%,#fff)}}
+:root[data-theme="dark"] .ask{background:color-mix(in oklab,var(--paper) 85%,#fff)}
+
+.roompanel{position:absolute;left:var(--padl);right:0;top:92px;height:calc(100% - 92px);display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:0 56px;animation:pane .5s .1s var(--ease) both;min-height:0}
+.log{position:static;overflow:hidden;animation:none}
+.log:not(.open) li:nth-child(n+4){display:none}
+.log.open ol{max-height:calc(100% - 40px);overflow:auto}
+.log{min-height:0;max-height:100%;display:flex;flex-direction:column}
+.log .more{flex:none;align-self:flex-start}
+.log li .a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .more{display:inline-block;margin-top:8px;font-size:13px;font-weight:500;color:var(--ink-72);border-bottom:1px solid var(--ink-28)}
+.log .more:hover{color:var(--ink);border-color:var(--ink)}
+.wgs{display:grid;grid-template-columns:1fr 1fr;gap:28px 44px;align-content:start;overflow:auto;min-height:0;padding-right:4px;scrollbar-width:thin}
+.wg{min-width:0;padding-top:10px;border-top:1px solid var(--rule)}
+.wg.wide{grid-column:1/-1}
+.wg h6{margin:0 0 10px;font-size:13px;font-weight:400;color:var(--ink-48)}
+.kv{font-weight:500;font-size:clamp(24px,2.2vw,32px);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.kc{margin-top:8px;font-size:13px;color:var(--ink-48);line-height:1.4}
+.w{display:block;width:100%;height:60px;margin-top:12px}
+.w .ln{fill:none;stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.w .pj{fill:none;stroke:var(--c);stroke-width:1.5;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.w .tg{stroke:var(--ink-28);stroke-width:1;stroke-dasharray:2 3;vector-effect:non-scaling-stroke}
+.w .dt{fill:var(--c)}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:9em minmax(0,1fr) 3em;gap:12px;align-items:center;font-size:13px}
+.bar .bl{color:var(--ink-72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .bt{height:6px;background:var(--rule);border-radius:2px;overflow:hidden}
+.bar .bt i{display:block;height:100%;background:var(--ink)}
+.bar .bt i.hi{background:var(--c)}
+.bar .bv{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.cells{display:flex;flex-wrap:wrap;gap:4px}
+.cells i{width:12px;height:12px;border-radius:2px;background:var(--rule)}
+.cells i.on{background:var(--c)}
+.cells i.wr{background:color-mix(in oklab,var(--orange) 55%,var(--paper))}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:7px 0;border-bottom:1px solid var(--rule)}
+.tl li:last-child{border-bottom:0}
+.tl .td{color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl .tt{color:var(--ink-48);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tl li.now .tt{color:var(--ct);font-weight:500}
+.tl li.done .tt{color:var(--ink-28)}
+@media (max-width:900px){.roompanel{grid-template-columns:1fr;overflow:auto}.wgs{grid-template-columns:1fr}}
+
+/* ---- live surfaces ---- */
+.lv{display:flex;flex-direction:column;min-height:0;border:1px solid var(--rule);border-radius:4px;background:color-mix(in oklab,var(--paper) 92%,#fff);overflow:hidden;transition:box-shadow .3s}
+.lv.flash{box-shadow:0 0 0 1.5px var(--c)}
+.lv-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-48)}
+.lv-kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.lv-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-72)}
+.lv-dot{width:7px;height:7px;border-radius:50%;background:var(--ink-28);flex:none}
+.lv.busy .lv-dot{background:var(--c);animation:pulse 1s ease-in-out infinite}
+.lv-body{flex:1;min-height:0;overflow:auto;padding:10px 12px;font-size:13px;line-height:1.45}
+.lv-list,.lv-check,.lv-code{list-style:none;margin:0;padding:0}
+.lv-list li{display:grid;grid-template-columns:9em minmax(0,1fr) auto;gap:12px;padding:6px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.lv-from{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv-sub{color:var(--ink-72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv-when{color:var(--ink-48);font-size:12px;white-space:nowrap}
+.lv-doc p{margin:0 0 10px;color:var(--ink);max-width:62ch}
+.lv-code li{display:grid;grid-template-columns:2.2em minmax(0,1fr);gap:8px;font-family:var(--mono);font-size:12px;line-height:1.7;counter-increment:ln}
+.lv-code li::before{content:counter(ln);color:var(--ink-28);text-align:right}
+.lv-code{counter-reset:ln}
+.lv-code code{white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.lv-tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.lv-tbl th{text-align:left;font-weight:400;font-size:11.5px;color:var(--ink-48);padding:0 8px 6px 0;border-bottom:1px solid var(--rule)}
+.lv-tbl td{padding:6px 8px 6px 0;border-bottom:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:14em}
+.lv-check li{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--rule)}
+.lv-check li i{width:12px;height:12px;border:1.5px solid var(--ink-28);border-radius:2px;flex:none}
+.lv-check li.ok i{background:var(--c);border-color:var(--c)}
+.lv .new{background:color-mix(in oklab,var(--c) 10%,transparent);box-shadow:inset 2px 0 0 var(--c);transition:opacity .35s,background .6s;animation:pane .25s var(--ease) both}
+.lv .new.done{background:color-mix(in oklab,var(--c) 16%,transparent)}
+.lv .new.fade{opacity:0}
+.lv-doc .new{padding-left:10px}
+.lv-code .new code::before{content:"+ ";color:var(--ct)}
+.lv.mini .lv-body{font-size:10.5px;padding:6px 8px;pointer-events:none}
+.lv.mini .lv-bar{padding:5px 8px;font-size:10px}
+.lv.mini .lv-list li{grid-template-columns:6em minmax(0,1fr);gap:6px;padding:3px 0}
+.lv.mini .lv-when,.lv.mini .lv-kind{display:none}
+.lv.mini .lv-code li{font-size:9.5px;line-height:1.5}
+.lv.mini .lv-tbl td,.lv.mini .lv-tbl th{padding:3px 6px 3px 0;font-size:10px}
+.lv.mini .lv-doc p{margin:0 0 5px}
+.lv.mini .lv-check li{padding:3px 0}
+
+/* room: brief and live, together or alone */
+.roompanel{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:0 40px}
+.roompanel.m-brief{grid-template-columns:1fr}
+.roompanel.m-brief .briefcol{grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:0 56px}
+.roompanel.m-brief .lvcol{display:none}
+.roompanel.m-live{grid-template-columns:1fr}
+.roompanel.m-live .briefcol{display:none}
+.briefcol{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:0 32px;min-height:0;align-content:start}
+.roompanel:not(.m-brief) .briefcol{grid-template-columns:1fr;gap:0}
+.roompanel:not(.m-brief) .briefcol .log{display:none}
+.roompanel:not(.m-brief) .wgs{grid-template-columns:1fr 1fr;gap:20px 28px}
+.lvcol{min-height:0;display:flex;flex-direction:column}
+.lvcol .lv{flex:1}
+.modes{position:absolute;right:0;top:56px;display:flex;gap:2px;border:1px solid var(--rule);border-radius:4px;padding:2px;font-size:12px}
+.modes button{padding:4px 10px;border-radius:3px;color:var(--ink-48);font-weight:500}
+.modes button.on{background:var(--ink);color:var(--paper)}
+.modes .sep{width:1px;height:16px;background:var(--rule);margin:0 4px;align-self:center}
+.modes .ic{width:26px;height:26px;padding:0;display:grid;place-items:center;color:var(--ink-48)}
+.modes .ic svg{width:14px;height:14px}
+.modes .ic:hover{color:var(--ink)}
+.body.max .modes .ic[data-snap="max"],.body.min .modes .ic[data-snap="min"]{color:var(--ink);background:color-mix(in oklab,var(--ink) 8%,var(--paper))}
+
+/* everything live at once */
+.lvgrid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:12px;animation:pane .4s var(--ease) both}
+.lvcell{display:flex;flex-direction:column;min-height:0;text-align:left;border-radius:4px;transition:transform .2s}
+.lvcell:hover{transform:translateY(-1px)}
+.lvcell .lvname{font-size:11.5px;font-weight:500;color:var(--ct);margin:0 0 4px 2px;display:flex;align-items:center;gap:6px}
+.lvcell .lvname::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
+.lvcell .lv{flex:1}
+.field.grid canvas,.field.grid #labels,.field.grid .marks,.field.grid .livebox{display:none}
+@media (max-width:900px){.lvgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.roompanel{grid-template-columns:1fr}.modes{top:-30px}}
+
+/* ---- right: the company ---- */
+.field{position:relative;min-height:0;min-width:0;--padl:132px}
+.field canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.lab{position:absolute;left:0;top:0;width:calc(var(--padl) - 16px);text-align:right;direction:rtl;line-height:1;white-space:nowrap;transition:color .3s,opacity .4s;will-change:transform;padding:6px 0}
+.lab:hover,.lab.on{color:var(--ink)}
+.lab.hot,.lab.on{color:var(--ct)}
+.lab.on{cursor:pointer}
+.lab.on::after{content:"\2190";margin-left:8px;margin-right:6px;color:var(--ink-48);font-size:11px;opacity:0;transition:opacity .2s}
+.lab.on:hover::after{opacity:1}
+.lab.on:hover{color:var(--ink)}
+.lab.off{opacity:0;pointer-events:none}
+.marks{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.rc{position:absolute;white-space:nowrap;font-size:14px;line-height:1;opacity:0;transform:translateY(6px);transition:opacity .28s var(--ease),transform .5s var(--ease);color:var(--ink-72)}
+.rc.in{opacity:1;transform:none}
+.rc.out{opacity:0;transition:opacity .35s}
+.rc b{font-weight:500;color:var(--ct);margin-right:8px}
+.rc span{color:var(--ink-48);margin-left:8px;font-size:13px}
+.th{position:absolute;width:1px;margin-left:-.5px;transform:scaleY(0);transition:transform .24s cubic-bezier(.5,0,.2,1),opacity .7s}
+.th.dn{transform-origin:50% 0;background:linear-gradient(to bottom,transparent,var(--c) 55%)}
+.th.up{transform-origin:50% 100%;background:linear-gradient(to top,transparent,var(--c) 55%)}
+.th.in{transform:scaleY(1)}
+.th.out{opacity:0}
+.ring{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;border:1.5px solid var(--c);border-radius:50%;opacity:1;transform:scale(.4);transition:transform 1.1s var(--ease),opacity 1.1s var(--ease)}
+.ring.in{transform:scale(3.6);opacity:0}
+.tk{position:absolute;left:0;top:0;width:0;height:0}
+.tk::before{content:"";position:absolute;left:-1px;top:-4px;width:2px;height:8px;border-radius:1px;background:var(--c);transform:scaleY(0);transition:transform .5s var(--ease)}
+.tk.in::before{transform:scaleY(1)}
+.mv{position:absolute;left:0;top:0;width:0;height:0;transition:opacity .5s}
+.mv::before{content:"";position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--paper)}
+.mv .k{position:absolute;left:-4px;bottom:18px;white-space:nowrap;color:var(--ink);transition:opacity .6s;text-shadow:0 0 6px var(--paper),0 0 2px var(--paper),0 0 10px var(--paper)}
+.mv.quiet .k{opacity:0}
+.mv.gone{opacity:0}
+
+.livebox{position:absolute;left:var(--padl);right:0;bottom:0;height:24px;opacity:0;transition:opacity .4s var(--ease)}
+.livebox.on{opacity:1}
+.live{display:flex;align-items:center;gap:10px;height:24px;font-size:14px;line-height:1;white-space:nowrap;color:var(--ink-72)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--c);flex:none;animation:pulse 1.1s ease-in-out infinite}
+.live.wait i{animation:none;background:var(--paper);border:1.5px solid var(--c)}
+.live b{font-weight:500;color:var(--ct)}
+.live .s{overflow:hidden;text-overflow:ellipsis;min-width:0;transition:opacity .25s}
+.live .s.swap{opacity:0}
+.live .t{margin-left:auto;color:var(--ink-48);font-size:13px;font-variant-numeric:tabular-nums}
+@keyframes pulse{0%,100%{transform:scale(.8);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+.foot{display:none}
+
+@media (max-width:900px){
+  .body{--padl:0px}
+  .divider{margin-left:0}
+  .field{--padl:100px;margin-bottom:30px}
+  .top-right .k:first-child{display:none}
+  .log{top:52px}
+  .log li{grid-template-columns:4.6em minmax(0,1fr)}
+  .log li .k:last-child{display:none}
+  .livebox{top:100%;bottom:auto;margin-top:8px;left:0}
+  .live .t{display:none}
+  .rc.tick{left:0;right:0;bottom:-30px;text-align:left;font-size:14px;overflow:hidden;text-overflow:ellipsis}
+}
+  .marks{overflow:visible}
+  .mv .k{display:none}
+  .field{margin-bottom:34px}
+}
+@media (prefers-reduced-motion:reduce){ .pane,.log{animation:none} }
+</style>
+</head>
+<body>
+<section class="ym" aria-label="Run a sample company for a minute">
+  <header class="top">
+    <span class="who"><b>Halden</b><span>Sample company</span></span>
+    <div class="top-right">
+      <span class="k" id="prog" aria-live="polite"></span>
+      <button class="txt" id="viewall" type="button">All live</button>
+      <button class="txt" id="pace" type="button">Real time</button>
+      <button class="txt" id="watch" type="button">Watch it play</button>
+    </div>
+  </header>
+
+  <div class="body">
+    <div class="field" id="field">
+      <canvas id="gl" aria-hidden="true"></canvas>
+      <div id="labels"></div>
+      <div class="marks" id="ticks"></div>
+      <div class="marks" id="marks"></div>
+      <div id="logwrap"></div>
+      <div class="livebox" id="livebox" aria-live="polite"></div>
+    </div>
+    <div class="divider" id="divider"><button type="button" class="dv" data-snap="max" aria-label="Show only the company"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button><span class="grip"></span><button type="button" class="dv" data-snap="min" aria-label="Show only the chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>
+    <div class="tray"><div class="left" id="left"></div></div>
+    <div class="chat">
+      <form class="ask" id="askform"><input id="askinput" type="text" autocomplete="off" placeholder="Chat with Rebel" aria-label="Chat with Rebel"><button type="submit" class="send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button></form>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <span class="ft">Every figure is illustrative.</span>
+    <span class="ft">Each line is a part of the company. Open one to go deeper.</span>
+  </footer>
+</section>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= data (illustrative) ================= */
+var FUNCS=["Incorporation","Legal","Compliance","Security","Product","Design","Marketing","AI answers","Sales","RevOps","Support","Finance","Books","Tax","Payroll","Hiring"];
+/* Acid: the brand orange running to olive. Growth in orange, building in gold, the company and the law in yellow, money in chartreuse, people in olive. */
+var FAMILY={orange:"#D85A30",gold:"#F2A21E",yellow:"#E6C51B",chartreuse:"#B5C43A",olive:"#6F8A2E"};
+var FAM=["yellow","yellow","yellow","yellow","gold","gold","orange","orange","orange","orange","olive","chartreuse","chartreuse","chartreuse","olive","olive"];
+var COLORS=FAM.map(function(f){return FAMILY[f];});
+
+var DECISIONS=[
+ {fn:"Sales",
+  q:"Northside wants 10% off to sign. Give it to them?",
+  ctx:"Northside Physical Therapy has four locations and is eleven days into its trial.",
+  pool:"212 comparable deals",
+  ev:{a:{name:"Give under 15% off",n:"81%",p:.81,t:"kept the account a year later",c:"174 companies"},
+      b:{name:"Hold the price",n:"39%",p:.39,t:"kept the account a year later",c:"38 companies"}},
+  rec:"a",
+  why:"Rebel-1 recommends giving the discount. With four locations, Northside is worth more as a reference than the $29 a month it costs.",
+  opts:{a:{label:"Give the discount",past:"You gave Northside 10% off."},
+        b:{label:"Hold the price",past:"You held the price with Northside.",risk:"Rebel-1 noted the risk. 61% of the companies that held lost the deal within 30 days, so it set a check-in for Thursday."}},
+  cascade:{
+   a:[["Legal","Order form amended to $261",""],["Legal","Agreement sent to Northside","DocuSign"],["Finance","Price created at 10% off","Stripe"],
+      ["RevOps","Deal moved to closing","HubSpot"],["Legal","BAA attached for signature","DocuSign"],["Finance","First invoice scheduled","Stripe"],
+      ["Product","Workspace created for 4 locations",""],["RevOps","Forecast revised to 7 of 20","HubSpot"],["Support","Onboarding call booked","Google Calendar"],
+      ["Product","9 staff logins provisioned",""],["Finance","Revenue plan updated","QuickBooks"],["Support","Welcome sequence queued","Gmail"],
+      ["Product","Reminder templates imported","Twilio"],["RevOps","Accounts checked, all in sync",""]],
+   b:[["Sales","Reply written and sent to Northside","Gmail"],["Sales","One-page value summary attached",""],["RevOps","Deal flagged at risk","HubSpot"],
+      ["RevOps","Check-in set for Thursday","Google Calendar"],["Support","Trial extended by 7 days",""],["Marketing","Two Dallas references lined up",""],
+      ["Sales","3 lookalike clinics added to outbound","Apollo"],["Books","Forecast held at 6 of 20","QuickBooks"]]}},
+
+ {fn:"Compliance",
+  q:"Add a consent line to every first text? Reply rates may dip.",
+  ctx:"Carriers are tightening their rules on health reminders sent by text.",
+  pool:"96 health messaging companies",
+  ev:{a:{name:"Add consent up front",n:"0 of 71",p:1,t:"blocked by a carrier within a year",c:""},
+      b:{name:"Leave it out",n:"6 of 25",p:.76,t:"blocked by a carrier within a year",c:""}},
+  rec:"a",
+  why:"Rebel-1 recommends adding it. The companies that did gave up about 3 points of reply rate and kept their sending number.",
+  opts:{a:{label:"Add the consent line",past:"You added consent to every first text."},
+        b:{label:"Leave it out",past:"You left the consent line out.",risk:"Rebel-1 noted the risk. 6 of 25 comparable companies were blocked within a year, so it will watch delivery daily and ask again if it drops."}},
+  cascade:{
+   a:[["Compliance","Consent wording checked against TCPA",""],["Product","First-message template changed","GitHub"],["Compliance","Carrier registration updated","Twilio"],
+      ["Legal","Terms of service updated",""],["Product","Opt-out handling tested","Twilio"],["Product","Shipped to all 17 clinics","Vercel"],
+      ["Compliance","HIPAA checks re-run, 6 of 6 pass","Vanta"],["Support","Help article published","Intercom"],["Support","Note sent to 17 clinic managers","Gmail"],
+      ["Marketing","Site copy updated","Webflow"],["Legal","Change notice filed with agreements","DocuSign"],["RevOps","Reply-rate target adjusted to 19%","HubSpot"]],
+   b:[["Compliance","Decision logged with its reasoning",""],["Compliance","Daily delivery watch set","Twilio"],["Compliance","Carrier policy changes tracked",""],
+      ["Legal","Risk note added to the file",""],["Product","Consent line built behind a switch","GitHub"],["Support","Blocked-message playbook written","Intercom"]]}},
+
+ {fn:"Marketing",
+  q:"Spend next month getting named in AI answers, or buying more ads?",
+  ctx:"AI answers name Halden in 14 of the 40 questions clinic owners ask. Ads bring in a lead for $212.",
+  pool:"131 local software companies",
+  ev:{a:{name:"Move budget to AI answers",n:"70%",p:.70,t:"cut cost per customer within two quarters",c:"83 companies"},
+      b:{name:"Stay on ads",n:"35%",p:.35,t:"cut cost per customer within two quarters",c:"48 companies"}},
+  rec:"a",
+  why:"Rebel-1 recommends going after answers. Clinic owners now ask an assistant before they search, and Halden is already named in a third of those answers.",
+  opts:{a:{label:"Go after AI answers",past:"You put next month into AI answers."},
+        b:{label:"Keep buying ads",past:"You kept the budget in ads.",risk:"Rebel-1 noted the risk. 65% of the companies that stayed on ads saw cost per customer rise, so it will run this call again in 30 days."}},
+  cascade:{
+   a:[["AI answers","26 unanswered questions mapped",""],["AI answers","12 answer pages outlined",""],["Finance","$1,100 moved out of ads","Mercury"],
+      ["Marketing","Ad spend cut to $400","Google Ads"],["Design","Answer page template drawn","Figma"],["AI answers","First 3 pages written","Webflow"],
+      ["Product","Comparison page shipped","Vercel"],["AI answers","Structured data added","Webflow"],["Sales","5 clinic owners asked for reviews","Gmail"],
+      ["Product","Public pricing page shipped","Vercel"],["Sales","Review profiles claimed","Capterra"],["AI answers","AI referrals tracked as a source","HubSpot"],
+      ["AI answers","Weekly answer check scheduled",""]],
+   b:[["Marketing","Ad budget raised to $1,900","Google Ads"],["Marketing","4 new ad variants written","Google Ads"],["Finance","Budget moved","Mercury"],
+      ["Design","Landing page variant drawn","Figma"],["Marketing","Landing page test started","Webflow"],["RevOps","Lead routing tightened","HubSpot"],
+      ["Sales","Five-minute follow-up switched on","HubSpot"]]}}
+];
+
+/* When each action really lands, in hours after the decision, and where the founder has to act before the fleet can continue. */
+var TIMING=[
+ {a:[0.2,0.5,0.6,0.7,1.0,1.5,3.0,3.2,20,26,27,28,30,31], b:[0.3,0.4,0.6,0.7,1.0,4,22,23]},
+ {a:[0.5,2.0,2.5,3.0,5.0,9.0,9.5,10,11,12,13,14], b:[0.2,0.5,1.0,1.5,6,7]},
+ {a:[0.5,1.0,1.2,1.3,4.0,26,30,31,32,48,49,50,52], b:[0.3,1.0,1.2,4,5,6,7]}
+];
+var GATES=[
+ {a:{1:{label:"Countersign the Northside agreement",act:"Sign",note:"Rebel-1 prepared the agreement and the BAA. Nothing else moves until you sign."}},
+  b:{0:{label:"Approve the reply to Northside",act:"Send it",note:"Rebel-1 drafted a reply that holds the price and offers a longer trial."}}},
+ {a:{3:{label:"Approve the new consent wording",act:"Approve",note:"One sentence at the top of every first text. Legal has already reviewed it."},
+     5:{label:"Ship the change to all 17 clinics",act:"Ship",note:"Tested against carrier rules and opt-out handling. Ships within the hour once you say so."}},
+  b:{}},
+ {a:{2:{label:"Move $1,100 out of ads for the month",act:"Approve",note:"Budget changes over $500 always come to you. Rebel-1 recommends this one."}},
+  b:{0:{label:"Raise the ad budget to $1,900",act:"Approve",note:"Budget changes over $500 always come to you."}}}
+];
+/* What the fleet is doing, live, on the way to each action */
+var STEPS={
+ "Order form amended to $261":["Pulling the current order form","Applying 10% to the four-location plan","Checking the total against Stripe","Saving the amended form"],
+ "Agreement sent to Northside":["Gathering Northside's clinic details","Drafting the agreement from the standard template","Attaching the amended order form","Sending for signature via DocuSign"],
+ "Price created at 10% off":["Opening the Stripe product","Creating a discounted price","Linking it to Northside's account","Confirming the first charge date"],
+ "Deal moved to closing":["Reading the DocuSign status","Updating the deal stage in HubSpot","Setting the expected close date","Notifying the pipeline"],
+ "BAA attached for signature":["Pulling the HIPAA business associate agreement","Filling in Northside's entity details","Attaching it to the signature packet"],
+ "First invoice scheduled":["Reading the signed agreement","Setting the billing start date","Scheduling the first invoice in Stripe","Adding a payment reminder"],
+ "Workspace created for 4 locations":["Creating Northside's workspace","Adding four clinic locations","Setting each location's hours","Importing the reminder defaults"],
+ "Forecast revised to 7 of 20":["Counting signed clinics","Re-running the pace to 20","Updating the forecast in HubSpot"],
+ "Onboarding call booked":["Checking Northside's availability","Finding a slot on your calendar","Sending the invitation","Preparing the onboarding notes"],
+ "9 staff logins provisioned":["Reading the staff list from onboarding","Creating nine logins","Setting roles per location","Sending welcome emails"],
+ "Revenue plan updated":["Reading the new contract value","Updating the revenue plan in QuickBooks","Re-running cash runway"],
+ "Welcome sequence queued":["Selecting the four-location welcome sequence","Personalising for Northside","Scheduling the first three emails"],
+ "Reminder templates imported":["Reading Northside's current reminder texts","Converting them to Halden templates","Testing delivery through Twilio"],
+ "Accounts checked, all in sync":["Comparing Stripe, HubSpot and the calendar","Reconciling 17 accounts","Logging the check"],
+ "Consent wording checked against TCPA":["Reading the current first-message template","Drafting a one-line consent notice","Checking it against TCPA guidance","Sending it to Legal"],
+ "First-message template changed":["Opening the messaging service","Adding the consent line","Running the message tests","Opening a pull request"],
+ "Carrier registration updated":["Reading the carrier campaign registration","Updating the sample messages","Submitting to Twilio"],
+ "Terms of service updated":["Reading the current terms","Adding the consent clause","Preparing the change for your approval"],
+ "Opt-out handling tested":["Sending STOP to a test number","Confirming the opt-out is recorded","Checking no further texts are sent"],
+ "Shipped to all 17 clinics":["Merging the change","Deploying to production","Verifying delivery at three clinics"],
+ "HIPAA checks re-run, 6 of 6 pass":["Triggering the Vanta checks","Waiting for results","Recording six passes"],
+ "Help article published":["Drafting the consent help article","Adding it to the help centre","Linking it from the settings page"],
+ "Note sent to 17 clinic managers":["Drafting a short note to clinic managers","Personalising for each clinic","Sending 17 emails"],
+ "Site copy updated":["Finding the messaging claims on the site","Updating the wording","Publishing"],
+ "Change notice filed with agreements":["Preparing the change notice","Attaching it to each agreement in DocuSign"],
+ "Reply-rate target adjusted to 19%":["Reading last week's reply rate","Setting the new target","Updating the dashboard"],
+ "26 unanswered questions mapped":["Asking four assistants the 40 clinic-owner questions","Recording which name Halden","Listing the 26 that don't"],
+ "12 answer pages outlined":["Grouping the 26 questions","Outlining 12 pages","Sending outlines to you for reference"],
+ "$1,100 moved out of ads":["Reading this month's ad spend","Preparing the budget change","Waiting for your approval"],
+ "Ad spend cut to $400":["Opening Google Ads","Lowering the daily budget","Confirming the change"],
+ "Answer page template drawn":["Drafting the page layout in Figma","Matching Halden's type and colours","Exporting components"],
+ "First 3 pages written":["Writing the first three answers","Checking facts against Halden's data","Publishing to Webflow"],
+ "Comparison page shipped":["Gathering competitor pricing","Drafting the comparison","Deploying the page"],
+ "Structured data added":["Adding schema markup to answer pages","Validating it","Redeploying"],
+ "5 clinic owners asked for reviews":["Choosing the five happiest clinics","Drafting a short request","Sending five emails"],
+ "Public pricing page shipped":["Drafting the pricing page","Checking prices against Stripe","Deploying"],
+ "Review profiles claimed":["Claiming the Capterra listing","Filling in the profile","Adding screenshots"],
+ "AI referrals tracked as a source":["Adding an AI-referral source in HubSpot","Tagging the first visits","Adding it to the weekly report"],
+ "Weekly answer check scheduled":["Saving the 40 questions","Scheduling a weekly re-check","Setting an alert on drops"]
+};
+function stepsFor(l){return STEPS[l[1]]||["Gathering what's needed"+(l[2]?" from "+l[2]:""),"Doing the work","Checking the result","Recording it in the ledger"];}
+/* ================= what each part of the company shows when opened =================
+   A few small instruments per part: the number that matters, how it is moving, and what is next.
+   Ink carries the data; the part's own colour marks now, the target, or the thing that needs you. */
+function svgo(w,h,inner){return '<svg class="w" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" aria-hidden="true">'+inner+'</svg>';}
+function spark(vals,o){
+  o=o||{};var w=240,h=48,pad=3,mn=Math.min.apply(null,vals.concat(o.target!=null?[o.target]:[])),mx=Math.max.apply(null,vals.concat(o.target!=null?[o.target]:[]));
+  if(mx===mn)mx=mn+1;var X=function(i){return pad+(w-2*pad)*i/(vals.length-1);},Y=function(v){return pad+(h-2*pad)*(1-(v-mn)/(mx-mn));};
+  var d=vals.map(function(v,i){return (i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1);}).join(" ");
+  var out="";
+  if(o.target!=null)out+='<line x1="0" x2="'+w+'" y1="'+Y(o.target)+'" y2="'+Y(o.target)+'" class="tg"/>';
+  if(o.proj){var last=vals.length-1;out+='<path d="M'+X(last)+' '+Y(vals[last])+' L'+w+' '+Y(o.proj)+'" class="pj"/>';}
+  out+='<path d="'+d+'" class="ln"/><circle cx="'+X(vals.length-1)+'" cy="'+Y(vals[vals.length-1])+'" r="3" class="dt"/>';
+  return svgo(w,h,out);
+}
+function bars(items,max,_u,fmt){
+  return '<div class="bars">'+items.map(function(it){var p=Math.max(0.02,it[1]/max);return '<div class="bar"><span class="bl">'+esc(it[0])+'</span><span class="bt"><i style="width:'+(p*100)+'%"'+(it[2]?' class="hi"':'')+'></i></span><span class="bv">'+esc(it[3]!=null?it[3]:it[1])+'</span></div>';}).join("")+'</div>';
+}
+function cells(n,k,o){o=o||{};var s="";for(var i=0;i<n;i++)s+='<i class="'+(i<k?"on":"")+(o.warn&&i>=k?" wr":"")+'"></i>';return '<div class="cells">'+s+'</div>';}
+function tl(items){return '<ol class="tl">'+items.map(function(it){return '<li class="'+(it[2]||"")+'"><span class="td">'+esc(it[0])+'</span><span class="tt">'+esc(it[1])+'</span></li>';}).join("")+'</ol>';}
+function kpi(v,cap){return '<div class="kv">'+v+'</div><div class="kc">'+esc(cap)+'</div>';}
+function wg(title,body,wide){return '<section class="wg'+(wide?" wide":"")+'"><h6>'+esc(title)+'</h6>'+body+'</section>';}
+
+var WIDGETS={
+ "Sales":function(){return wg("Pipeline this month",bars([["Researched",38],["First email sent",120],["Replied",26],["In trial",11,1],["Signed",6,1]],120))+
+   wg("Reply rate, 8 weeks",kpi("22%","against a target of 18%")+spark([13,15,14,17,18,19,21,22],{target:18}))+
+   wg("Closing next",tl([["Northside, 4 locations","Thu",""],["Lakewood PT","Mon",""],["Bishop Arts Rehab","trial ends 3 Oct",""]]))+
+   wg("Best fit right now",kpi("3+ locations","answer twice as often. Outbound has shifted toward them."));},
+ "RevOps":function(){return wg("Pace to 20 paying clinics",kpi("17 Feb","three weeks past the 31 Jan target")+spark([1,2,2,3,4,5,6,6],{target:20,proj:20})+'<div class="kc">6 signed · 11 in trial · needs 2 signings a week from here</div>',true)+
+   wg("Systems in sync",cells(17,17)+'<div class="kc">17 of 17 accounts agree across Stripe, HubSpot and the calendar</div>')+
+   wg("Trial to paid",kpi("55%","of trials sign within 30 days, up from 40%"));},
+ "Marketing":function(){return wg("Cost of a lead",kpi("$212","against a target of $250")+spark([301,280,262,255,240,231,220,212],{target:250}))+
+   wg("Leads by source, this month",bars([["Ads",19],["AI answers",11,1],["Referrals",6],["Direct",4]],19))+
+   wg("Spend this month",bars([["Ads",1500],["Content",400],["Reviews",100]],2000,0).replace("</div></div>","</div></div>")+'<div class="kc">$2,000 budget · Dallas clinic-owner audience is nearly used up</div>',true);},
+ "AI answers":function(){return wg("Questions where an assistant names Halden",cells(40,14)+'<div class="kc">14 of 40 · up from 3 in August</div>',true)+
+   wg("Named, by month",kpi("14","of 40")+spark([1,2,3,6,9,14]))+
+   wg("Next pages",tl([["How much does clinic booking software cost","drafting","now"],["Best text reminders for PT clinics","outlined",""],["Halden vs Jane App","outlined",""]]));},
+ "Product":function(){return wg("Bookings a week",kpi("412","against a target of 400")+spark([310,335,350,362,371,380,398,412],{target:400}))+
+   wg("No-shows after two-way reminders",kpi("6.1%","from 11.4% at clinics that switched them on")+spark([11.4,10.2,9.1,8.0,7.2,6.1]))+
+   wg("Health",cells(30,30)+'<div class="kc">30 days without an incident · 99.98% uptime</div>')+
+   wg("Shipping next",tl([["Clinic logo on reminders","in review","now"],["Waitlist auto-fill","building",""],["Spanish reminders","planned",""]]));},
+ "Design":function(){return wg("Taps to make a booking",kpi("2","down from 5 on the new booking screen")+spark([5,5,4,3,2,2]))+
+   wg("Bookings on the new screen",kpi("+9%","at the four clinics that have it"))+
+   wg("In flight",tl([["Booking flow","shipped","done"],["Reminder text preview","in review","now"],["Clinic logo upload","drawing",""]]),true);},
+ "Legal":function(){return wg("Agreements",cells(9,8)+'<div class="kc">8 signed · 1 awaiting Northside</div>')+
+   wg("Renewals",tl([["Riverbend PT","renews 12 Nov",""],["Lakewood PT","renews 3 Dec",""],["Oak Cliff Rehab","renews 19 Jan",""]]))+
+   wg("Standard terms",kpi("100%","of clinics on the same agreement. Two asked for changes; both declined without losing the deal."),true);},
+ "Compliance":function(){return wg("HIPAA checks",cells(6,6)+'<div class="kc">6 of 6 passing · last run today</div>')+
+   wg("Business associate agreements",cells(17,17)+'<div class="kc">17 of 17 clinics covered</div>')+
+   wg("Coming up",tl([["Quarterly access review","1 Oct",""],["Vendor review, Twilio","15 Oct",""],["Annual risk assessment","Jan",""]]),true);},
+ "Security":function(){return wg("Open findings",kpi("0","last scan clean, 2 hours ago"))+
+   wg("Second factor on staff logins",cells(17,15,{warn:true})+'<div class="kc">15 of 17 · reminders sent to two clinics</div>')+
+   wg("Recent",tl([["Dependency scan","clean","done"],["Access keys","rotated","done"],["Backup restore","tested","done"]]),true);},
+ "Incorporation":function(){return wg("Entity",kpi("Delaware C-corp","registered to do business in Texas · good standing"),true)+
+   wg("Filings",tl([["Texas registration","renewed Aug","done"],["Delaware franchise tax","1 Mar",""],["Annual report","1 Mar",""]]))+
+   wg("Cap table",bars([["You",88],["Jordan, vesting",2],["Option pool",10]],100,0));},
+ "Finance":function(){return wg("Revenue a month",kpi("$1,740","against a target of $2,000")+spark([620,780,900,1050,1190,1310,1450,1740],{target:2000,proj:2000})+'<div class="kc">On pace to reach $2,000 by mid-December</div>')+
+   wg("Cash runway",bars([["Months of runway",14]],24,0)+'<div class="kc">$41,200 cash · $2,900 a month out</div>')+
+   wg("This month",bars([["Collected",1740,1],["Outstanding",0]],1740)+'<div class="kc">Every invoice paid · one card failure retried and cleared</div>');},
+ "Books":function(){return wg("September close",bars([["Categorised",84,1]],100,0,"84%")+'<div class="kc">84% done with nine days left · August closed on 3 Sep</div>',true)+
+   wg("Receipts matched",cells(41,39)+'<div class="kc">39 of 41 transactions · 2 receipts chased</div>')+
+   wg("Bank feed",kpi("Reconciled","Mercury, this morning"));},
+ "Tax":function(){return wg("Filings",tl([["Q3 federal estimate","paid 15 Sep","done"],["Q4 federal estimate","15 Jan",""],["Texas franchise report","15 May",""]]),true)+
+   wg("Overdue",kpi("0","Texas sales tax does not apply to Halden’s service"))+
+   wg("R&D credit",kpi("$4,100","estimated for the year, notes kept current"));},
+ "Payroll":function(){return wg("People",bars([["You",1],["Jordan, from 1 Oct",1,1]],1,0,"")+'<div class="kc">1 + Jordan</div>')+
+   wg("Next payroll",kpi("15 Oct","first run including Jordan · $5,400"))+
+   wg("Before Jordan starts",tl([["Payroll provider","set up","done"],["Offer letter","countersigned","done"],["Payroll authorisation","needs your signature","now"]]),true);},
+ "Hiring":function(){return wg("Onboarding role",bars([["Screened",14],["Interviewed",3],["Hired",1,1]],14))+
+   wg("Next hire",kpi("At 30 clinics","a second onboarder · 17 of 30 now")+bars([["Clinics",17,1]],30,0))+
+   wg("Open roles",kpi("0","Jordan covers clinic onboarding from 1 Oct"),true);},
+ "Support":function(){return wg("Median first reply",kpi("4 min","against a target of 10")+spark([12,9,8,7,6,5,4,4],{target:10}))+
+   wg("Tickets today",bars([["Rescheduling",8,1],["Reminder timing",5],["Billing",3],["Other",7]],8)+'<div class="kc">A help article on rescheduling would remove about a third</div>')+
+   wg("Gone quiet",tl([["Riverbend PT","no logins in 9 days","now"],["Bishop Arts Rehab","no logins in 4 days",""]]),true);}
+};
+/* ================= live: the place where each part of the company actually works =================
+   Every part of the company has two faces. The brief: numbers, what happened, what is next. The live view:
+   the surface where the work is being done, changing in front of you as the fleet does it. Five kinds of
+   surface cover the company: an inbox, a document, an editor, a ledger and a checklist. */
+var LIVE={
+ "Incorporation":{kind:"doc",title:"Halden, Inc. · corporate record",items:["Delaware C-corporation, formed 12 March.","Registered to do business in Texas, renewed August.","Registered agent: Harvard Business Services, Wilmington.","Board: Kavon (sole director). 10,000,000 shares authorised."]},
+ "Legal":{kind:"doc",title:"Northside Physical Therapy · Services agreement",items:["1. Services. Halden provides booking and text reminders for the clinics listed in Schedule A.","2. Fees. $261 a month for four locations, billed monthly in advance.","3. Term. Twelve months, renewing annually unless either party gives 30 days’ notice.","4. Data. Patient data is handled under the Business Associate Agreement attached as Exhibit B."]},
+ "Compliance":{kind:"check",title:"HIPAA controls",items:[["Encryption at rest and in transit",1],["Access reviewed quarterly",1],["Audit logging on all patient data",1],["Business associate agreements current",1],["Backups tested monthly",1],["Incident response plan reviewed",1]]},
+ "Security":{kind:"check",title:"Security posture",items:[["Dependency scan clean",1],["Access keys rotated within 90 days",1],["Second factor on all staff logins",0],["Backup restore tested",1]]},
+ "Product":{kind:"code",title:"halden/reminders/first_message.ts",items:["export const firstMessage = (b: Booking) =>","  `Hi ${b.patient.first}, this is ${b.clinic.name}.`","  + ` Your appointment is ${when(b.start)}.`","  + ` Reply C to confirm or R to reschedule.`"]},
+ "Design":{kind:"code",title:"Booking screen · layout",items:["Header: clinic name, location switcher","Calendar: week view, 15-minute slots","Slot: patient, treatment, reminder status","Footer: one button, Book"]},
+ "Marketing":{kind:"ledger",title:"Google Ads · Dallas clinic owners",cols:["Campaign","Daily","Leads","CPL"],items:[["PT booking software","$50","7","$214"],["No-show reminders","$30","5","$180"],["Halden brand","$20","2","$300"]]},
+ "AI answers":{kind:"code",title:"halden.com/answers/cost-of-clinic-booking-software.md",items:["# How much does clinic booking software cost?","","Most independent PT clinics pay between $49 and $299 a month.","Halden is $79 a month per location, with text reminders included."]},
+ "Sales":{kind:"inbox",title:"Outbound · clinics in Dallas",items:[["Northside Physical Therapy","Re: booking and reminders for four locations","Tue"],["Lakewood PT","Trial started, first reminders sent tonight","Mon"],["Bishop Arts Rehab","Following up on Friday’s call","Mon"],["Oak Cliff Rehab","Quick question about your no-show rate","Mon"]]},
+ "RevOps":{kind:"ledger",title:"HubSpot · pipeline",cols:["Clinic","Stage","Value","Close"],items:[["Northside PT","Closing","$261/mo","Thu"],["Lakewood PT","Trial","$79/mo","3 Oct"],["Bishop Arts Rehab","Trial","$79/mo","3 Oct"],["Oak Cliff Rehab","Replied","$79/mo","Oct"]]},
+ "Support":{kind:"inbox",title:"Intercom · open conversations",items:[["Riverbend PT","How do I move a patient to next week?","4 min"],["Lakewood PT","Reminder went out at 6am, can we change the time?","22 min"],["Preston Hollow PT","Card on file expired","1 h"]]},
+ "Finance":{kind:"ledger",title:"Stripe · subscriptions",cols:["Customer","Plan","Amount","Next invoice"],items:[["Riverbend PT","1 location","$79","1 Oct"],["Lakewood PT","1 location","$79","1 Oct"],["Oak Cliff Rehab","2 locations","$158","3 Oct"],["Preston Hollow PT","1 location","$79","5 Oct"]]},
+ "Books":{kind:"ledger",title:"QuickBooks · September",cols:["Date","Payee","Amount","Category"],items:[["19 Sep","Twilio","$142.10","Messaging"],["19 Sep","Vercel","$20.00","Hosting"],["18 Sep","Google Ads","$50.00","Marketing"],["18 Sep","Riverbend PT","+$79.00","Revenue"]]},
+ "Tax":{kind:"ledger",title:"Tax calendar",cols:["Filing","Jurisdiction","Due","Status"],items:[["Q3 estimated tax","Federal","15 Sep","Paid"],["Q4 estimated tax","Federal","15 Jan","Scheduled"],["Franchise report","Texas","15 May","Not yet due"]]},
+ "Payroll":{kind:"ledger",title:"Gusto · people",cols:["Person","Role","Start","Pay"],items:[["Kavon","Founder","Mar","$0"],["Jordan","Clinic onboarding","1 Oct","$5,400/mo"]]},
+ "Hiring":{kind:"check",title:"Clinic onboarding role",items:[["Role scoped and posted",1],["14 candidates screened",1],["3 interviewed",1],["Offer accepted: Jordan",1],["Second onboarder at 30 clinics",0]]}
+};
+var LIVE_LABEL={inbox:"Inbox",doc:"Document",code:"Editor",ledger:"Ledger",check:"Checklist"};
+function liveSurface(name,mini){
+  var L=LIVE[name],c=COLORS[FUNCS.indexOf(name)],b='';
+  if(L.kind==="inbox")b='<ul class="lv-list">'+L.items.map(function(it){return '<li><span class="lv-from">'+esc(it[0])+'</span><span class="lv-sub">'+esc(it[1])+'</span><span class="lv-when">'+esc(it[2])+'</span></li>';}).join("")+'</ul>';
+  else if(L.kind==="doc")b='<div class="lv-doc">'+L.items.map(function(t){return '<p>'+esc(t)+'</p>';}).join("")+'</div>';
+  else if(L.kind==="code")b='<ol class="lv-code">'+L.items.map(function(t){return '<li><code>'+esc(t)+'</code></li>';}).join("")+'</ol>';
+  else if(L.kind==="ledger")b='<table class="lv-tbl"><thead><tr>'+L.cols.map(function(x){return '<th>'+esc(x)+'</th>';}).join("")+'</tr></thead><tbody>'+L.items.map(function(r){return '<tr>'+r.map(function(x){return '<td>'+esc(x)+'</td>';}).join("")+'</tr>';}).join("")+'</tbody></table>';
+  else b='<ul class="lv-check">'+L.items.map(function(it){return '<li class="'+(it[1]?"ok":"")+'"><i></i>'+esc(it[0])+'</li>';}).join("")+'</ul>';
+  return '<div class="lv'+(mini?" mini":"")+'" id="live-'+name.replace(/\s/g,"_")+'" style="--c:'+c+'"><div class="lv-bar"><span class="lv-kind">'+LIVE_LABEL[L.kind]+'</span><span class="lv-title">'+esc(L.title)+'</span><span class="lv-dot"></span></div><div class="lv-body">'+b+'</div></div>';
+}
+function typeInto(el,text,ms,done){
+  var i=0,n=text.length,step=Math.max(1,Math.round(n/Math.max(1,ms/16)));
+  (function tick(){i=Math.min(n,i+step);el.textContent=text.slice(0,i);if(i<n)requestAnimationFrame(tick);else if(done)done();})();
+}
+/* an action lands on a surface: the surface shows the steps being done, then the result, in its own idiom */
+function liveApply(name,action,tool){
+  var host=document.getElementById("live-"+name.replace(/\s/g,"_"));if(!host)return;
+  var L=LIVE[name],body=host.querySelector(".lv-body"),steps=stepsFor([name,action,tool]);
+  host.classList.add("busy");
+  var q=steps.slice(0,3).concat([action]),k=0;
+  (function nextStep(){
+    if(k>=q.length){host.classList.remove("busy");host.classList.add("flash");setTimeout(function(){host.classList.remove("flash");},900);return;}
+    var t=q[k],last=k===q.length-1;k++;
+    var el,target;
+    if(L.kind==="inbox"){var ul=body.querySelector("ul");el=document.createElement("li");el.className="new"+(last?" done":"");el.innerHTML='<span class="lv-from">'+(last?esc(action.split(" ")[0]==="Reply"?"Northside":"Fleet"):"Draft")+'</span><span class="lv-sub"></span><span class="lv-when">now</span>';ul.insertBefore(el,ul.firstChild);target=el.querySelector(".lv-sub");}
+    else if(L.kind==="doc"){var d=body.querySelector(".lv-doc");el=document.createElement("p");el.className="new"+(last?" done":"");d.appendChild(el);target=el;}
+    else if(L.kind==="code"){var ol=body.querySelector("ol");el=document.createElement("li");el.className="new"+(last?" done":"");el.innerHTML="<code></code>";ol.appendChild(el);target=el.querySelector("code");}
+    else if(L.kind==="ledger"){var tb=body.querySelector("tbody");el=document.createElement("tr");el.className="new"+(last?" done":"");var cols=L.cols.length;el.innerHTML='<td colspan="'+cols+'"></td>';tb.insertBefore(el,tb.firstChild);target=el.firstChild;}
+    else{var ulc=body.querySelector("ul");el=document.createElement("li");el.className="new"+(last?" ok done":"");el.innerHTML="<i></i><span></span>";ulc.appendChild(el);target=el.querySelector("span");}
+    typeInto(target,t,last?520:340,function(){
+      if(!last)setTimeout(function(){el.classList.add("fade");setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},380);},260);
+      body.scrollTop=body.scrollHeight;
+      setTimeout(nextStep,last?0:120);
+    });
+  })();
+}
+function liveGrid(){
+  return '<div class="lvgrid">'+FUNCS.map(function(f){return '<button type="button" class="lvcell" data-room="'+esc(f)+'" style="--c:'+COLORS[FUNCS.indexOf(f)]+'"><span class="lvname">'+esc(f)+'</span>'+liveSurface(f,true)+'</button>';}).join("")+'</div>';
+}
+
+var DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+function clockLabel(h){var m=Math.round((9+h)*60),d=Math.floor(m/1440),mm=m%1440;return DAYS[d%7]+" "+("0"+Math.floor(mm/60)).slice(-2)+":"+("0"+(mm%60)).slice(-2);}
+function elapsedLabel(h){if(h<1)return Math.round(h*60)+" min in";if(h<24)return Math.round(h)+" h in";var d=Math.floor(h/24),r=Math.round(h-d*24);return d+" day"+(d>1?"s":"")+(r?" "+r+" h":"")+" in";}
+var SAY=[
+ {lead:"Northside wants 10% off to sign. Four locations, eleven days into the trial.",
+  rest:"Across 212 comparable deals, giving under 15% kept the account a year later 81% of the time; holding the price, 39%. I’d give it. With four locations, Northside is worth more as a reference than the $29 a month."},
+ {lead:"Carriers are tightening their rules on health reminders sent by text.",
+  rest:"We could add a consent line to every first message, and reply rates may dip about three points. Of 96 comparable companies, none that added consent were blocked by a carrier; 6 of the 25 that left it out were. I’d add it."},
+ {lead:"Next month’s marketing budget: ads at $212 a lead, or the AI answers clinic owners ask before they search.",
+  rest:"Of 131 local software companies, 70% that moved budget to being named cut their cost per customer within two quarters, against 35% that stayed on ads. Halden is already named in 14 of 40 answers. I’d go after answers."}
+];
+var ROOMS={
+ "Incorporation":{num:"Good standing",cap:"Delaware C-corp, registered to do business in Texas",say:"Nothing is due until the Delaware franchise tax in March. It is on the calendar and will be filed for you.",log:[["Aug","Texas registration renewed",""],["Aug","Registered agent confirmed",""],["Sep","Cap table updated for Jordan's grant","Carta"]]},
+ "Legal":{num:"8",cap:"agreements signed, against a target of 8",say:"Every clinic is on the same agreement. Two asked for changes and both were declined without losing the deal.",log:[["Mon","Riverbend agreement countersigned","DocuSign"],["Tue","Privacy policy reviewed",""],["Tue","Contractor agreement prepared for Jordan","DocuSign"]]},
+ "Compliance":{num:"6 of 6",cap:"HIPAA checks passing",say:"All six checks pass. The next thing that could break them is a new vendor, and none is planned.",log:[["Mon","Access review completed","Vanta"],["Tue","Vendor agreements confirmed current",""],["Tue","Backup restore tested",""]]},
+ "Security":{num:"0",cap:"open findings",say:"The last scan was clean. Staff logins at two clinics still lack a second factor, and reminders have gone out.",log:[["Mon","Dependency scan clean","GitHub"],["Tue","Access keys rotated",""],["Tue","Second-factor reminders sent to 2 clinics","Gmail"]]},
+ "Product":{num:"412",cap:"bookings a week, against a target of 400",say:"Two-way text reminders shipped last week, and no-shows fell at every clinic that switched them on.",log:[["Mon","Two-way reminders shipped","Vercel"],["Tue","Calendar sync bug fixed","GitHub"],["Tue","Load test passed at 5x traffic",""]]},
+ "Design":{num:"3",cap:"screens redrawn this week",say:"The booking screen now takes two taps where it took five. Clinics on the new screen book 9% more visits.",log:[["Mon","Booking flow redrawn","Figma"],["Tue","Reminder text preview added","Figma"],["Tue","Clinic logo upload designed","Figma"]]},
+ "Marketing":{num:"$212",cap:"cost of a lead from ads, against a target of $250",say:"Ads are efficient and small. The Dallas clinic-owner audience is nearly used up, so growth has to come from elsewhere.",log:[["Mon","Ad report filed","Google Ads"],["Tue","Clinic spotlight published","Webflow"],["Tue","Newsletter sent to 310 clinic owners","Gmail"]]},
+ "AI answers":{num:"14 of 40",cap:"questions where an assistant names Halden",say:"Up from 3 of 40 in August. The gains came from two comparison pages and eleven clinic reviews.",log:[["Mon","40 questions re-checked across 4 assistants",""],["Tue","Comparison page refreshed","Webflow"],["Tue","2 new clinic reviews collected","Capterra"]]},
+ "Sales":{num:"22%",cap:"reply rate, against a target of 18%",say:"Replies are at a record. Clinics with three or more locations answer twice as often, so outbound has shifted toward them.",log:[["Mon","38 new clinics researched","Apollo"],["Mon","120 first emails sent","Gmail"],["Tue","11 trials started","HubSpot"]]},
+ "RevOps":{num:"17 of 17",cap:"accounts agree across Stripe, HubSpot and the calendar",say:"6 signed and 11 in trial. At this pace Halden reaches 20 paying clinics on 21 February, three weeks late.",log:[["Mon","4 dead leads closed","HubSpot"],["Tue","Trial-to-paid report refreshed",""],["Tue","Billing and CRM reconciled","Stripe"]]},
+ "Support":{num:"4 min",cap:"median first reply, against a target of 10",say:"Most questions are about rescheduling. A help article on it would remove about a third of tickets.",log:[["Mon","23 tickets answered","Intercom"],["Tue","Riverbend went quiet, check-in sent","Gmail"],["Tue","3 a.m. outage question answered","Intercom"]]},
+ "Finance":{num:"$1,740",cap:"revenue a month, against a target of $2,000",say:"On pace to reach $2,000 by mid-December. Cash covers 14 months at the current spend.",log:[["Thu","Runway re-run after payroll estimate","Mercury"],["Fri","September forecast refreshed","QuickBooks"],["Mon","6 invoices collected","Stripe"],["Tue","Card failure at Lakewood retried and cleared","Stripe"],["Tue","Weekly cash report filed","Mercury"]]},
+ "Books":{num:"Closed",cap:"August closed on 3 September",say:"Every transaction is categorised and matched to a receipt. September is 84% done with nine days left.",log:[["Mon","41 transactions categorised","QuickBooks"],["Tue","Bank feed reconciled","Mercury"],["Tue","2 missing receipts chased and found","Gmail"]]},
+ "Tax":{num:"0",cap:"filings overdue",say:"Texas sales tax does not apply to Halden's service. Quarterly estimates are paid through Q3.",log:[["Sep","Q3 federal estimate paid",""],["Sep","Texas franchise status checked",""],["Sep","R&D credit notes kept current",""]]},
+ "Payroll":{num:"1 + Jordan",cap:"people, with Jordan starting on 1 October",say:"Payroll needs to be live before Jordan starts. Everything is set up.",wait:"One thing here is waiting on you, which is signing the payroll authorisation.",log:[["Mon","Payroll provider set up","Gusto"],["Tue","Jordan's offer letter countersigned","DocuSign"],["Tue","Benefits options priced",""]]},
+ "Hiring":{num:"1",cap:"role filled, none open",say:"Jordan covers clinic onboarding. The next hire Rebel-1 expects to matter is a second onboarder at about 30 clinics.",log:[["Aug","Onboarding role scoped",""],["Aug","14 candidates screened","Ashby"],["Sep","Jordan accepted","DocuSign"]]}
+};
+
+/* ================= state, clock, scheduler ================= */
+var $=function(id){return document.getElementById(id);};
+var left=$("left"),field=$("field"),labelsEl=$("labels"),marks=$("marks"),ticksEl=$("ticks"),logwrap=$("logwrap"),prog=$("prog"),watchBtn=$("watch");
+var S={i:0,view:"card",picks:[],done:{},back:null,watching:false,touched:false,room:null};
+var paceBtn=$("pace"),viewAll=$("viewall");S.real=true;
+var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+var CHECK='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 6.5l3 3 6-7"/></svg>';
+
+/* one clock drives the waves and the choreography, so they can never drift apart */
+var clock={t:0,last:0,manual:/[?&]manual/.test(location.search)};
+var tasks=[];
+function later(fn,ms,keep){var o={at:clock.t+ms/1000,fn:fn,keep:!!keep};tasks.push(o);return o;}
+function clearTimers(){tasks=tasks.filter(function(o){return o.keep;});}
+function runTasks(){
+  if(!tasks.length)return;
+  var due=tasks.filter(function(o){return o.at<=clock.t;});
+  if(!due.length)return;
+  tasks=tasks.filter(function(o){return o.at>clock.t;});
+  due.sort(function(a,b){return a.at-b.at;}).forEach(function(o){o.fn();});
+}
+
+/* ================= the field ================= */
+var NS=FUNCS.length, NF=1, NP=220, MAXP=32, HF=1;
+var F={W:0,H:0,dpr:1,scale:1,padL:132,padR:6,y:[],ty:[],a:[],ta:[],tint:[],tt:[],sp:[],tsp:[],pulses:[],ticks:[],gl:null,ok:false,visible:true};
+for(var s0=0;s0<NS;s0++){F.y.push(0);F.ty.push(0);F.a.push(1);F.ta.push(1);F.tint.push(0);F.tt.push(0);F.sp.push(1);F.tsp.push(1);}
+var canvas=$("gl");
+
+function cssColor(name){
+  var v=getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  var m=v.match(/^#([0-9a-f]{6})$/i); if(!m) return [0.08,0.07,0.06];
+  var n=parseInt(m[1],16); return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255];
+}
+
+/* Each part of the company is a bundle of hairlines. A pulse widens the bundle where it passes,
+   so the hairlines keep their order and never cross: the field stays crisp however busy it gets. */
+/* Each part of the company is one solid ribbon: a hairline at rest that swells into a flat lens where a pulse passes.
+   One shape with a crisp anti-aliased edge, so it stays sharp at any width. */
+var VS=[
+"attribute vec4 a;",
+"uniform vec2 u_res; uniform vec4 u_geom; uniform float u_time;",
+"uniform vec4 u_s["+NS+"]; uniform vec4 u_a["+MAXP+"]; uniform vec4 u_b["+MAXP+"]; uniform vec3 u_col["+NS+"];",
+"varying float v_side; varying float v_or; varying float v_al; varying vec3 v_col; varying float v_hw;",
+"const float PI=3.14159265;",
+"void main(){",
+"  float t=a.x;",
+"  vec4 S=u_s[int(a.z+0.5)]; v_col=u_col[int(a.z+0.5)];",
+"  float w=0.0; float c=0.0; float eo=0.0;",
+"  for(int i=0;i<"+MAXP+";i++){",
+"    vec4 A=u_a[i];",
+"    if(A.w==0.0) continue;",
+"    if(abs(floor(A.x)-a.z)>0.5) continue;",
+"    float u=(t-A.y)/A.z;",
+"    float g=exp(-u*u);",
+"    w+=abs(A.w)*g;",
+"    c+=u_b[i].x*g*sin(u*2.4+u_b[i].y);",
+"    eo+=step(0.25,fract(A.x))*g*u_b[i].z;",
+"  }",
+"  float lens=pow(sin(PI*t),1.6);",
+"  float breathe=1.0+0.25*sin(u_time*0.5+a.z*1.7);",
+"  float ends=smoothstep(0.0,0.05,t)*smoothstep(0.0,0.05,1.0-t);",
+"  float hw=u_geom.z+(1.1*breathe*lens+0.42*w*ends)*S.w*u_geom.w;",
+"  v_hw=hw;",
+"  v_or=clamp(max(S.z,eo),0.0,1.0);",
+"  float yy=S.x+c*ends*u_geom.w+a.y*hw;",
+"  v_side=a.y;",
+"  v_al=S.y;",
+"  gl_Position=vec4(mix(u_geom.x,u_geom.y,t)/u_res.x*2.0-1.0,1.0-yy/u_res.y*2.0,0.0,1.0);",
+"}"].join("\n");
+var FS=[
+"precision mediump float;",
+"varying float v_side; varying float v_or; varying float v_al; varying vec3 v_col; varying float v_hw;",
+"uniform vec3 u_ink;",
+"void main(){",
+"  float aa=clamp(1.0/max(v_hw,0.5),0.0,1.0);",
+"  float e=1.0-smoothstep(1.0-aa,1.0,abs(v_side));",
+"  float lit=smoothstep(0.03,0.14,v_or);",
+"  vec3 col=mix(u_ink,v_col,lit);",
+"  gl_FragColor=vec4(col,v_al*e*mix(0.78,1.0,lit));",
+"}"].join("\n");
+
+var U={};
+function initGL(){
+  var gl=canvas.getContext("webgl",{antialias:true,alpha:true,premultipliedAlpha:false});
+  if(!gl) return false;
+  function sh(type,src){var o=gl.createShader(type);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(o));return null;}return o;}
+  var v=sh(gl.VERTEX_SHADER,VS),f=sh(gl.FRAGMENT_SHADER,FS); if(!v||!f) return false;
+  var pr=gl.createProgram();gl.attachShader(pr,v);gl.attachShader(pr,f);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){console.error(gl.getProgramInfoLog(pr));return false;}
+  gl.useProgram(pr);
+  var data=new Float32Array(NS*NF*NP*2*4),o=0;
+  for(var s=0;s<NS;s++)for(var fl=0;fl<NF;fl++)for(var j=0;j<NP;j++){var t=j/(NP-1);
+    data[o++]=t;data[o++]=-1;data[o++]=s;data[o++]=fl; data[o++]=t;data[o++]=1;data[o++]=s;data[o++]=fl;}
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+  var loc=gl.getAttribLocation(pr,"a");gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,4,gl.FLOAT,false,0,0);
+  ["u_res","u_geom","u_time","u_s","u_a","u_b","u_ink","u_col"].forEach(function(n){U[n]=gl.getUniformLocation(pr,n);});
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  F.gl=gl;return true;
+}
+
+function layout(){
+  var r=field.getBoundingClientRect();
+  F.W=r.width;F.H=Math.max(r.height,200);F.dpr=Math.min(window.devicePixelRatio||1,2);
+  F.padL=parseFloat(getComputedStyle(field).getPropertyValue("--padl"))||132;
+  canvas.width=Math.round(F.W*F.dpr);canvas.height=Math.round(F.H*F.dpr);
+  if(F.gl)F.gl.viewport(0,0,canvas.width,canvas.height);
+  F.reserve=34;F.scale=Math.max(0.42,Math.min(1,((F.H-52-(window.innerWidth>=900?F.reserve:0))/(NS-1))/46));
+  setTargets(true);
+}
+function restY(s){var top=26,bot=F.H-26-(window.innerWidth>=900?F.reserve:0);return top+(bot-top)*s/(NS-1);}
+function setTargets(snap){
+  for(var s=0;s<NS;s++){
+    if(S.view==="room"){F.ty[s]=(s===S.room)?40:restY(s);F.ta[s]=(s===S.room)?1:0;F.tsp[s]=((s===S.room)?2.2:1)*F.scale;}
+    else{F.ty[s]=restY(s);F.ta[s]=1;F.tsp[s]=F.scale;}
+    if(snap){F.y[s]=F.ty[s];F.a[s]=F.ta[s];F.sp[s]=F.tsp[s];}
+  }
+}
+function xPx(x0){return F.padL+(F.W-F.padL-F.padR)*x0;}
+
+/* ---- pulses ---- */
+function easeOut(p){return 1-Math.pow(1-p,3);}
+function easeInOut(p){return p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;}
+var K=reduce?0.3:1;
+/* a pulse that travels from xa to xb */
+function travel(s,orange,xa,xb,dur,amp,sig,o){
+  o=o||{};
+  F.pulses.push({s:s,k:orange?1:0,born:clock.t+(o.delay||0),dur:dur,sig:sig,
+    at:function(p){var e=(o.ease||easeInOut)(p),env=Math.min(1,p/(o.rise||0.12))*Math.min(1,(1-p)/(o.fall||0.3));
+      return {x:xa+(xb-xa)*e,w:amp*K*env,c:(o.sway||0)*amp*K*env,glow:env*(o.glow==null?1:o.glow)};}});
+}
+/* a pulse that swells in place and settles */
+function swell(s,orange,x0,dur,amp,sig,o){
+  o=o||{};
+  F.pulses.push({s:s,k:orange?1:0,born:clock.t+(o.delay||0),dur:dur,sig:sig,
+    at:function(p){var age=p*dur,env=(1-Math.exp(-age*16))*Math.pow(1-p,1.6);
+      return {x:x0,w:amp*K*env,c:0,glow:env};}});
+}
+/* work landing on a line: a swell where it lands and two ripples running out from it */
+function landing(s,x0){
+  swell(s,true,x0,2.1,21,0.036);
+  travel(s,true,x0,Math.min(0.98,x0+0.30),1.7,11,0.026,{ease:easeOut,rise:0.05,fall:0.85});
+  travel(s,true,x0,Math.max(0.02,x0-0.30),1.7,11,0.026,{ease:easeOut,rise:0.05,fall:0.85});
+}
+var aBuf=new Float32Array(MAXP*4),bBuf=new Float32Array(MAXP*4),sBuf=new Float32Array(NS*4),labs=[];
+
+function step(dt){
+  clock.t+=dt;runTasks();cascadeStep(dt);
+  var k=1-Math.exp(-dt*7.5),s;
+  for(s=0;s<NS;s++){
+    F.y[s]+=(F.ty[s]-F.y[s])*k;F.a[s]+=(F.ta[s]-F.a[s])*k;F.sp[s]+=(F.tsp[s]-F.sp[s])*k;
+    F.tint[s]+=(F.tt[s]-F.tint[s])*(1-Math.exp(-dt*(F.tt[s]>F.tint[s]?9:1.6)));
+  }
+}
+function draw(){
+  var s,i,n=0;
+  for(s=0;s<NS;s++){
+    sBuf[s*4]=F.y[s]*F.dpr;sBuf[s*4+1]=F.a[s];sBuf[s*4+2]=F.tint[s];sBuf[s*4+3]=F.sp[s];
+    if(labs[s])labs[s].style.transform="translateY("+(F.y[s]-11)+"px)";
+  }
+  F.ticks.forEach(function(tk){tk.el.style.transform="translate("+xPx(tk.x)+"px,"+F.y[tk.s]+"px)";tk.el.style.opacity=F.a[tk.s];});
+  if(F.head){var hp=F.head();if(hp){F.headEl.style.transform="translate("+xPx(hp.x)+"px,"+F.y[hp.s]+"px)";}}
+  aBuf.fill(0);bBuf.fill(0);
+  F.pulses=F.pulses.filter(function(p){return clock.t-p.born<p.dur;});
+  for(i=0;i<F.pulses.length&&n<MAXP;i++){
+    var p=F.pulses[i],age=clock.t-p.born;if(age<0)continue;
+    var v=p.at(age/p.dur);
+    aBuf[n*4]=p.s+(p.k?0.5:0);aBuf[n*4+1]=v.x;aBuf[n*4+2]=p.sig;aBuf[n*4+3]=v.w||1e-6;
+    bBuf[n*4]=v.c;bBuf[n*4+1]=clock.t*3.0;bBuf[n*4+2]=v.glow;n++;
+  }
+  var gl=F.gl;if(!gl)return;
+  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.uniform2f(U.u_res,canvas.width,canvas.height);
+  gl.uniform4f(U.u_geom,F.padL*F.dpr,(F.W-F.padR)*F.dpr,0.6*F.dpr,F.dpr*(S.view==="room"?1:F.scale));
+  gl.uniform1f(U.u_time,clock.t);
+  gl.uniform4fv(U.u_s,sBuf);gl.uniform4fv(U.u_a,aBuf);gl.uniform4fv(U.u_b,bBuf);
+  gl.uniform3fv(U.u_ink,F.ink);gl.uniform3fv(U.u_col,F.colBuf);
+  for(var q=0;q<NS*NF;q++)gl.drawArrays(gl.TRIANGLE_STRIP,q*NP*2,NP*2);
+}
+function frame(ts){
+  requestAnimationFrame(frame);
+  if(!F.visible)return;
+  var dt=clock.last?Math.min((ts-clock.last)/1000,0.05):0;clock.last=ts;
+  if(!clock.manual)step(dt);
+  draw();
+}
+window.__ym={advance:function(sec){var n=Math.round(sec*60);for(var i=0;i<n;i++)step(1/60);draw();},clock:clock};
+
+function ambient(){
+  if(F.visible&&(S.view==="card"||S.view==="after"||S.view==="tally")){
+    var s=Math.floor(Math.random()*NS),xa=0.1+Math.random()*0.8,dir=Math.random()<.5?-1:1;
+    travel(s,false,xa,Math.max(0.04,Math.min(0.96,xa+dir*(0.25+Math.random()*0.3))),3.2+Math.random()*2.4,4+Math.random()*4,0.05+Math.random()*0.03,{rise:0.3,fall:0.5,glow:0});
+  }
+  later(ambient,700+Math.random()*900,true);
+}
+function hex3(h){var n=parseInt(h.slice(1),16);return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255];}
+function colors(){F.ink=cssColor("--ink");F.colBuf=new Float32Array(NS*3);COLORS.forEach(function(c,i){var v=hex3(c);F.colBuf[i*3]=v[0];F.colBuf[i*3+1]=v[1];F.colBuf[i*3+2]=v[2];});}
+
+function buildLabels(){
+  labelsEl.innerHTML=FUNCS.map(function(f,i){return '<button type="button" class="lab k" style="--c:'+COLORS[i]+'" data-room="'+esc(f)+'" data-i="'+i+'">'+esc(f)+'</button>';}).join("");
+  labs=[].slice.call(labelsEl.querySelectorAll(".lab"));
+}
+function labelState(){
+  labs.forEach(function(l,i){
+    l.classList.toggle("off",S.view==="room"&&i!==S.room);
+    l.classList.toggle("on",S.view==="room"&&i===S.room);
+  });
+}
+
+/* ---- what lands on the field: threads, rings, receipts, ticks, the playhead ---- */
+function thread(from,to,x0){
+  if(from===to||reduce)return;
+  var el=document.createElement("div"),y1=F.y[from],y2=F.y[to];
+  el.className="th "+(y2>y1?"dn":"up");el.style.setProperty("--c",COLORS[to]);
+  el.style.left=xPx(x0)+"px";el.style.top=Math.min(y1,y2)+"px";el.style.height=Math.abs(y2-y1)+"px";
+  marks.appendChild(el);
+  later(function(){el.classList.add("in");},20,true);
+  later(function(){el.classList.add("out");},520,true);
+  later(function(){el.remove();},1300,true);
+}
+function ring(s,x0){
+  if(reduce)return;
+  var el=document.createElement("div");el.className="ring";el.style.setProperty("--c",COLORS[s]);
+  el.style.left=xPx(x0)+"px";el.style.top=F.y[s]+"px";marks.appendChild(el);
+  later(function(){el.classList.add("in");},20,true);
+  later(function(){el.remove();},1000,true);
+}
+var liveRc={};
+function receipt(s,x0,action,tool){
+  if(F.W>=560)return;
+  var el=document.createElement("div");el.style.setProperty("--c",COLORS[s]);
+  Object.keys(liveRc).forEach(function(q){dropRc(q);});el.className="rc tick";
+  el.innerHTML='<b>'+esc(FUNCS[s])+'</b>'+esc(action)+(tool?'<span>'+esc(tool)+'</span>':'');
+  marks.appendChild(el);liveRc[s]=el;
+  later(function(){el.classList.add("in");},20,true);
+  later(function(){if(liveRc[s]===el)dropRc(s);},1650,true);
+}
+function dropRc(s){var el=liveRc[s];if(!el)return;delete liveRc[s];el.classList.remove("in");el.classList.add("out");later(function(){el.remove();},500,true);}
+function tick(s,x0){
+  var el=document.createElement("div");el.className="tk";el.style.setProperty("--c",COLORS[s]);ticksEl.appendChild(el);
+  F.ticks.push({s:s,x:x0,el:el});
+  later(function(){el.classList.add("in");},20,true);
+}
+function clearMarks(){marks.innerHTML="";liveRc={};F.head=null;F.headEl=null;}
+function tintFor(lines,v){
+  for(var s=0;s<NS;s++)F.tt[s]=0;
+  labs.forEach(function(l){l.classList.remove("hot");});
+  if(!lines)return;
+  lines.forEach(function(l){var i=FUNCS.indexOf(l[0]);if(i>=0){F.tt[i]=v;labs[i].classList.add("hot");}});
+}
+
+/* ================= left pane views ================= */
+var TH=null;
+function threadEl(){if(!TH||!TH.isConnected){left.innerHTML='<div class="thread" id="thread"></div>';TH=$("thread");}return TH;}
+function retire(){ /* only the newest message keeps live ids and replies */
+  var t=threadEl();[].forEach.call(t.querySelectorAll("[id]"),function(e){if(e!==t)e.removeAttribute("id");});
+  [].forEach.call(t.querySelectorAll(".replies"),function(r){r.remove();});
+}
+function scrollTray(){var tr=document.querySelector(".tray");if(!tr)return;var go=function(){tr.scrollTop=tr.scrollHeight;};requestAnimationFrame(go);setTimeout(go,120);setTimeout(go,320);}
+function msg(o){
+  var t=threadEl();retire();
+  var side=o.side?'<span class="side" style="--c:'+(o.c||"transparent")+'">'+(o.c?'<i></i>':'')+o.side+'</span>':'';
+  var el=document.createElement("div");el.className="msg";
+  el.innerHTML='<span class="av"></span><div><div class="who"><b>Rebel</b>'+side+'</div><div class="body">'+(o.lead?'<p class="lead">'+o.lead+'</p>':'')+'<p id="say">'+(o.text||"")+'</p>'+(o.att?'<div class="att">'+o.att+'</div>':'')+'</div>'+(o.replies?'<div class="replies">'+o.replies+'</div>':'')+'</div>';
+  t.appendChild(el);while(t.children.length>14)t.removeChild(t.firstChild);
+  var h=el.querySelector("p");if(h&&S.touched){h.setAttribute("tabindex","-1");h.focus({preventScroll:true});}
+  scrollTray();
+}
+function you(text){
+  var t=threadEl();retire();
+  var el=document.createElement("div");el.className="you";el.innerHTML='<div class="body">'+esc(text)+'</div>';
+  t.appendChild(el);scrollTray();
+}
+function show(html,cls){
+  TH=null;left.innerHTML='<div class="pane '+(cls||"")+'">'+html+'</div>';
+  var h=left.querySelector("[data-focus]");
+  if(h&&S.touched){h.setAttribute("tabindex","-1");h.focus({preventScroll:true});}
+}
+function setProg(){prog.textContent=S.view==="tally"?"Day done":S.view==="room"?"":"Move "+(S.i+1)+" of "+DECISIONS.length;}
+function joinNames(a){
+  if(a.length<2)return a.join("")+".";
+  return a.map(function(x,i){
+    if(i===a.length-1)return 'and <span class="nw">'+x+'.</span>';
+    return '<span class="nw">'+x+(i<a.length-2?",":"")+'</span> ';
+  }).join("");
+}
+function enter(view){document.querySelector(".body").classList.toggle("inroom",view==="room");if(view==="room"&&bodyEl.classList.contains("min"))snap("");if(S.keepGrid&&view!=="room"){S.view=view;setProg();if(view!=="cascade"&&C){C.done=true;F.pulses=F.pulses.filter(function(p){return p!==C.headP&&p!==C.gatePulse;});C=null;}return;}field.classList.remove("grid");viewAll.textContent="All live";S.keepGrid=false;var lb=$("livebox");if(lb&&view!=="cascade"){lb.classList.remove("on");}if(view!=="cascade"&&C){C.done=true;F.pulses=F.pulses.filter(function(p){return p!==C.headP&&p!==C.gatePulse;});C=null;}S.view=view;setProg();setTargets(false);labelState();logwrap.innerHTML="";}
+
+function card(){
+  S.stateView="card";enter("card");clearMarks();tintFor(null);
+  var d=DECISIONS[S.i];
+  var col=COLORS[FUNCS.indexOf(d.fn)],alt=d.rec==="a"?"b":"a";
+  msg({c:col,side:esc(d.fn)+' · move '+(S.i+1)+' of '+DECISIONS.length,lead:esc(SAY[S.i].lead),text:esc(SAY[S.i].rest),
+       replies:'<button type="button" class="rp p" data-pick="'+d.rec+'">'+esc(d.opts[d.rec].label)+'</button><button type="button" class="rp alt" data-pick="'+alt+'">'+esc(d.opts[alt].label)+' instead</button>'});
+  var origin=FUNCS.indexOf(d.fn);
+  swell(origin,false,0.07,2.4,10,0.04);
+  left.querySelectorAll("[data-pick]").forEach(function(b){
+    var k=b.getAttribute("data-pick");
+    function on(){tintFor(d.cascade[k],0.5);}
+    function off(){tintFor(null);}
+    b.addEventListener("mouseenter",on);b.addEventListener("focus",on);
+    b.addEventListener("mouseleave",off);b.addEventListener("blur",off);
+  });
+  if(S.watching){
+    var r=left.querySelector('[data-pick="'+d.rec+'"]');
+    later(function(){r.classList.add("auto");tintFor(d.cascade[d.rec],0.5);},2400);
+    later(function(){pick(d.rec);},4200);
+  }
+}
+
+/* The move is a playhead that runs along its own line. As it passes each point it hands
+   one piece of work to another line: a thread drops, the work lands, a receipt is written. */
+var C=null;
+function pick(k){
+  clearTimers();
+  var d=DECISIONS[S.i],lines=d.cascade[k],origin=FUNCS.indexOf(d.fn),n=lines.length;
+  S.picks[S.i]=k;
+  lines.forEach(function(l){(S.done[l[0]]=S.done[l[0]]||[]).unshift(l);});
+  enter("cascade");tintFor(null);clearMarks();
+  var hrs=TIMING[S.i][k],gates=GATES[S.i][k]||{},H=hrs[n-1]*1.06+0.5;
+  var T=S.real?Math.min(44,16+H*0.5):(0.55+n*(reduce?0.14:0.31));
+  C={liveFor:null,i:0,h:0,H:H,rate:H/T,gated:false,origin:origin,hrs:hrs,gates:gates,lines:lines,n:n,XA:0.07,XB:0.95,done:false};
+  msg({c:COLORS[origin],side:esc(d.fn)+' · '+esc(d.opts[k].past),text:"On it. I’ll stop and ask when something needs you.",
+       att:'<div class="status"><span><b id="clock">'+clockLabel(0)+'</b> · <span id="elapsed">just now</span></span><span><b id="count">0</b> of '+n+' done</span></div><div class="prog" id="pbar"></div><ul class="feed" id="feed"></ul><div id="gatebox"></div>'});
+  for(var q=0;q<NS;q++){var dist=Math.abs(q-origin);swell(q,false,C.XA,1.5,q===origin?30:16*Math.exp(-dist*0.22),0.05,{delay:dist*0.035});}
+  var CH=C;var headP={s:origin,k:0,born:clock.t,dur:1e9,sig:0.05,at:function(){return {x:CH.XA+(CH.XB-CH.XA)*Math.min(1,CH.h/CH.H),w:CH.done?0:14*K,c:0,glow:0};}};
+  F.pulses.push(headP);C.headP=headP;
+  var head=document.createElement("div");head.className="mv";head.innerHTML='<span class="k">Your move</span>';marks.appendChild(head);
+  F.headEl=head;var CC=C;F.head=function(){return {s:origin,x:CC.XA+(CC.XB-CC.XA)*Math.min(1,CC.h/CC.H)};};
+  later(function(){head.classList.add("quiet");},1500);
+}
+function cascadeStep(dt){
+  if(!C||C.done||S.view!=="cascade")return;
+  if(!C.gated)C.h+=dt*C.rate;
+  liveStrip();
+  if(C.gated)return;
+  var clk=$("clock"),el=$("elapsed");if(clk&&el){clk.textContent=clockLabel(C.h);el.textContent=elapsedLabel(C.h);}
+  while(C.i<C.n&&C.hrs[C.i]<=C.h){
+    var i=C.i,l=C.lines[i],s=FUNCS.indexOf(l[0]),x0=C.XA+(C.XB-C.XA)*(C.hrs[i]/C.H);
+    if(C.gates[i]&&!C.gates[i].cleared){C.gated=true;C.h=C.hrs[i];showGate(i,s,x0);return;}
+    land(i,l,s,x0);C.i++;
+  }
+  if(C.i>=C.n&&C.h>=C.H&&!C.done){C.done=true;later(function(){F.pulses=F.pulses.filter(function(p){return p!==C.headP;});F.headEl&&F.headEl.classList.add("gone");},200);later(after,1500);}
+}
+function liveStrip(){
+  var box=$("livebox");if(!box)return;
+  if(C.i>=C.n){later(function(){box.classList.remove("on");},900,true);return;}
+  var i=C.i,l=C.lines[i],s=FUNCS.indexOf(l[0]),prev=i>0?C.hrs[i-1]:0,end=C.hrs[i];
+  var start=Math.max(prev,end-Math.max(0.25,(end-prev)*0.85));
+  if(C.h<start)return;
+  var steps=stepsFor(l),gate=C.gates[i]&&!C.gates[i].cleared,m=steps.length;
+  var p=(C.h-start)/Math.max(end-start,1e-6),k=Math.min(m-1,Math.floor(p*m));
+  var text=(gate&&k===m-1)?"Waiting for you":steps[k];
+  if(C.liveFor!==i){
+    C.liveFor=i;C.liveK=-1;
+    box.innerHTML='<div class="live" style="--c:'+COLORS[s]+'"><i></i><b>'+esc(l[0])+'</b><span class="s"></span><span class="t"></span></div>';
+    box.classList.add("on");
+  }
+  var live=box.firstChild,sp=live.querySelector(".s");
+  live.classList.toggle("wait",!!(gate&&k===m-1));
+  if(C.liveK!==k){
+    C.liveK=k;
+    if(sp.textContent){sp.classList.add("swap");later(function(){sp.textContent=text;sp.classList.remove("swap");},250,true);}
+    else sp.textContent=text;
+  }
+  live.querySelector(".t").textContent=clockLabel(C.h);
+}
+function land(i,l,s,x0,you){
+  liveApply(l[0],l[1],l[2]);
+  thread(C.origin,s,x0);
+  landing(s,x0);ring(s,x0);tick(s,x0);receipt(s,x0,l[1],l[2]);
+  F.tint[s]=Math.max(F.tint[s],0.42);labs[s].classList.add("hot");
+  var count=$("count");if(count)count.textContent=i+1;
+  var pb=$("pbar");if(pb){var seg=document.createElement("i");seg.style.setProperty("--c",COLORS[s]);seg.style.flexBasis=(100/C.n)+"%";pb.appendChild(seg);}
+  var li=document.createElement("li");li.style.setProperty("--c",COLORS[s]);if(you)li.className="you";
+  li.innerHTML='<span class="dot"></span><span class="a"><b>'+esc(you?"You":l[0])+'</b>'+esc(l[1])+'</span><span class="ft">'+esc(clockLabel(C.h))+'</span>';
+  var fd=$("feed");if(fd){fd.insertBefore(li,fd.firstChild);while(fd.children.length>1)fd.removeChild(fd.lastChild);}
+}
+function showGate(i,s,x0){
+  var g=C.gates[i],box=$("gatebox");
+  swell(s,true,x0,1e9,12,0.03);C.gatePulse=F.pulses[F.pulses.length-1];
+  box.innerHTML="";
+  msg({c:COLORS[s],side:esc(FUNCS[s])+' · waiting on you',lead:esc(g.label)+".",text:esc(g.note),replies:'<button type="button" class="rp p" id="gateok">'+esc(g.act)+'</button>'});
+  var ok=$("gateok");ok.addEventListener("click",function(){you(g.act==="Sign"?"Signed.":g.act==="Ship"?"Ship it.":g.act==="Send it"?"Send it.":"Approved.");clearGate(i,s,x0);});
+
+  if(S.watching)later(function(){if(C&&C.gated)clearGate(i,s,x0);},2600);
+}
+function clearGate(i,s,x0){
+  var g=C.gates[i];g.cleared=true;C.gated=false;
+  F.pulses=F.pulses.filter(function(p){return p!==C.gatePulse;});
+  msg({text:"Done. Carrying on.",att:'<div class="status"><span><b id="clock">'+clockLabel(C.h)+'</b> · <span id="elapsed">'+elapsedLabel(C.h)+'</span></span><span><b id="count">'+C.i+'</b> of '+C.n+' done</span></div><div class="prog" id="pbar">'+C.lines.slice(0,C.i+1).map(function(l){return '<i style="--c:'+COLORS[FUNCS.indexOf(l[0])]+';flex-basis:'+(100/C.n)+'%"></i>';}).join("")+'</div><ul class="feed" id="feed"></ul><div id="gatebox"></div>'});
+  var l=C.lines[i];land(i,[l[0],g.label.replace(/^(Countersign|Approve|Ship|Send)( it)?/,function(m){return {Countersign:"Countersigned",Approve:"Approved",Ship:"Shipped",Send:"Sent"}[m.split(" ")[0]];}),l[2]],s,x0,true);
+  C.i++;
+}
+function after(){
+  S.stateView="after";enter("after");
+  var d=DECISIONS[S.i],k=S.picks[S.i],lines=d.cascade[k],fns=[];
+  lines.forEach(function(l){if(fns.indexOf(l[0])<0)fns.push(l[0]);});
+  tintFor(lines,0.16);
+  var last=S.i===DECISIONS.length-1;
+  var counts={};lines.forEach(function(l){counts[l[0]]=(counts[l[0]]||0)+1;});
+  var names=fns.map(function(f){return '<button type="button" style="--c:'+COLORS[FUNCS.indexOf(f)]+'" data-room="'+esc(f)+'">'+esc(f)+'</button>';});
+  var list=names.length<2?names.join(""):names.slice(0,-1).join(", ")+" and "+names[names.length-1];
+  msg({c:COLORS[FUNCS.indexOf(d.fn)],side:esc(d.fn)+' · '+esc(d.opts[k].past),
+       text:"Done. "+lines.length+" things across "+list+"."+(d.opts[k].risk?" "+esc(d.opts[k].risk):" Open any of them to see exactly what was done."),
+       att:'<div class="split" aria-hidden="true">'+fns.map(function(f){return '<i style="--c:'+COLORS[FUNCS.indexOf(f)]+';flex:'+counts[f]+'"></i>';}).join("")+'</div>',
+       replies:'<button type="button" class="rp p" id="next">'+(last?"See the day":"Next decision")+'</button>'});
+  if(S.watching)later(next,3200);
+}
+function next(){clearTimers();if(S.i<DECISIONS.length-1){S.i++;card();}else tally();}
+
+function tally(){
+  S.stateView="tally";enter("tally");clearMarks();stopWatching();tintFor(null);
+  var total=0,tools={};
+  DECISIONS.forEach(function(d,i){d.cascade[S.picks[i]].forEach(function(l){total++;if(l[2])tools[l[2]]=1;});});
+  var c={};DECISIONS.forEach(function(d,i){d.cascade[S.picks[i]].forEach(function(l){c[l[0]]=(c[l[0]]||0)+1;});});
+  msg({c:COLORS[6],side:'Halden · day done',
+       text:"That was one day. <b>"+DECISIONS.length+" moves from you, "+total+" from the fleet</b>, across "+Object.keys(tools).length+" tools. Nothing else needed you. Now imagine it’s yours.",
+       att:'<div class="split" aria-hidden="true">'+FUNCS.filter(function(f){return c[f];}).map(function(f){return '<i style="--c:'+COLORS[FUNCS.indexOf(f)]+';flex:'+c[f]+'"></i>';}).join("")+'</div>',
+       replies:'<a class="rp cta" href="https://mutiny.ai/intake/" target="_blank" rel="noopener">Start company<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a><button type="button" class="rp" id="again">Play again</button>'});
+  sweep();
+}
+/* one front crossing every line, a beat apart, so the whole company moves as a single wave */
+function sweep(){
+  if(S.view!=="tally")return;
+  for(var s=0;s<NS;s++)travel(s,true,0.0,1.0,2.6,13,0.05,{delay:s*0.07,ease:easeInOut,rise:0.15,fall:0.25,sway:0.1});
+  later(sweep,6500);
+}
+
+function room(name){
+  var idx=FUNCS.indexOf(name),r=ROOMS[name]; if(idx<0||!r)return;
+  clearTimers();stopWatching();clearMarks();tintFor(null);
+  if(S.view!=="room")S.back=S.keepGrid?"grid":S.view;
+  S.room=idx;enter("room");
+  var mine=F.ticks.filter(function(t){return t.s===idx;}).slice().reverse();
+  var fresh=(S.done[name]||[]).map(function(l){return '<li class="new"><span class="k">Just now</span><span class="a">'+esc(l[1])+'</span><span class="k">'+esc(l[2])+'</span></li>';}).join("");
+  var old=r.log.slice().reverse().map(function(l){return '<li><span class="k">'+esc(l[0])+'</span><span class="a">'+esc(l[1])+'</span><span class="k">'+esc(l[2])+'</span></li>';}).join("");
+  msg({c:COLORS[idx],side:esc(name)+' · '+(r.wait?'waiting on you':'running'),
+       text:"Here’s "+esc(name)+". <b>"+esc(r.num)+"</b>, "+esc(r.cap)+"."+(r.wait?" "+esc(r.wait):""),
+       replies:'<button type="button" class="rp" id="back">Back to the company</button>',cls:"room"});
+  var more=(S.done[name]||[]).length+r.log.length>3;S.roomMode=S.roomMode||"split";
+  logwrap.innerHTML='<div class="modes" role="tablist">'+["brief","split","live"].map(function(m){return '<button type="button" data-mode="'+m+'" class="'+(m===S.roomMode?"on":"")+'">'+({brief:"Brief",split:"Split",live:"Live"})[m]+'</button>';}).join("")+'<span class="sep"></span><button type="button" class="ic" data-snap="max" aria-label="Fill the screen" title="Fill the screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button type="button" class="ic" data-snap="min" aria-label="Show the chat" title="Show the chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg></button></div>'+
+    '<div class="roompanel m-'+S.roomMode+'" id="roompanel" style="--c:'+COLORS[idx]+'"><div class="briefcol"><div class="log"><ol>'+fresh+old+'</ol>'+(more?'<button type="button" class="more" id="more">Show more</button>':'')+'</div><div class="wgs">'+(WIDGETS[name]?WIDGETS[name]():'')+'</div></div><div class="lvcol">'+liveSurface(name)+'</div></div>';
+  logwrap.querySelectorAll("[data-mode]").forEach(function(b){b.addEventListener("click",function(){S.roomMode=b.getAttribute("data-mode");logwrap.querySelectorAll("[data-mode]").forEach(function(x){x.classList.toggle("on",x===b);});$("roompanel").className="roompanel m-"+S.roomMode;});});
+  var mb=$("more");if(mb)mb.addEventListener("click",function(){var lg=mb.parentNode;lg.classList.toggle("open");mb.textContent=lg.classList.contains("open")?"Show less":"Show more";});
+  var rows=logwrap.querySelectorAll("li");
+  rows.forEach(function(li,i){li.addEventListener("mouseenter",function(){
+    var isNew=li.classList.contains("new"),x=(isNew&&mine[i])?mine[i].x:0.1+0.8*(i+0.5)/rows.length;
+    swell(idx,isNew,x,1.6,12,0.03);
+  });});
+  travel(idx,false,0.0,1.0,2.2,12,0.06,{delay:0.35,rise:0.15,fall:0.25});
+}
+function gridView(){
+  clearTimers();stopWatching();clearMarks();tintFor(null);
+  var was=S.view;
+  S.view="grid";S.keepGrid=true;setProg();labelState();field.classList.add("grid");logwrap.innerHTML=liveGrid();
+  viewAll.textContent="Lines";
+  if(was==="room"||was==="grid"){S.back=null;S.room=null;({card:card,after:after,tally:tally})[S.stateView||"card"]();}
+}
+function goBack(){if(S.back==="grid"){S.back=null;S.room=null;gridView();return;}var b=S.back||"card";S.back=null;S.room=null;if(b==="after")after();else if(b==="tally")tally();else card();}
+function stopWatching(){S.watching=false;watchBtn.textContent="Watch it play";}
+function reset(){clearTimers();S.i=0;S.picks=[];S.done={};S.back=null;S.room=null;ticksEl.innerHTML="";F.ticks=[];card();}
+
+/* ================= the chat ================= */
+function rebelSay(html){msg({text:html});}
+function askRebel(q){
+  var t=q.trim();if(!t)return;
+  you(t);
+  var low=t.toLowerCase(),hit=null;
+  if(S.view==="card"){var d=DECISIONS[S.i],pk=null;["a","b"].forEach(function(k){var lab=d.opts[k].label.toLowerCase(),words=lab.split(" ").filter(function(w){return w.length>3;});if(words.some(function(w){return low.indexOf(w)>=0;}))pk=k;});if(!pk&&/^(yes|do it|go|ok|okay|agreed|sure)/.test(low))pk=d.rec;if(pk){stopWatching();pick(pk);return;}}
+  if(C&&C.gated&&/(sign|approve|ship|send|yes|do it|go ahead|ok)/.test(low)){var gi=C.i,gl=C.lines[gi],gs=FUNCS.indexOf(gl[0]);clearGate(gi,gs,C.XA+(C.XB-C.XA)*(C.hrs[gi]/C.H));return;}
+  FUNCS.forEach(function(f){if(low.indexOf(f.toLowerCase())>=0)hit=f;});
+  if(!hit){var alias={money:"Finance",cash:"Finance",revenue:"Finance",pipeline:"RevOps",deals:"Sales",customers:"Support",tickets:"Support",hipaa:"Compliance",ads:"Marketing",seo:"AI answers",people:"Payroll",hire:"Hiring"};Object.keys(alias).forEach(function(k){if(low.indexOf(k)>=0)hit=alias[k];});}
+  if(hit){room(hit);return;}
+  if(/next|continue|go on|see the day/.test(low)&&S.view==="after"){next();return;}
+  if(/^back|lines$/.test(low)&&S.view==="room"){goBack();return;}
+  if(/(start|play) again|reset/.test(low)){reset();return;}
+  rebelSay("This is a sample company, so here I can open any part of it for you. Try “show me finance” or “what’s waiting in legal”. In your own company I answer anything, and I can act on it.");
+}
+$("askform").addEventListener("submit",function(e){e.preventDefault();var inp=$("askinput");askRebel(inp.value);inp.value="";});
+
+/* ================= the divider ================= */
+var bodyEl=document.querySelector(".body"),dv=$("divider");
+function snap(mode){bodyEl.classList.remove("min","max","sized");if(mode==="min"||mode==="max")bodyEl.classList.add(mode);scrollTray();}
+document.addEventListener("click",function(e){var b=e.target.closest("[data-snap]");if(!b)return;S.touched=true;var m=b.getAttribute("data-snap");if(bodyEl.classList.contains("min")||bodyEl.classList.contains("max"))snap("");else snap(m);});
+(function(){
+  var start=null;
+  dv.addEventListener("pointerdown",function(e){if(e.target.closest("[data-snap]"))return;start={y:e.clientY,h:document.querySelector(".tray").getBoundingClientRect().height};dv.classList.add("drag");dv.setPointerCapture(e.pointerId);});
+  dv.addEventListener("pointermove",function(e){if(!start)return;var avail=bodyEl.getBoundingClientRect().height-dv.offsetHeight-document.querySelector(".chat").offsetHeight-40;var h=Math.max(0,Math.min(avail,start.h+(start.y-e.clientY)));
+    bodyEl.classList.remove("min","max");bodyEl.classList.add("sized");bodyEl.style.setProperty("--trayset",h+"px");
+    if(h<30)snap("max");else if(h>avail-30)snap("min");});
+  dv.addEventListener("pointerup",function(){start=null;dv.classList.remove("drag");});
+  dv.addEventListener("dblclick",function(){snap("");});
+})();
+/* a new message while the chat is hidden brings the chat back */
+var _msg=msg;msg=function(o){if(bodyEl.classList.contains("max"))snap("");_msg(o);};
+
+/* ================= events ================= */
+document.addEventListener("click",function(e){
+  var t=e.target.closest("button");if(!t||t===watchBtn)return;
+  S.touched=true;
+  if(t.hasAttribute("data-pick")){stopWatching();you(t.textContent.replace(/ instead$/,""));pick(t.getAttribute("data-pick"));}
+  else if(t.hasAttribute("data-room")){if(S.view==="cascade")return;var rn=t.getAttribute("data-room");if(S.view==="room"&&FUNCS.indexOf(rn)===S.room){you("Back to the company.");goBack();return;}you("Show me "+rn.toLowerCase()+".");room(rn);}
+  else if(t.id==="next"){stopWatching();you(t.textContent);next();}
+  else if(t.id==="back"){you("Back to the company.");goBack();}
+  else if(t.id==="again")reset();
+});
+labelsEl.addEventListener("mouseover",function(e){
+  var l=e.target.closest(".lab");if(!l||S.view==="room"||S.view==="cascade")return;
+  travel(+l.getAttribute("data-i"),false,0.0,0.5,1.6,11,0.04,{ease:easeOut,rise:0.08,fall:0.6});
+});
+viewAll.addEventListener("click",function(){S.touched=true;if(S.keepGrid){S.keepGrid=false;S.back=null;S.room=null;({card:card,after:after,tally:tally})[S.stateView||"card"]();}else gridView();});
+paceBtn.addEventListener("click",function(){S.real=!S.real;paceBtn.textContent=S.real?"Real time":"Fast";if(C&&!C.done){var d=DECISIONS[S.i],n=C.n,T=S.real?Math.min(44,16+C.H*0.5):(0.55+n*0.31);C.rate=C.H/T;}});
+watchBtn.addEventListener("click",function(){
+  S.touched=true;
+  if(S.watching){stopWatching();clearTimers();var a=left.querySelector(".auto");if(a)a.classList.remove("auto");tintFor(null);return;}
+  S.watching=true;watchBtn.textContent="Stop";
+  if(S.view==="tally"||S.view==="room")reset();else if(S.view==="after")later(next,1200);else if(S.view==="card")card();
+});
+
+/* ================= boot ================= */
+buildLabels();colors();
+F.ok=initGL();
+layout();
+window.addEventListener("resize",layout);
+if("ResizeObserver" in window){var ro=new ResizeObserver(function(){layout();});ro.observe(field);}
+if(window.matchMedia){var mq=window.matchMedia("(prefers-color-scheme: dark)");(mq.addEventListener?mq.addEventListener.bind(mq,"change"):mq.addListener.bind(mq))(colors);}
+if("IntersectionObserver" in window){new IntersectionObserver(function(en){F.visible=en[0].isIntersecting;clock.last=0;}).observe(field);}
+if(!F.ok){
+  canvas.style.display="none";
+  var st=document.createElement("style");st.textContent=".lab::after{content:'';position:absolute;left:calc(100% + 16px);top:50%;width:100vw;height:1px;background:var(--ink-28)}";document.head.appendChild(st);
+}
+card();
+requestAnimationFrame(frame);
+ambient();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(layout);
+})();
+</script>
+</body>
+</html>
