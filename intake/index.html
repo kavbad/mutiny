@@ -9,20 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/site.css">
-<link rel="stylesheet" href="../assets/intake.css">
-<style>
-  main{ padding:calc(var(--u)*3) var(--g) calc(var(--u)*2); display:flex; flex-direction:column; }
-  .intake{ height:auto; flex:1; min-height:0; zoom:1; max-width:1040px; width:100%; margin:0 auto; }
-  body{ height:100dvh; overflow:hidden; }
-  [hidden]{ display:none !important; }
-  .intake .flow{ max-width:900px; }
-  .gate{ max-width:44ch; margin:10vh auto 0; }
-  .gate h1{ font-size:clamp(28px, 3.1vw, 44px); }
-  .gate a.cta{ margin-top:calc(var(--u)*3); }
-  .usage{ font-family:'Spline Sans Mono',ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-48); }
-  @media (max-width:600px){ main{ padding:calc(var(--u)*2) 16px; } .intake .top{ flex-wrap:wrap; } }
-</style>
+<link rel="stylesheet" href="../assets/intake-os.css?v=os1">
 </head>
 <body>
 <div class="grain" aria-hidden="true"></div>
@@ -42,14 +29,14 @@
     <div class="answer" id="answer">
       <div class="inner">
         <div class="chips" id="chips"></div>
-        <div class="bar" style="padding:8px 8px 8px 18px"><input id="text" placeholder="Say it however it comes out…" autocomplete="off"><button class="mic" id="mic" title="Talk"><svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg></button><button class="send" id="send">Send</button></div>
+        <div class="bar" style="padding:8px 8px 8px 18px"><input id="text" placeholder="Chat with Rebel" autocomplete="off" aria-label="Chat with Rebel"><button class="mic" id="mic" title="Talk"><svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg></button><button class="send" id="send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button></div>
         <div class="hint"><span id="hintl">Talk, type, or tap.</span><span id="hintr">Rebel keeps up either way</span></div>
       </div>
     </div>
   </div>
 </main>
-<script src="../assets/config.js"></script>
-<script src="../assets/intake-ui.js"></script>
+<script src="../assets/config.js?v=os1"></script>
+<script src="../assets/intake-ui.js?v=os1"></script>
 <script>
 (() => {
   const API=window.MUTINY_API;

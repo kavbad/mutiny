@@ -148,3 +148,10 @@
 
 /* ops teams (case handlers, support) */
 .intake .roster .tok.o i{background:var(--graphite)}
+
+/* the finish card's form (styles were inline before) */
+.intake form.startco{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.intake .startco input{flex:1;min-width:200px;font:inherit;font-size:15px;padding:11px 14px;border:1px solid var(--rule2);border-radius:999px;background:#fff;color:var(--ink);outline:none}
+.intake .startco button{background:var(--ember);color:#fff;border:0;border-radius:999px;padding:12px 20px;font:inherit;font-weight:500;cursor:pointer}
+.intake .startco .small{color:var(--ash);font-size:13px;flex-basis:100%}
+.intake .startco .inline{font-size:15px}

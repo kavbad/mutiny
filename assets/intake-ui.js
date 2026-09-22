@@ -143,14 +143,14 @@
       return gen(`<div class="artifact"><div class="eyebrow"><span>Positioning · chosen against the field</span><span>Mutiny · Rebel</span></div><h3>${escape(art.headline)}</h3><div class="grid">${col("Strengths", art.strengths)}${col("Weaknesses", art.weaknesses)}${col("Opportunities", art.opportunities)}</div></div>`);
     }
     function finishCard(o = {}) {
-      const g = gen(`<div class="eyebrow"><span>Ready when you are</span><span>one subscription · one living business</span></div><h4>Start the company.</h4><p class="sub">Rebel comes with you. Nothing irreversible happens in there without your press.</p><form class="startco" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px"><input type="email" required placeholder="Your email" autocomplete="email" style="flex:1;min-width:200px;font:inherit;font-size:15px;padding:11px 14px;border:1px solid var(--rule2);border-radius:999px;background:#fff;color:var(--ink);outline:none"><button type="submit" style="background:var(--ember);color:#fff;border:0;border-radius:999px;padding:12px 20px;font:inherit;font-weight:500;cursor:pointer">Start the company →</button><span class="small" style="color:var(--ash);font-size:13px;flex-basis:100%">You'll hear from Mutiny. Nobody else will.</span></form>`);
+      const g = gen(`<div class="eyebrow"><span>Ready when you are</span><span>one subscription · one living business</span></div><h4>Start the company.</h4><p class="sub">Rebel comes with you. Nothing irreversible happens in there without your press.</p><form class="startco"><input type="email" required placeholder="Your email" autocomplete="email"><button type="submit">Start the company →</button><span class="small">You'll hear from Mutiny. Nobody else will.</span></form>`);
       const form = g.querySelector("form"), input = form.querySelector("input"), btn = form.querySelector("button");
       if (o.email) { input.value = o.email; }
       form.addEventListener("submit", async (e) => {
         e.preventDefault(); const v = input.value.trim(); if (!v) { input.focus(); return; }
         btn.disabled = true; btn.textContent = "Saving…";
-        try { if (o.onEmail) await o.onEmail(v); form.innerHTML = `<span style="font-size:15px">You're in line, ${escape(v)}. Founders are admitted in order of arrival.</span>`; }
-        catch (err) { btn.disabled = false; btn.textContent = "Start the company →"; const m = el("span", "small", escape(err.message || "That didn't save. Try again.")); m.style.cssText = "color:var(--ember);font-size:13px;flex-basis:100%"; form.appendChild(m); }
+        try { if (o.onEmail) await o.onEmail(v); form.innerHTML = `<span class="inline">You're in line, ${escape(v)}. Founders are admitted in order of arrival.</span>`; }
+        catch (err) { btn.disabled = false; btn.textContent = "Start the company →"; const m = el("span", "small", escape(err.message || "That didn't save. Try again.")); m.style.color = "var(--ember, var(--orange-text))"; form.appendChild(m); }
       });
       return g;
     }
